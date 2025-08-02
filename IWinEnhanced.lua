@@ -32,11 +32,7 @@ IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced system loaded.|r")
 		IWin:UnregisterEvent("ADDON_LOADED")
-	elseif event == "CHAT_MSG_COMBAT_SELF_MISSES" then
-		if string.find(arg1,"dodge") then
-			IWin_CombatVar["dodge"] = GetTime()
-		end		
-	elseif event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF" then
+	elseif event == "CHAT_MSG_COMBAT_SELF_MISSES" or event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF" then
 		if string.find(arg1,"dodge") then
 			IWin_CombatVar["dodge"] = GetTime()
 		end
@@ -50,7 +46,7 @@ IWin_ExecuteCostReduction = {
 	[2] = 5,
 }
 
-IWin_BloodRageCostReduction = {
+IWin_BloodrageCostReduction = {
 	[0] = 0,
 	[1] = 2,
 	[2] = 5,
@@ -69,12 +65,12 @@ function IWin:GetTalentRank(tabIndex, talentIndex)
 end
 
 function IWin:GetExecuteCostReduction()
-	local executeRank = IWin:GetTalentRank(2, 10)
+	local executeRank = IWin:GetTalentRank(2, 13)
 	return IWin_ExecuteCostReduction[executeRank]
 end
 
-function IWin:GetBloodRageCostReduction()
-	local bloodrageRank = IWin:GetTalentRank(3, 3)
+function IWin:GetBloodrageCostReduction()
+	local bloodrageRank = IWin:GetTalentRank(3, 1)
 	return IWin_BloodrageCostReduction[bloodrageRank]
 end
 
@@ -85,17 +81,19 @@ end
 
 IWin_RageCost = {
 	["Battle Shout"] = 10,
-	["Berserker Rage"] = 0 - IWin:GetTalentRank(2, 15) * 5,
-	["Bloodrage"] = - 10,
+	["Berserker Rage"] = 0 - IWin:GetTalentRank(2, 16) * 5,
+	["Bloodrage"] = - 10 - IWin:GetBloodrageCostReduction(),
 	["Bloodthirst"] = 30,
 	["Charge"] = - 12 - IWin:GetTalentRank(1, 4) * 3,
 	["Cleave"] = 20,
+	["Concussion Blow"] = - 10,
 	["Demoralizing Shout"] = 10,
 	["Disarm"] = 20,
 	["Execute"] = 15 - IWin:GetExecuteCostReduction(),
 	["Hamstring"] = 10,
 	["Heroic Strike"] = 15 - IWin:GetTalentRank(1, 1),
 	["Intercept"] = 10,
+	--["Master Strike"] = 20,
 	["Mocking Blow"] = 10,
 	["Mortal Strike"] = 30,
 	["Overpower"] = 5,
@@ -106,7 +104,7 @@ IWin_RageCost = {
 	["Shield Block"] = 10,
 	["Shield Slam"] = 20,
 	["Slam"] = 15,
-	["Sunder Armor"] = 15 - IWin:GetTalentRank(3, 10),
+	["Sunder Armor"] = 15,
 	["Sweeping Strikes"] = 30,
 	["Thunder Clap"] = 20 - IWin:GetThunderClapCostReduction(),
 	["Whirlwind"] = 25,
@@ -477,6 +475,12 @@ function IWin:CleaveStance()
 	end
 end
 
+function IWin:ConcussionBlow()
+	if IWin:IsSpellLearnt("Concussion Blow") and not IWin:IsOnCooldown("Concussion Blow") then
+		Cast("Concussion Blow")
+	end
+end
+
 function IWin:DPSStance()
 	if IWin:IsStanceActive("Defensive Stance") then
 		if IWin:IsSpellLearnt("Berserker Stance") then
@@ -547,6 +551,12 @@ function IWin:Intercept()
 			Cast("Bloodrage")
 		end
 		Cast("Intercept")
+	end
+end
+
+function IWin:MasterStrike()
+	if IWin:IsSpellLearnt("Master Strike") and not IWin:IsOnCooldown("Master Strike") and IWin:IsRageAvailable("Master Strike") then
+		Cast("Master Strike")
 	end
 end
 
@@ -743,6 +753,8 @@ function SlashCmdList.IDPS()
 	IWin:SetReservedRage("Bloodthirst", "cooldown")
 	IWin:Whirlwind()
 	IWin:SetReservedRage("Whirlwind", "cooldown")
+	--IWin:MasterStrike()
+	IWin:SetReservedRage("Master Strike", "cooldown")
 	IWin:BerserkerRage()
 	IWin:HeroicStrike()
 	IWin:StartAttack()
@@ -772,6 +784,8 @@ function SlashCmdList.ICLEAVE()
 	IWin:SetReservedRage("Mortal Strike", "cooldown")
 	IWin:Bloodthirst()
 	IWin:SetReservedRage("Bloodthirst", "cooldown")
+	--IWin:MasterStrike()
+	IWin:SetReservedRage("Master Strike", "cooldown")
 	IWin:BerserkerRage()
 	IWin:Cleave()
 	IWin:StartAttack()
@@ -796,6 +810,7 @@ function SlashCmdList.ITANK()
 	IWin:SunderArmorFirstStack()
 	IWin:BattleShoutFaded()
 	IWin:SetReservedRage("Battle Shout", "buff", "player")
+	IWin:ConcussionBlow()
 	IWin:SunderArmor()
 	IWin:SetReservedRage("Sunder Armor", "nocooldown")
 	IWin:BerserkerRage()
@@ -824,6 +839,7 @@ function SlashCmdList.IHODOR()
 	IWin:SunderArmorFirstStack()
 	IWin:BattleShoutFaded()
 	IWin:SetReservedRage("Battle Shout", "buff", "player")
+	IWin:ConcussionBlow()
 	IWin:SunderArmor()
 	IWin:SetReservedRage("Sunder Armor", "nocooldown")
 	IWin:BerserkerRage()
