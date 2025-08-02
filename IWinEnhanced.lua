@@ -274,7 +274,7 @@ function IWin:IsInMeleeRange()
 end
 
 function IWin:GetStanceSwapRageRetain()
-	return math.min(IWin:GetTalentRank(1, 5) * 5, UnitMana("player"))
+	return math.min(IWin:GetTalentRank(1, 2) * 5, UnitMana("player"))
 end
 
 function IWin:IsStanceSwapMaxRageLoss(rage)
