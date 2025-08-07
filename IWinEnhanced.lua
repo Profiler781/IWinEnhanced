@@ -393,7 +393,16 @@ function IWin:TargetEnemy()
 end
 
 function IWin:StartAttack()
-	if not PlayerFrame.inCombat then
+	local attackActionFound = false
+	for action = 1, 172 do
+		if IsAttackAction(action) then
+			attackActionFound = true
+			if not IsCurrentAction(action) then
+				UseAction(action)
+			end
+		end
+	end
+	if not attackActionFound and not PlayerFrame.inCombat then
 		AttackTarget()
 	end
 end
@@ -405,7 +414,7 @@ function IWin:MarkSkull()
 end
 
 function IWin:BattleShout()
-	if IWin:IsSpellLearnt("Battle Shout") and not IWin:IsBuffActive("player","Battle Shout") and IWin:IsRageCostAvailable("Battle Shout") then
+	if IWin:IsSpellLearnt("Battle Shout") and not IWin:IsBuffActive("player","Battle Shout") and not IWin:IsBuffActive("player","Blessing of Power") and IWin:IsRageCostAvailable("Battle Shout") then
 		Cast("Battle Shout")
 	end
 end
