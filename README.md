@@ -12,6 +12,7 @@ Smart macros for Turtle Warriors. Make macros with commands. Put them on your ac
     /ikick       Kick with Pummel or Shield Bash
     /ifeardance  Use Berserker Rage if available
     /itaunt      Taunt or Mocking Blow if the target is not under another taunt effect
+    /ishoot      Shoot with bow, crossbow, gun or throw
 
 ## Required Addons
 You need one of the following addons:
