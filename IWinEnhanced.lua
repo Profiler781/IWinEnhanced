@@ -414,20 +414,29 @@ function IWin:MarkSkull()
 end
 
 function IWin:BattleShout()
-	if IWin:IsSpellLearnt("Battle Shout") and not IWin:IsBuffActive("player","Battle Shout") and not IWin:IsBuffActive("player","Blessing of Power") and IWin:IsRageCostAvailable("Battle Shout") then
-		Cast("Battle Shout")
+	if IWin:IsSpellLearnt("Battle Shout")
+		and not IWin:IsBuffActive("player","Battle Shout")
+		and not IWin:IsBuffActive("player","Blessing of Power")
+		and IWin:IsRageAvailable("Battle Shout") then
+			Cast("Battle Shout")
 	end
 end
 
 function IWin:BattleShoutRefresh()
-	if IWin:IsSpellLearnt("Battle Shout") and IWin:GetBuffRemaining("player","Battle Shout") < 9 and IWin:IsRageCostAvailable("Battle Shout") then
-		Cast("Battle Shout")
+	if IWin:IsSpellLearnt("Battle Shout")
+		and IWin:GetBuffRemaining("player","Battle Shout") < 9
+		and IWin:IsRageAvailable("Battle Shout") then
+			Cast("Battle Shout")
 	end
 end
 
 function IWin:BattleShoutRefreshOOC()
-	if IWin:IsSpellLearnt("Battle Shout") and IWin:GetBuffRemaining("player","Battle Shout") < 30 and UnitMana("player") > 60 and not UnitAffectingCombat("player") then
-		Cast("Battle Shout")
+	if IWin:IsSpellLearnt("Battle Shout")
+		and IWin:GetBuffRemaining("player","Battle Shout") < 30
+		and IWin:IsRageAvailable("Battle Shout")
+		and UnitMana("player") > 60
+		and not UnitAffectingCombat("player") then
+			Cast("Battle Shout")
 	end
 end
 
@@ -868,7 +877,7 @@ function IWin:SweepingStrikes()
 end
 
 function IWin:TankStance()
-	if IWin:IsSpellLearnt("Defensive Stance") then
+	if IWin:IsSpellLearnt("Defensive Stance") and not IWin:IsDefensiveTacticsActive() then
 		if UnitAffectingCombat("player") and not IWin:IsStanceActive("Defensive Stance") then
 			Cast("Defensive Stance")
 		end
