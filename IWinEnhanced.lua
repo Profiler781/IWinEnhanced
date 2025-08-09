@@ -640,7 +640,7 @@ function IWin:SetReservedRageExecuteDefensiveTactics()
 			lowHealthTarget
 			or IWin:IsExecutePhase()
 		)
-		and IsDefensiveTacticsActive() then 
+		and IWin:IsDefensiveTacticsActive() then 
 			IWin:SetReservedRage("Execute", "cooldown")
 	end
 end
