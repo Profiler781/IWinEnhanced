@@ -1,6 +1,6 @@
-# IWinEnhanced
+# IWinEnhanced v1.3
 
-Smart macros for Turtle Warriors. Make macros with commands. Put them on your action bars. Enjoy!
+Smart macros for Turtle Warriors v1.18.0. Make macros with commands. Put them on your action bars. Enjoy!
 
 
 ## Commands

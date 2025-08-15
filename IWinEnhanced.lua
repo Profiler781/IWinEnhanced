@@ -83,10 +83,10 @@ end
 
 IWin_RageCost = {
 	["Battle Shout"] = 10,
-	["Berserker Rage"] = 0 - IWin:GetTalentRank(2, 16) * 5,
+	["Berserker Rage"] = 0 - IWin:GetTalentRank(2, 14) * 5,
 	["Bloodrage"] = - 10 - IWin:GetBloodrageCostReduction(),
 	["Bloodthirst"] = 30,
-	["Charge"] = - 12 - IWin:GetTalentRank(1, 4) * 3,
+	["Charge"] = - 12 - IWin:GetTalentRank(1, 4) * 5,
 	["Cleave"] = 20,
 	["Concussion Blow"] = - 10,
 	["Demoralizing Shout"] = 10,
@@ -1044,8 +1044,8 @@ function SlashCmdList.IDPS()
 	IWin:SetReservedRageBloodthirst()
 	IWin:Whirlwind()
 	IWin:SetReservedRage("Whirlwind", "cooldown")
-	--IWin:MasterStrike()
-	--IWin:SetReservedRage("Master Strike", "cooldown")
+	IWin:MasterStrike()
+	IWin:SetReservedRage("Master Strike", "cooldown")
 	IWin:Overpower()
 	IWin:ConcussionBlow()
 	IWin:BattleShoutRefresh()
@@ -1085,8 +1085,8 @@ function SlashCmdList.ICLEAVE()
 	IWin:SetReservedRage("Mortal Strike", "cooldown")
 	IWin:Bloodthirst()
 	IWin:SetReservedRageBloodthirst()
-	--IWin:MasterStrike()
-	--IWin:SetReservedRage("Master Strike", "cooldown")
+	IWin:MasterStrike()
+	IWin:SetReservedRage("Master Strike", "cooldown")
 	IWin:Overpower()
 	IWin:ConcussionBlow()
 	IWin:BattleShoutRefresh()

@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: IWinEnhanced
 ## Notes: Smart macros for turtle warriors
-## Version: 1.2
+## Version: 1.3
 ## SavedVariables: 
 ## OptionalDeps: ShaguTweaks, pfUI
 
