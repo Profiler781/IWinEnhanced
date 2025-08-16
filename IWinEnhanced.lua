@@ -33,6 +33,7 @@ IWin:RegisterEvent("ADDON_LOADED")
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced system loaded.|r")
+		IWin.hasSuperwow = SetAutoloot and true or false
 		IWin:UnregisterEvent("ADDON_LOADED")
 	elseif event == "CHAT_MSG_COMBAT_SELF_MISSES" or event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF" then
 		if string.find(arg1,"dodge") then
@@ -123,16 +124,33 @@ IWin_Taunt = {
 
 ---- Functions ----
 function IWin:GetBuffIndex(unit, spell)
-	local index = 1
-	while UnitBuff(unit, index) do
-		IWin_T:SetOwner(WorldFrame, "ANCHOR_NONE")
-		IWin_T:ClearLines()
-		IWin_T:SetUnitBuff(unit, index)
-		local buffName = IWin_TTextLeft1:GetText()
-		if buffName == spell then
-			return index
+	if unit == "player" then
+		if not IWin.hasSuperwow then
+	    	DEFAULT_CHAT_FRAME:AddMessage("|cFF00FFFFbalakethelock's SuperWoW|r required:")
+	        DEFAULT_CHAT_FRAME:AddMessage("https://github.com/balakethelock/SuperWoW")
+	    	return 0
 		end
-		index = index + 1
+	    local index = 0
+	    while true do
+	        spellID = GetPlayerBuffID(index)
+	        if not spellID then break end
+	        if spell == SpellInfo(spellID) then
+	        	return index
+	        end
+	        index = index + 1
+	    end
+	else
+		local index = 1
+		while UnitBuff(unit, index) do
+			IWin_T:SetOwner(WorldFrame, "ANCHOR_NONE")
+			IWin_T:ClearLines()
+			IWin_T:SetUnitBuff(unit, index)
+			local buffName = IWin_TTextLeft1:GetText()
+			if buffName == spell then
+				return index
+			end
+			index = index + 1
+		end
 	end
 	return nil
 end

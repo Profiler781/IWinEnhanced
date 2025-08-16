@@ -2,8 +2,8 @@
 
 Smart macros for Turtle Warriors v1.18.0. Make macros with commands. Put them on your action bars. Enjoy!
 
-
 ## Commands
+
     /idps        Single target DPS rotation
     /icleave     Multi target DPS rotation
     /itank       Single target threat rotation
@@ -14,7 +14,11 @@ Smart macros for Turtle Warriors v1.18.0. Make macros with commands. Put them on
     /itaunt      Taunt or Mocking Blow if the target is not under another taunt effect
     /ishoot      Shoot with bow, crossbow, gun or throw
 
-## Required Addons
+## Required Mods & Addons
+
+Mandatory Mods:
+* [SuperWoW](https://github.com/balakethelock/SuperWoW/), A mod made for fixing client bugs and expanding the lua-based API used by user interface addons.
+
 You need one of the following addons:
 * [pfUI](https://shagu.org/pfUI/), A full UI replacement.
 * [ShaguTweaks](https://shagu.org/ShaguTweaks/), A non-intrusive quality of life addon.
