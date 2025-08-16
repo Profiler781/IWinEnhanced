@@ -196,11 +196,11 @@ function IWin:GetBuffRemaining(unit, spell)
 	if unit == "player" then
 		local index = IWin:GetBuffIndex(unit, spell)
 		if index then
-			return GetPlayerBuffTimeLeft(index - 1)
+			return GetPlayerBuffTimeLeft(index)
 		end
 		local index = IWin:GetDebuffIndex(unit, spell)
 		if index then
-			return GetPlayerBuffTimeLeft(index - 1)
+			return GetPlayerBuffTimeLeft(index)
 		end
 	elseif unit == "target" then
 		local libdebuff = pfUI and pfUI.api and pfUI.api.libdebuff or ShaguTweaks and ShaguTweaks.libdebuff
@@ -400,7 +400,7 @@ end
 
 function IWin:IsHighAP()
 	local APbase, APpos, APneg = UnitAttackPower("player")
-	return (APbase + APpos + APneg) * 0.35 + 200 > 825
+	return (APbase + APpos - APneg) * 0.35 + 200 > 600 + 20 * 15
 end
 
 ---- Actions ----
@@ -527,6 +527,7 @@ function IWin:BloodthirstHighAP()
 	if IWin:IsSpellLearnt("Bloodthirst")
 		and not IWin:IsOnCooldown("Bloodthirst")
 		and IWin:IsRageAvailable("Bloodthirst")
+		and UnitMana("player") < 60
 		and IWin:IsHighAP() then
 			Cast("Bloodthirst")
 	end
@@ -904,6 +905,32 @@ function IWin:Shoot()
 	end
 end
 
+function IWin:Slam()
+	if IWin:IsSpellLearnt("Slam")
+		and IWin:IsRageAvailable("Slam")
+		and (
+				IWin:GetTalentRank(1, 16)
+				or (
+						not IWin:IsSpellLearnt("Bloodthirst")
+						and not IWin:IsSpellLearnt("Mortal Strike")
+						and not IWin:IsSpellLearnt("Shield Slam")
+					)
+			) then
+			Cast("Slam")
+	end
+end
+
+function IWin:SetReservedRageSlam()
+	if IWin:GetTalentRank(1, 16)
+		or (
+				not IWin:IsSpellLearnt("Bloodthirst")
+				and not IWin:IsSpellLearnt("Mortal Strike")
+				and not IWin:IsSpellLearnt("Shield Slam")
+			) then
+			IWin:SetReservedRage("Slam", "nocooldown")
+	end
+end
+
 function IWin:SunderArmor()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and IWin:IsRageAvailable("Sunder Armor") then
@@ -1067,6 +1094,8 @@ function SlashCmdList.IDPS()
 	IWin:Overpower()
 	IWin:ConcussionBlow()
 	IWin:BattleShoutRefresh()
+	IWin:Slam()
+	IWin:SetReservedRageSlam()
 	IWin:DemoralizingShout()
 	IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
 	IWin:Rend()
@@ -1108,6 +1137,8 @@ function SlashCmdList.ICLEAVE()
 	IWin:Overpower()
 	IWin:ConcussionBlow()
 	IWin:BattleShoutRefresh()
+	IWin:Slam()
+	IWin:SetReservedRageSlam()
 	IWin:DemoralizingShout()
 	IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
 	IWin:BerserkerRage()
