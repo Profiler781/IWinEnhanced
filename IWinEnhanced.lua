@@ -100,6 +100,7 @@ IWin_RageCost = {
 	["Mocking Blow"] = 10,
 	["Mortal Strike"] = 30,
 	["Overpower"] = 5,
+	["Piercing Howl"] = 10,
 	["Pummel"] = 10,
 	["Rend"] = 10,
 	["Revenge"] = 5,
@@ -593,6 +594,7 @@ end
 function IWin:DemoralizingShout()
 	if IWin:IsSpellLearnt("Demoralizing Shout")
 		and IWin:IsRageAvailable("Demoralizing Shout")
+		and IWin:IsInRange("Intimidating Shout")
 		and not IWin:IsBuffActive("target", "Demoralizing Shout")
 		and IWin:GetTimeToDiePrediction() > 10 then
 			Cast("Demoralizing Shout")
@@ -774,6 +776,14 @@ function IWin:OverpowerDefensiveTactics()
 			if IWin:IsStanceActive("Battle Stance") then
 				Cast("Overpower")
 			end
+	end
+end
+
+function IWin:PiercingHowl()
+	if IWin:IsSpellLearnt("Piercing Howl")
+		and IWin:IsInRange("Intimidating Shout")
+		and IWin:IsRageCostAvailable("Piercing Howl") then
+			Cast("Piercing Howl")
 	end
 end
 
@@ -1219,6 +1229,7 @@ function SlashCmdList.ICHASE()
 	IWin:Charge()
 	IWin:Intercept()
 	IWin:Hamstring()
+	IWin:PiercingHowl()
 	IWin:StartAttack()
 end
 
