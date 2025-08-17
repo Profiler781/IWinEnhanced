@@ -302,8 +302,12 @@ function IWin:IsRageCostAvailable(spell)
 	return UnitMana("player") >= IWin_RageCost[spell]
 end
 
-function IWin:IsInMeleeRange()
-	return CheckInteractDistance("target", 3) ~= nil
+function IWin:IsInRange(spell)
+	if not IsSpellInRange then
+        return CheckInteractDistance("target", 3)
+	else
+		return IsSpellInRange(spell, "target")
+	end
 end
 
 function IWin:GetStanceSwapRageRetain()
@@ -542,23 +546,8 @@ end
 function IWin:Charge()
 	if IWin:IsSpellLearnt("Charge")
 		and not IWin:IsOnCooldown("Charge")
-		and not IWin:IsInMeleeRange()
+		and IWin:IsInRange("Charge")
 		and not UnitAffectingCombat("player") then
-			if not IWin:IsStanceActive("Battle Stance") then
-				Cast("Battle Stance")
-			else
-				Cast("Charge")
-				IWin_CombatVar["charge"] = GetTime()
-			end
-	end
-end
-
-function IWin:ChargeOpenWorld()
-	if IWin:IsSpellLearnt("Charge")
-		and not IWin:IsOnCooldown("Charge")
-		and not IWin:IsInMeleeRange()
-		and not UnitAffectingCombat("player")
-		and not IsInInstance() then
 			if not IWin:IsStanceActive("Battle Stance")
 				and (
 						IWin:IsStanceSwapMaxRageLoss(25)
@@ -666,7 +655,8 @@ end
 
 function IWin:Hamstring()
 	if IWin:IsSpellLearnt("Hamstring")
-		and IWin:IsInMeleeRange()
+		and not IWin:IsOnCooldown("Hamstring")
+		and IWin:IsInRange("Hamstring")
 		and IWin:IsRageCostAvailable("Hamstring") then
 			Cast("Hamstring")
 	end
@@ -685,7 +675,7 @@ end
 function IWin:Intercept()
 	if IWin:IsSpellLearnt("Intercept")
 		and not IWin:IsOnCooldown("Intercept")
-		and not IWin:IsInMeleeRange()
+		and IWin:IsInRange("Intercept")
 		and not IWin:IsCharging()
 		and (
 				(
@@ -1029,6 +1019,7 @@ end
 function IWin:ThunderClap()
 	if IWin:IsSpellLearnt("Thunder Clap")
 		and IWin:IsRageAvailable("Thunder Clap")
+		and IWin:IsInRange("Rend")
 		and not IWin:IsOnCooldown("Thunder Clap") then
 			if IWin:IsStanceActive("Berserker Stance") then
 				Cast("Battle Stance")
@@ -1050,7 +1041,7 @@ function IWin:Whirlwind()
 			end
 			if not IWin:IsOnCooldown("Whirlwind")
 				and IWin:IsRageAvailable("Whirlwind")
-				and IWin:IsInMeleeRange()
+				and IWin:IsInRange("Rend")
 				and IWin:IsStanceActive("Berserker Stance") then 
 					Cast("Whirlwind")
 			end
@@ -1070,7 +1061,8 @@ function SlashCmdList.IDPS()
 	IWin_CombatVar["reservedRageStance"] = nil
 	IWin:TargetEnemy()
 	IWin:BattleShoutRefreshOOC()
-	IWin:ChargeOpenWorld()
+	IWin:Charge()
+	IWin:Intercept()
 	IWin:DPSStance()
 	IWin:Bloodrage()
 	IWin:BattleShout()
@@ -1113,7 +1105,8 @@ function SlashCmdList.ICLEAVE()
 	IWin_CombatVar["reservedRageStance"] = nil
 	IWin:TargetEnemy()
 	IWin:BattleShoutRefreshOOC()
-	IWin:ChargeOpenWorld()
+	IWin:Charge()
+	IWin:Intercept()
 	IWin:CleaveStance()
 	IWin:Bloodrage()
 	IWin:BattleShout()
@@ -1154,6 +1147,8 @@ function SlashCmdList.ITANK()
 	IWin:TargetEnemy()
 	IWin:MarkSkull()
 	IWin:BattleShoutRefreshOOC()
+	IWin:Charge()
+	IWin:Intercept()
 	IWin:TankStance()
 	IWin:Bloodrage()
 	IWin:ShieldSlam()
@@ -1188,6 +1183,8 @@ function SlashCmdList.IHODOR()
 	IWin:TargetEnemy()
 	IWin:MarkSkull()
 	IWin:BattleShoutRefreshOOC()
+	IWin:Charge()
+	IWin:Intercept()
 	IWin:TankStance()
 	IWin:Bloodrage()
 	IWin:ThunderClap()

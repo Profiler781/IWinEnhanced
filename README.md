@@ -19,6 +19,9 @@ Smart macros for Turtle Warriors v1.18.0. Make macros with commands. Put them on
 Mandatory Mods:
 * [SuperWoW](https://github.com/balakethelock/SuperWoW/), A mod made for fixing client bugs and expanding the lua-based API used by user interface addons.
 
+Optionnal Mods:
+* [Nampower](https://github.com/pepopo978/nampower/), A mod made to dramatically increase cast efficiency on the 1.12.1 client.
+
 You need one of the following addons:
 * [pfUI](https://shagu.org/pfUI/), A full UI replacement.
 * [ShaguTweaks](https://shagu.org/ShaguTweaks/), A non-intrusive quality of life addon.
