@@ -304,9 +304,9 @@ end
 
 function IWin:IsInRange(spell)
 	if not IsSpellInRange then
-        return CheckInteractDistance("target", 3)
+        return CheckInteractDistance("target", 3) ~= nil
 	else
-		return IsSpellInRange(spell, "target")
+		return IsSpellInRange(spell, "target") == 1
 	end
 end
 
@@ -694,15 +694,15 @@ function IWin:Intercept()
 				)
 				or not IWin:IsOnCooldown("Bloodrage")
 			) then
-		if not IWin:IsStanceActive("Berserker Stance") then
-			Cast("Berserker Stance")
-		end
-		if not IWin:IsRageCostAvailable("Intercept") then
-			Cast("Bloodrage")
-		end
-		if IWin:IsStanceActive("Berserker Stance") then
-			Cast("Intercept")
-		end
+			if not IWin:IsStanceActive("Berserker Stance") then
+				Cast("Berserker Stance")
+			end
+			if not IWin:IsRageCostAvailable("Intercept") then
+				Cast("Bloodrage")
+			end
+			if IWin:IsStanceActive("Berserker Stance") then
+				Cast("Intercept")
+			end
 	end
 end
 
