@@ -190,7 +190,7 @@ function IWin:IsBuffStack(unit, spell, stack)
 end
 
 function IWin:IsBuffActive(unit, spell)
-	return IWin:GetBuffStack(unit, spell) ~= 0
+	return IWin:GetBuffRemaining(unit, spell) ~= 0
 end
 
 function IWin:GetBuffRemaining(unit, spell)
