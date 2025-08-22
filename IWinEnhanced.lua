@@ -15,7 +15,7 @@ IWin.t = CreateFrame("GameTooltip", "IWin_T", UIParent, "GameTooltipTemplate")
 local IWin_Settings = {
 	["rageTimeToReserveBuffer"] = 1.5,
 	["ragePerSecondPrediction"] = 10, -- change it to match your gear and buffs
-	["outOfRaidCombatLength"] = 20,
+	["outOfRaidCombatLength"] = 25,
 	["playerToNPCHealthRatio"] = 0.75,
 }
 local IWin_CombatVar = {
@@ -274,11 +274,11 @@ function IWin:IsStanceActive(stance)
 	return false
 end
 
-function IWin:GetTimeToDiePrediction()
+function IWin:GetTimeToDie()
 	local ttd = 0
 	if UnitInRaid("player") then
 		ttd = 999
-	elseif UnitInParty("player") then
+	elseif GetNumPartyMembers ~= 0 then
 		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / GetNumPartyMembers()
 	else
 		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"]
@@ -316,7 +316,7 @@ function IWin:GetStanceSwapRageRetain()
 end
 
 function IWin:IsStanceSwapMaxRageLoss(rage)
-	return rage >= math.max(0, UnitMana("player") - IWin:GetStanceSwapRageRetain())
+	return rage >= math.max(0, UnitMana("player") - IWin:GetStanceSwapRageRetain() + IWin_CombatVar["reservedRage"])
 end
 
 function IWin:GetRageToReserve(spell, trigger, unit)
@@ -366,6 +366,11 @@ function IWin:IsShieldEquipped()
 	return false
 end
 
+function IWin:Is2HanderEquipped()
+	local offHandLink = GetInventoryItemLink("player", 17)
+	return not offHandLink
+end
+
 IWin_UnitClassification = {
 	["worldboss"] = true,
 	["rareelite"] = true,
@@ -408,7 +413,7 @@ function IWin:IsHighAP()
 	return (APbase + APpos - APneg) * 0.35 + 200 > 600 + 20 * 15
 end
 
----- Actions ----
+---- General Actions ----
 function IWin:TargetEnemy()
 	if not UnitExists("target") or UnitIsDead("target") or UnitIsFriend("target", "player") then
 		TargetNearestEnemy()
@@ -425,8 +430,9 @@ function IWin:StartAttack()
 			end
 		end
 	end
-	if not attackActionFound and not PlayerFrame.inCombat then
-		AttackTarget()
+	if not attackActionFound
+		and not PlayerFrame.inCombat then
+			zAttackTarget()
 	end
 end
 
@@ -438,6 +444,7 @@ function IWin:MarkSkull()
 	end
 end
 
+---- Class Actions ----
 function IWin:BattleShout()
 	if IWin:IsSpellLearnt("Battle Shout")
 		and not IWin:IsBuffActive("player","Battle Shout")
@@ -596,7 +603,7 @@ function IWin:DemoralizingShout()
 		and IWin:IsRageAvailable("Demoralizing Shout")
 		and IWin:IsInRange("Intimidating Shout")
 		and not IWin:IsBuffActive("target", "Demoralizing Shout")
-		and IWin:GetTimeToDiePrediction() > 10 then
+		and IWin:GetTimeToDie() > 10 then
 			Cast("Demoralizing Shout")
 	end
 end
@@ -818,7 +825,7 @@ end
 function IWin:Rend()
 	if IWin:IsSpellLearnt("Rend")
 		and IWin:IsRageAvailable("Rend")
-		and IWin:GetTimeToDiePrediction() > 9
+		and IWin:GetTimeToDie() > 9
 		and not UnitInRaid("player")
 		and not IWin:IsRageReservedStance("Berserker Stance")
 		and not IWin:IsBuffActive("target","Rend")
@@ -908,6 +915,7 @@ end
 function IWin:Slam()
 	if IWin:IsSpellLearnt("Slam")
 		and IWin:IsRageAvailable("Slam")
+		and IWin:Is2HanderEquipped()
 		and (
 				IWin:GetTalentRank(1, 16)
 				or (
@@ -921,11 +929,14 @@ function IWin:Slam()
 end
 
 function IWin:SetReservedRageSlam()
-	if IWin:GetTalentRank(1, 16)
-		or (
-				not IWin:IsSpellLearnt("Bloodthirst")
-				and not IWin:IsSpellLearnt("Mortal Strike")
-				and not IWin:IsSpellLearnt("Shield Slam")
+	if IWin:Is2HanderEquipped()
+		and (
+				IWin:GetTalentRank(1, 16)
+				or (
+						not IWin:IsSpellLearnt("Bloodthirst")
+						and not IWin:IsSpellLearnt("Mortal Strike")
+						and not IWin:IsSpellLearnt("Shield Slam")
+					)
 			) then
 			IWin:SetReservedRage("Slam", "nocooldown")
 	end
@@ -949,7 +960,7 @@ end
 function IWin:SunderArmorDPS()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and IWin:IsRageAvailable("Sunder Armor")
-		and IWin:GetTimeToDiePrediction() > 10
+		and IWin:GetTimeToDie() > 10
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5) then
 			Cast("Sunder Armor")
 	end
@@ -957,7 +968,7 @@ end
 
 function IWin:SetReservedRageSunderArmorDPS()
 	if IWin:IsSpellLearnt("Sunder Armor")
-		and IWin:GetTimeToDiePrediction() > 10
+		and IWin:GetTimeToDie() > 10
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5) then
 			IWin:SetReservedRage("Sunder Armor", "nocooldown")
 	end
@@ -976,7 +987,7 @@ end
 function IWin:SunderArmorDPSRefresh()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and IWin:IsRageAvailable("Sunder Armor")
-		and IWin:GetTimeToDiePrediction() > 10
+		and IWin:GetTimeToDie() > 10
 		and IWin:IsBuffActive("target", "Sunder Armor")
 		and IWin:GetBuffRemaining("target", "Sunder Armor") < 9 then
 			Cast("Sunder Armor")
