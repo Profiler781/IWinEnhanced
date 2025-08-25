@@ -432,7 +432,7 @@ function IWin:StartAttack()
 	end
 	if not attackActionFound
 		and not PlayerFrame.inCombat then
-			zAttackTarget()
+			AttackTarget()
 	end
 end
 
