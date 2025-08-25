@@ -439,7 +439,8 @@ end
 function IWin:MarkSkull()
 	if GetRaidTargetIndex("target") ~= 8
 		and not UnitIsFriend("player", "target")
-		and not UnitInRaid("player") then
+		and not UnitInRaid("player")
+		and GetNumPartyMembers() ~= 0 then
 			SetRaidTarget("target", 8)
 	end
 end
@@ -506,6 +507,7 @@ function IWin:Bloodrage()
 	if IWin:IsSpellLearnt("Bloodrage")
 		and UnitMana("player") < 70
 		and IWin:GetHealthPercent("player") > 25
+		and not IWin:IsBuffActive("player","Enrage")
 		and (
 				IWin:IsStanceActive("Defensive Stance")
 				or (
@@ -516,6 +518,7 @@ function IWin:Bloodrage()
 							or IWin:IsSpellLearnt("Shield Slam")
 						)
 					)
+				or IWin:GetTalentRank(2, 9)
 			) then
 		Cast("Bloodrage")
 	end
@@ -915,15 +918,7 @@ end
 function IWin:Slam()
 	if IWin:IsSpellLearnt("Slam")
 		and IWin:IsRageAvailable("Slam")
-		and IWin:Is2HanderEquipped()
-		and (
-				IWin:GetTalentRank(1, 16)
-				or (
-						not IWin:IsSpellLearnt("Bloodthirst")
-						and not IWin:IsSpellLearnt("Mortal Strike")
-						and not IWin:IsSpellLearnt("Shield Slam")
-					)
-			) then
+		and IWin:Is2HanderEquipped() then
 			Cast("Slam")
 	end
 end
