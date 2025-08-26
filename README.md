@@ -14,6 +14,19 @@ Smart macros for Turtle Warriors v1.18.0. Make macros with commands. Put them on
     /itaunt      Taunt or Mocking Blow if the target is not under another taunt effect
     /ishoot      Shoot with bow, crossbow, gun or throw
 
+## Setup commands
+
+    /iwin                             Current setup
+    /iwin charge <partySize>          Setup for Charge and Intercept
+    /iwin sunder <priority>           Setup for Sunder Armor priority as DPS
+
+partySize possible values: raid, group, solo, off.
+
+priority possible values: high, low, off.
+
+Example: /iwin charge group
+=> Will setup charge usable in rotations while in group or solo.
+
 ## Required Mods & Addons
 
 Mandatory Mods:

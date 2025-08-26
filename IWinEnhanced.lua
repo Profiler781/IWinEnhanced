@@ -12,19 +12,19 @@ if UnitClass("player") ~= "Warrior" then return end
 ---- Loading ----
 IWin = CreateFrame("frame",nil,UIParent)
 IWin.t = CreateFrame("GameTooltip", "IWin_T", UIParent, "GameTooltipTemplate")
-local IWin_Settings = {
-	["rageTimeToReserveBuffer"] = 1.5,
-	["ragePerSecondPrediction"] = 10, -- change it to match your gear and buffs
-	["outOfRaidCombatLength"] = 25,
-	["playerToNPCHealthRatio"] = 0.75,
-}
-local IWin_CombatVar = {
+IWin_CombatVar = {
 	["dodge"] = 0,
 	["reservedRage"] = 0,
 	["reservedRageStance"] = nil,
 	["charge"] = 0,
 }
 local Cast = CastSpellByName
+IWin_PartySize = {
+	["raid"] = 40,
+	["group"] = 5,
+	["solo"] = 1,
+	["off"] = 0,
+}
 
 ---- Event Register ----
 IWin:RegisterEvent("CHAT_MSG_COMBAT_SELF_MISSES")
@@ -33,6 +33,16 @@ IWin:RegisterEvent("ADDON_LOADED")
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced system loaded.|r")
+		if IWin_Settings == nil then
+			IWin_Settings = {
+				["rageTimeToReserveBuffer"] = 1.5,
+				["ragePerSecondPrediction"] = 10,
+				["outOfRaidCombatLength"] = 25,
+				["playerToNPCHealthRatio"] = 0.75,
+				["charge"] = "solo",
+				["sunder"] = "high",
+			}
+		end
 		IWin.hasSuperwow = SetAutoloot and true or false
 		IWin:UnregisterEvent("ADDON_LOADED")
 	elseif event == "CHAT_MSG_COMBAT_SELF_MISSES" or event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF" then
@@ -516,9 +526,9 @@ function IWin:Bloodrage()
 							IWin:IsSpellLearnt("Mortal Strike")
 							or IWin:IsSpellLearnt("Bloodthirst")
 							or IWin:IsSpellLearnt("Shield Slam")
+							or IWin:GetTalentRank(2, 9)
 						)
 					)
-				or IWin:GetTalentRank(2, 9)
 			) then
 		Cast("Bloodrage")
 	end
@@ -570,6 +580,22 @@ function IWin:Charge()
 				Cast("Charge")
 				IWin_CombatVar["charge"] = GetTime()
 			end
+	end
+end
+
+function IWin:ChargePartySize()
+	local partySize = IWin_Settings["charge"]
+	if (
+			UnitInRaid("player")
+			and IWin_PartySize[partySize] == 40
+		) or (
+			GetNumPartyMembers() ~= 0
+			and IWin_PartySize[partySize] >= 5
+		) or (
+			GetNumPartyMembers() == 0
+			and IWin_PartySize[partySize] >= 1
+		) then
+			IWin:Charge()
 	end
 end
 
@@ -715,6 +741,22 @@ function IWin:Intercept()
 			if IWin:IsStanceActive("Berserker Stance") then
 				Cast("Intercept")
 			end
+	end
+end
+
+function IWin:InterceptPartySize()
+	local partySize = IWin_Settings["charge"]
+	if (
+			UnitInRaid("player")
+			and IWin_PartySize[partySize] == 40
+		) or (
+			GetNumPartyMembers() ~= 0
+			and IWin_PartySize[partySize] >= 5
+		) or (
+			GetNumPartyMembers() == 0
+			and IWin_PartySize[partySize] >= 1
+		) then
+			IWin:Intercept()
 	end
 end
 
@@ -955,6 +997,7 @@ end
 function IWin:SunderArmorDPS()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and IWin:IsRageAvailable("Sunder Armor")
+		and not IWin_Settings["sunder"] == "off"
 		and IWin:GetTimeToDie() > 10
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5) then
 			Cast("Sunder Armor")
@@ -963,6 +1006,7 @@ end
 
 function IWin:SetReservedRageSunderArmorDPS()
 	if IWin:IsSpellLearnt("Sunder Armor")
+		and not IWin_Settings["sunder"] == "off"
 		and IWin:GetTimeToDie() > 10
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5) then
 			IWin:SetReservedRage("Sunder Armor", "nocooldown")
@@ -972,6 +1016,7 @@ end
 function IWin:SunderArmorRaid()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and IWin:IsRageAvailable("Sunder Armor")
+		and IWin_Settings["sunder"] == "high"
 		and UnitInRaid("player")
 		and IWin:IsElite()
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5) then
@@ -982,6 +1027,7 @@ end
 function IWin:SunderArmorDPSRefresh()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and IWin:IsRageAvailable("Sunder Armor")
+		and not IWin_Settings["sunder"] == "off"
 		and IWin:GetTimeToDie() > 10
 		and IWin:IsBuffActive("target", "Sunder Armor")
 		and IWin:GetBuffRemaining("target", "Sunder Armor") < 9 then
@@ -1070,6 +1116,46 @@ function SlashCmdList.IDEBUG()
 	DEFAULT_CHAT_FRAME:AddMessage(IWin:GetCooldownRemaining("Whirlwind"))
 end
 
+---- commands ----
+SLASH_IWIN1 = "/iwin"
+function SlashCmdList.IWIN(command)
+	if not command then return end
+	local arguments = {}
+	for token in string.gfind(command, "%S+") do
+		table.insert(arguments, token)
+	end
+	if arguments[1] == "charge"then
+		if arguments[2] ~= "raid"
+			and arguments[2] ~= "group"
+			and arguments[2] ~= "solo"
+			and arguments[2] ~= "off"
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("Unkown parameter. Possible values: raid, group, solo, off.")
+				return
+		end
+	elseif arguments[1] == "sunder" then
+		if arguments[2] ~= "high"
+			and arguments[2] ~= "low"
+			and arguments[2] ~= "off"
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("Unkown parameter. Possible values: high, low, off.")
+				return
+		end
+	end
+    if arguments[1] == "charge" then
+        IWin_Settings["charge"] = arguments[2]
+	    DEFAULT_CHAT_FRAME:AddMessage("Charge: " .. IWin_Settings["charge"])
+	elseif arguments[1] == "sunder" then
+	    IWin_Settings["sunder"] = arguments[2]
+	    DEFAULT_CHAT_FRAME:AddMessage("Sunder Armor: " .. IWin_Settings["sunder"])
+	else
+		DEFAULT_CHAT_FRAME:AddMessage("Usage:")
+		DEFAULT_CHAT_FRAME:AddMessage(" /iwin : Current setup")
+		DEFAULT_CHAT_FRAME:AddMessage(" /iwin charge [" .. IWin_Settings["charge"] .. "] : Setup for Charge and Intercept")
+		DEFAULT_CHAT_FRAME:AddMessage(" /iwin sunder [" .. IWin_Settings["sunder"] .. "] : Setup for Sunder Armor priority as DPS")
+    end
+end
+
 ---- idps button ----
 SLASH_IDPS1 = '/idps'
 function SlashCmdList.IDPS()
@@ -1077,8 +1163,8 @@ function SlashCmdList.IDPS()
 	IWin_CombatVar["reservedRageStance"] = nil
 	IWin:TargetEnemy()
 	IWin:BattleShoutRefreshOOC()
-	IWin:Charge()
-	IWin:Intercept()
+	IWin:ChargePartySize()
+	IWin:InterceptPartySize()
 	IWin:DPSStance()
 	IWin:Bloodrage()
 	IWin:BattleShout()
@@ -1121,8 +1207,8 @@ function SlashCmdList.ICLEAVE()
 	IWin_CombatVar["reservedRageStance"] = nil
 	IWin:TargetEnemy()
 	IWin:BattleShoutRefreshOOC()
-	IWin:Charge()
-	IWin:Intercept()
+	IWin:ChargePartySize()
+	IWin:InterceptPartySize()
 	IWin:CleaveStance()
 	IWin:Bloodrage()
 	IWin:BattleShout()
@@ -1163,8 +1249,8 @@ function SlashCmdList.ITANK()
 	IWin:TargetEnemy()
 	IWin:MarkSkull()
 	IWin:BattleShoutRefreshOOC()
-	IWin:Charge()
-	IWin:Intercept()
+	IWin:ChargePartySize()
+	IWin:InterceptPartySize()
 	IWin:TankStance()
 	IWin:Bloodrage()
 	IWin:ShieldSlam()
@@ -1199,8 +1285,8 @@ function SlashCmdList.IHODOR()
 	IWin:TargetEnemy()
 	IWin:MarkSkull()
 	IWin:BattleShoutRefreshOOC()
-	IWin:Charge()
-	IWin:Intercept()
+	IWin:ChargePartySize()
+	IWin:InterceptPartySize()
 	IWin:TankStance()
 	IWin:Bloodrage()
 	IWin:ThunderClap()
