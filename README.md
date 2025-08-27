@@ -19,10 +19,13 @@ Smart macros for Turtle Warriors v1.18.0. Make macros with commands. Put them on
     /iwin                             Current setup
     /iwin charge <partySize>          Setup for Charge and Intercept
     /iwin sunder <priority>           Setup for Sunder Armor priority as DPS
+    /iwin demo <toggle>               Setup for Demoralizing Shout
 
 partySize possible values: raid, group, solo, off.
 
 priority possible values: high, low, off.
+
+toggle possible values: on, off.
 
 Example: /iwin charge group
 => Will setup charge usable in rotations while in group or solo.

@@ -33,15 +33,27 @@ IWin:RegisterEvent("ADDON_LOADED")
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced system loaded.|r")
-		if IWin_Settings == nil then
-			IWin_Settings = {
-				["rageTimeToReserveBuffer"] = 1.5,
-				["ragePerSecondPrediction"] = 10,
-				["outOfRaidCombatLength"] = 25,
-				["playerToNPCHealthRatio"] = 0.75,
-				["charge"] = "solo",
-				["sunder"] = "high",
-			}
+		IWin_Settings = {}
+		if IWin_Settings["rageTimeToReserveBuffer"] == nil then
+			IWin_Settings["rageTimeToReserveBuffer"] = 1.5
+		end
+		if IWin_Settings["ragePerSecondPrediction"] == nil then
+			IWin_Settings["ragePerSecondPrediction"] = 10
+		end
+		if IWin_Settings["outOfRaidCombatLength"] == nil then
+			IWin_Settings["outOfRaidCombatLength"] = 25
+		end
+		if IWin_Settings["playerToNPCHealthRatio"] == nil then
+			IWin_Settings["playerToNPCHealthRatio"] = 0.75
+		end
+		if IWin_Settings["charge"] == nil then
+			IWin_Settings["charge"] = "solo"
+		end
+		if IWin_Settings["sunder"] == nil then
+			IWin_Settings["sunder"] = "high"
+		end
+		if IWin_Settings["demo"] == nil then
+			IWin_Settings["demo"] = "off"
 		end
 		IWin.hasSuperwow = SetAutoloot and true or false
 		IWin:UnregisterEvent("ADDON_LOADED")
@@ -289,7 +301,7 @@ function IWin:GetTimeToDie()
 	if UnitInRaid("player") then
 		ttd = 999
 	elseif GetNumPartyMembers ~= 0 then
-		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / GetNumPartyMembers()
+		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / GetNumPartyMembers() * 2
 	else
 		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"]
 	end
@@ -415,12 +427,54 @@ function IWin:IsTaunted()
 end
 
 function IWin:IsDefensiveTacticsActive()
-	return IWin:GetTalentRank(3, 18) and IWin:IsShieldEquipped()
+	if IWin:GetTalentRank(3, 18) ~= 0
+		and IWin:IsShieldEquipped() then
+			return true
+	else
+		return false
+	end
 end
 
 function IWin:IsHighAP()
 	local APbase, APpos, APneg = UnitAttackPower("player")
 	return (APbase + APpos - APneg) * 0.35 + 200 > 600 + 20 * 15
+end
+
+IWin_BlacklistFear = {
+	"Magmadar",
+	"Onyxia",
+	"Nefarian",
+}
+
+function IWin:IsBlacklistFear()
+	if not UnitExists("target") then
+		return true
+	end
+	local name = UnitName("target")
+	for unit in IWin_BlacklistFear do
+		if IWin_BlacklistFear[unit] == name then
+			return true
+		end
+	end
+	return false
+end
+
+IWin_BlacklistDemoralizingShout = {
+	"Vek'lor",
+	"Vek'nilash",
+}
+
+function IWin:IsBlacklistDemoralizingShout()
+	if not UnitExists("target") then
+		return true
+	end
+	local name = UnitName("target")
+	for unit in IWin_BlacklistDemoralizingShout do
+		if IWin_BlacklistDemoralizingShout[unit] == name then
+			return true
+		end
+	end
+	return false
 end
 
 ---- General Actions ----
@@ -486,9 +540,13 @@ end
 function IWin:BerserkerRage()
 	if IWin:IsSpellLearnt("Berserker Rage")
 		and IWin:IsStanceActive("Berserker Stance")
+		and not IWin:IsBlacklistFear()
 		and not IWin:IsOnCooldown("Berserker Rage")
 		and UnitAffectingCombat("player")
-		and IWin:IsTanking() then
+		and (
+				IWin:IsTanking()
+				or IWin:GetTalentRank(2, 14) ~= 0
+			) then
 			Cast("Berserker Rage")
 	end
 end
@@ -526,7 +584,7 @@ function IWin:Bloodrage()
 							IWin:IsSpellLearnt("Mortal Strike")
 							or IWin:IsSpellLearnt("Bloodthirst")
 							or IWin:IsSpellLearnt("Shield Slam")
-							or IWin:GetTalentRank(2, 9)
+							or IWin:GetTalentRank(2, 9) ~= 0
 						)
 					)
 			) then
@@ -630,6 +688,8 @@ end
 function IWin:DemoralizingShout()
 	if IWin:IsSpellLearnt("Demoralizing Shout")
 		and IWin:IsRageAvailable("Demoralizing Shout")
+		and not IWin:IsBlacklistDemoralizingShout()
+		and IWin_Settings["demo"] == "on"
 		and IWin:IsInRange("Intimidating Shout")
 		and not IWin:IsBuffActive("target", "Demoralizing Shout")
 		and IWin:GetTimeToDie() > 10 then
@@ -966,16 +1026,8 @@ function IWin:Slam()
 end
 
 function IWin:SetReservedRageSlam()
-	if IWin:Is2HanderEquipped()
-		and (
-				IWin:GetTalentRank(1, 16)
-				or (
-						not IWin:IsSpellLearnt("Bloodthirst")
-						and not IWin:IsSpellLearnt("Mortal Strike")
-						and not IWin:IsSpellLearnt("Shield Slam")
-					)
-			) then
-			IWin:SetReservedRage("Slam", "nocooldown")
+	if IWin:Is2HanderEquipped() then
+		IWin:SetReservedRage("Slam", "nocooldown")
 	end
 end
 
@@ -1113,7 +1165,7 @@ end
 ---- idebug button ----
 SLASH_IDEBUG1 = '/idebug'
 function SlashCmdList.IDEBUG()
-	DEFAULT_CHAT_FRAME:AddMessage(IWin:GetCooldownRemaining("Whirlwind"))
+	DEFAULT_CHAT_FRAME:AddMessage(IWin_Settings["test"])
 end
 
 ---- commands ----
@@ -1141,6 +1193,13 @@ function SlashCmdList.IWIN(command)
 				DEFAULT_CHAT_FRAME:AddMessage("Unkown parameter. Possible values: high, low, off.")
 				return
 		end
+	elseif arguments[1] == "demo" then
+		if arguments[2] ~= "on"
+			and arguments[2] ~= "off"
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("Unkown parameter. Possible values: on, off.")
+				return
+		end
 	end
     if arguments[1] == "charge" then
         IWin_Settings["charge"] = arguments[2]
@@ -1148,11 +1207,15 @@ function SlashCmdList.IWIN(command)
 	elseif arguments[1] == "sunder" then
 	    IWin_Settings["sunder"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("Sunder Armor: " .. IWin_Settings["sunder"])
+	elseif arguments[1] == "demo" then
+	    IWin_Settings["demo"] = arguments[2]
+	    DEFAULT_CHAT_FRAME:AddMessage("Demoralizing Shout: " .. IWin_Settings["demo"])
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("Usage:")
 		DEFAULT_CHAT_FRAME:AddMessage(" /iwin : Current setup")
 		DEFAULT_CHAT_FRAME:AddMessage(" /iwin charge [" .. IWin_Settings["charge"] .. "] : Setup for Charge and Intercept")
 		DEFAULT_CHAT_FRAME:AddMessage(" /iwin sunder [" .. IWin_Settings["sunder"] .. "] : Setup for Sunder Armor priority as DPS")
+		DEFAULT_CHAT_FRAME:AddMessage(" /iwin demo [" .. IWin_Settings["demo"] .. "] : Setup for Demoralizing Shout")
     end
 end
 
