@@ -22,7 +22,7 @@ Discord: Agamemnoth#5566
     /iwin charge <partySize>          Setup for Charge and Intercept
     /iwin sunder <priority>           Setup for Sunder Armor priority as DPS
     /iwin demo <toggle>               Setup for Demoralizing Shout
-    /iwin defensiveTactics <stance>   Setup to allow stances with Defensive Tactics
+    /iwin dt <stance>                 Setup to allow stances with Defensive Tactics
 
 partySize possible values: raid, group, solo, off.
 priority possible values: high, low, off.
