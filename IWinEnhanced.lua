@@ -29,36 +29,30 @@ IWin_PartySize = {
 ---- Event Register ----
 IWin:RegisterEvent("CHAT_MSG_COMBAT_SELF_MISSES")
 IWin:RegisterEvent("CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF")
+IWin:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE")
 IWin:RegisterEvent("ADDON_LOADED")
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced system loaded.|r")
-		IWin_Settings = {}
-		if IWin_Settings["rageTimeToReserveBuffer"] == nil then
-			IWin_Settings["rageTimeToReserveBuffer"] = 1.5
-		end
-		if IWin_Settings["ragePerSecondPrediction"] == nil then
-			IWin_Settings["ragePerSecondPrediction"] = 10
-		end
-		if IWin_Settings["outOfRaidCombatLength"] == nil then
-			IWin_Settings["outOfRaidCombatLength"] = 25
-		end
-		if IWin_Settings["playerToNPCHealthRatio"] == nil then
-			IWin_Settings["playerToNPCHealthRatio"] = 0.75
-		end
-		if IWin_Settings["charge"] == nil then
-			IWin_Settings["charge"] = "solo"
-		end
-		if IWin_Settings["sunder"] == nil then
-			IWin_Settings["sunder"] = "high"
-		end
-		if IWin_Settings["demo"] == nil then
-			IWin_Settings["demo"] = "off"
-		end
+		if IWin_Settings == nil then IWin_Settings = {} end
+		if IWin_Settings["rageTimeToReserveBuffer"] == nil then IWin_Settings["rageTimeToReserveBuffer"] = 1.5 end
+		if IWin_Settings["ragePerSecondPrediction"] == nil then IWin_Settings["ragePerSecondPrediction"] = 10 end
+		if IWin_Settings["outOfRaidCombatLength"] == nil then IWin_Settings["outOfRaidCombatLength"] = 25 end
+		if IWin_Settings["playerToNPCHealthRatio"] == nil then IWin_Settings["playerToNPCHealthRatio"] = 0.75 end
+		if IWin_Settings["charge"] == nil then IWin_Settings["charge"] = "solo" end
+		if IWin_Settings["sunder"] == nil then IWin_Settings["sunder"] = "high" end
+		if IWin_Settings["demo"] == nil then IWin_Settings["demo"] = "off" end
+		if IWin_Settings["dtBattle"] == nil then IWin_Settings["dtBattle"] = true end
+		if IWin_Settings["dtDefensive"] == nil then IWin_Settings["dtDefensive"] = true end
+		if IWin_Settings["dtBerserker"] == nil then IWin_Settings["dtBerserker"] = false end
 		IWin.hasSuperwow = SetAutoloot and true or false
 		IWin:UnregisterEvent("ADDON_LOADED")
 	elseif event == "CHAT_MSG_COMBAT_SELF_MISSES" or event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF" then
 		if string.find(arg1,"dodge") then
+			IWin_CombatVar["dodge"] = GetTime()
+		end
+	elseif event == "CHAT_MSG_SPELL_SELF_DAMAGE" then
+		if string.find(arg1,"dodged") then
 			IWin_CombatVar["dodge"] = GetTime()
 		end
 	end
@@ -296,6 +290,17 @@ function IWin:IsStanceActive(stance)
 	return false
 end
 
+function IWin:GetStance()
+	local forms = GetNumShapeshiftForms()
+	for index = 1, forms do
+		local _, name, active = GetShapeshiftFormInfo(index)
+		if active == 1 then
+			return name
+		end
+	end
+	return nil
+end
+
 function IWin:GetTimeToDie()
 	local ttd = 0
 	if UnitInRaid("player") then
@@ -426,9 +431,24 @@ function IWin:IsTaunted()
 	return false
 end
 
-function IWin:IsDefensiveTacticsActive()
+function IWin:IsDefensiveTacticsActive(stance)
+	local dtStance = stance or IWin:GetStance()
 	if IWin:GetTalentRank(3, 18) ~= 0
-		and IWin:IsShieldEquipped() then
+		and IWin:IsShieldEquipped()
+		and (
+				(
+					IWin_Settings["dtBattle"]
+					and dtStance == "Battle Stance"
+				) or (
+					IWin_Settings["dtDefensive"]
+					and dtStance == "Defensive Stance"
+					and IWin:IsSpellLearnt("Defensive Stance")
+				) or (
+					IWin_Settings["dtBerserker"]
+					and dtStance == "Berserker Stance"
+					and IWin:IsSpellLearnt("Berserker Stance")
+				)
+			) then
 			return true
 	else
 		return false
@@ -730,12 +750,19 @@ end
 function IWin:ExecuteDefensiveTactics()
 	if IWin:IsSpellLearnt("Execute")
 		and IWin:IsExecutePhase()
-		and IWin:IsRageAvailable("Execute")
-		and IWin:IsDefensiveTacticsActive() then
-			if IWin:IsStanceActive("Defensive Stance") then
-				Cast("Battle Stance")
-			else
-				Cast("Execute")
+		and IWin:IsRageAvailable("Execute") then
+			if IWin:IsStanceActive("Defensive Stance")
+				and IWin:IsDefensiveTacticsActive("Battle Stance")
+				and not IWin:IsDefensiveTacticsActive() then
+					Cast("Battle Stance")
+			elseif IWin:IsStanceActive("Defensive Stance")
+				and IWin:IsDefensiveTacticsActive("Berserker Stance")
+				and not IWin:IsDefensiveTacticsActive() then
+					Cast("Berserker Stance")
+			end
+			if IWin:IsStanceActive("Battle Stance")
+				or IWin:IsStanceActive("Berserker Stance") then
+					Cast("Execute")
 			end
 	end
 end
@@ -746,7 +773,10 @@ function IWin:SetReservedRageExecuteDefensiveTactics()
 			lowHealthTarget
 			or IWin:IsExecutePhase()
 		)
-		and IWin:IsDefensiveTacticsActive() then 
+		and (
+				IWin:IsDefensiveTacticsActive("Battle Stance")
+				or IWin:IsDefensiveTacticsActive("Berserker Stance")
+			) then 
 			IWin:SetReservedRage("Execute", "cooldown")
 	end
 end
@@ -875,10 +905,11 @@ function IWin:OverpowerDefensiveTactics()
 		and IWin:IsOverpowerAvailable()
 		and not IWin:IsOnCooldown("Overpower")
 		and IWin:IsRageAvailable("Overpower")
-		and IWin:IsRageReservedStance("Battle Stance")
-		and IWin:IsDefensiveTacticsActive() then
+		and IWin:IsRageReservedStance("Battle Stance") then
 			IWin_CombatVar["reservedRageStance"] = "Battle Stance"
 			if not IWin:IsStanceActive("Battle Stance")
+				and IWin:IsDefensiveTacticsActive("Battle Stance")
+				and not IWin:IsDefensiveTacticsActive()
 				and (
 						IWin:IsStanceSwapMaxRageLoss(25)
 						or UnitIsPVP("target")
@@ -953,9 +984,17 @@ function IWin:Revenge()
 	if IWin:IsSpellLearnt("Revenge")
 		and not IWin:IsOnCooldown("Revenge")
 		and IWin:IsRageCostAvailable("Revenge") then
-			if not IWin:IsStanceActive("Defensive Stance") then
+			if not IWin:IsStanceActive("Defensive Stance")
+				and (
+						(
+							IWin:IsDefensiveTacticsActive("Defensive Stance")
+							and not IWin:IsDefensiveTacticsActive("Battle Stance")
+						)
+						or IWin:GetTalentRank(3, 18) == 0
+					) then
 				Cast("Defensive Stance")
-			else
+			end
+			if IWin:IsStanceActive("Defensive Stance") then
 				Cast("Revenge")
 			end
 	end
@@ -1020,7 +1059,11 @@ end
 function IWin:Slam()
 	if IWin:IsSpellLearnt("Slam")
 		and IWin:IsRageAvailable("Slam")
-		and IWin:Is2HanderEquipped() then
+		and IWin:Is2HanderEquipped()
+		and (
+				not st_timer
+				or st_timer > UnitAttackSpeed("player") * 0.9
+			) then
 			Cast("Slam")
 	end
 end
@@ -1107,13 +1150,29 @@ end
 
 function IWin:TankStance()
 	if IWin:IsSpellLearnt("Defensive Stance")
-		and not IWin:IsDefensiveTacticsActive() then
-			if UnitAffectingCombat("player")
-				and not IWin:IsStanceActive("Defensive Stance") then
-					Cast("Defensive Stance")
-			end
-	else
-		Cast("Battle Stance")
+		and (
+				IWin:IsDefensiveTacticsActive("Defensive Stance")
+				or not IWin:IsDefensiveTacticsActive()
+			)
+		and UnitAffectingCombat("player")
+		and not IWin:IsStanceActive("Defensive Stance") then
+			Cast("Defensive Stance")
+	elseif IWin:IsSpellLearnt("Battle Stance")
+		and (
+				IWin:IsDefensiveTacticsActive("Battle Stance")
+				--or not IWin:IsDefensiveTacticsActive()
+			)
+		and not IWin:IsDefensiveTacticsActive()
+		and not IWin:IsStanceActive("Battle Stance") then
+			Cast("Battle Stance")
+	elseif IWin:IsSpellLearnt("Berserker Stance")
+		and (
+				IWin:IsDefensiveTacticsActive("Berserker Stance")
+				--or not IWin:IsDefensiveTacticsActive()
+			)
+		and not IWin:IsDefensiveTacticsActive()
+		and not IWin:IsStanceActive("Berserker Stance") then
+			Cast("Berserker Stance")
 	end
 end
 
@@ -1200,6 +1259,14 @@ function SlashCmdList.IWIN(command)
 				DEFAULT_CHAT_FRAME:AddMessage("Unkown parameter. Possible values: on, off.")
 				return
 		end
+	elseif arguments[1] == "dt" then
+		if arguments[2] ~= "battle"
+			and arguments[2] ~= "defensive"
+			and arguments[2] ~= "berserker"
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("Unkown parameter. Possible values: battle, defensive, berserker.")
+				return
+		end
 	end
     if arguments[1] == "charge" then
         IWin_Settings["charge"] = arguments[2]
@@ -1210,12 +1277,24 @@ function SlashCmdList.IWIN(command)
 	elseif arguments[1] == "demo" then
 	    IWin_Settings["demo"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("Demoralizing Shout: " .. IWin_Settings["demo"])
+	elseif arguments[1] == "dt" and arguments[2] == "battle" then
+	    IWin_Settings["dtBattle"] = not IWin_Settings["dtBattle"]
+	    DEFAULT_CHAT_FRAME:AddMessage("Defensive Tactics Battle Stance: " .. tostring(IWin_Settings["dtBattle"]))
+	elseif arguments[1] == "dt" and arguments[2] == "defensive" then
+	    IWin_Settings["dtDefensive"] = not IWin_Settings["dtDefensive"]
+	    DEFAULT_CHAT_FRAME:AddMessage("Defensive Tactics Defensive Stance: " .. tostring(IWin_Settings["dtDefensive"]))
+	elseif arguments[1] == "dt" and arguments[2] == "berserker" then
+	    IWin_Settings["dtBerserker"] = not IWin_Settings["dtBerserker"]
+	    DEFAULT_CHAT_FRAME:AddMessage("Defensive Tactics Berserker Stance: " .. tostring(IWin_Settings["dtBerserker"]))
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("Usage:")
 		DEFAULT_CHAT_FRAME:AddMessage(" /iwin : Current setup")
 		DEFAULT_CHAT_FRAME:AddMessage(" /iwin charge [" .. IWin_Settings["charge"] .. "] : Setup for Charge and Intercept")
 		DEFAULT_CHAT_FRAME:AddMessage(" /iwin sunder [" .. IWin_Settings["sunder"] .. "] : Setup for Sunder Armor priority as DPS")
 		DEFAULT_CHAT_FRAME:AddMessage(" /iwin demo [" .. IWin_Settings["demo"] .. "] : Setup for Demoralizing Shout")
+		DEFAULT_CHAT_FRAME:AddMessage(" /iwin dt battle : (" .. tostring(IWin_Settings["dtBattle"]) .. ") Setup for Battle Stance with Defensive Tactics")
+		DEFAULT_CHAT_FRAME:AddMessage(" /iwin dt defensive : (" .. tostring(IWin_Settings["dtDefensive"]) .. ") Setup for Defensive Stance with Defensive Tactics")
+		DEFAULT_CHAT_FRAME:AddMessage(" /iwin dt berserker : (" .. tostring(IWin_Settings["dtBerserker"]) .. ") Setup for Berserker Stance with Defensive Tactics")
     end
 end
 

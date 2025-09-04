@@ -2,6 +2,8 @@
 
 Smart macros for Turtle Warriors v1.18.0. Make macros with commands. Put them on your action bars. Enjoy!
 
+Discord: Agamemnoth#5566
+
 ## Commands
 
     /idps        Single target DPS rotation
@@ -20,12 +22,12 @@ Smart macros for Turtle Warriors v1.18.0. Make macros with commands. Put them on
     /iwin charge <partySize>          Setup for Charge and Intercept
     /iwin sunder <priority>           Setup for Sunder Armor priority as DPS
     /iwin demo <toggle>               Setup for Demoralizing Shout
+    /iwin defensiveTactics <stance>   Setup to allow stances with Defensive Tactics
 
 partySize possible values: raid, group, solo, off.
-
 priority possible values: high, low, off.
-
 toggle possible values: on, off.
+stance possible values: battle, defensive, berserker.
 
 Example: /iwin charge group
 => Will setup charge usable in rotations while in group or solo.
@@ -33,11 +35,14 @@ Example: /iwin charge group
 ## Required Mods & Addons
 
 Mandatory Mods:
-* [SuperWoW](https://github.com/balakethelock/SuperWoW/), A mod made for fixing client bugs and expanding the lua-based API used by user interface addons.
+* [SuperWoW](https://github.com/balakethelock/SuperWoW/), A mod made for fixing client bugs and expanding the lua-based API used by user interface addons. Used for debuff tracking.
 
 Optionnal Mods:
-* [Nampower](https://github.com/pepopo978/nampower/), A mod made to dramatically increase cast efficiency on the 1.12.1 client.
+* [Nampower](https://github.com/pepopo978/nampower/), A mod made to dramatically increase cast efficiency on the 1.12.1 client. Used for range checks.
 
 You need one of the following addons:
 * [pfUI](https://shagu.org/pfUI/), A full UI replacement.
 * [ShaguTweaks](https://shagu.org/ShaguTweaks/), A non-intrusive quality of life addon.
+
+Optionnal Addons:
+* [SP_SwingTimer](https://github.com/Profiler781/SP_SwingTimer), An auto attack swing timer. Used for Slam.
