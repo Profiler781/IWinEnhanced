@@ -1057,12 +1057,14 @@ function IWin:Shoot()
 end
 
 function IWin:Slam()
+	local slamCastSpeed = (2.5 - IWin:GetTalentRank(1,15) * 0.25) / (1 + IWin:GetTalentRank(2, 15) * 0.06)
 	if IWin:IsSpellLearnt("Slam")
 		and IWin:IsRageAvailable("Slam")
 		and IWin:Is2HanderEquipped()
 		and (
 				not st_timer
 				or st_timer > UnitAttackSpeed("player") * 0.9
+				or st_timer > slamCastSpeed
 			) then
 			Cast("Slam")
 	end
