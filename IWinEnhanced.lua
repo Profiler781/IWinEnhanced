@@ -303,7 +303,7 @@ end
 
 function IWin:GetTimeToDie()
 	local ttd = 0
-	if UnitInRaid("player") then
+	if UnitInRaid("player") or UnitIsPVP("target") then
 		ttd = 999
 	elseif GetNumPartyMembers ~= 0 then
 		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / GetNumPartyMembers() * 2
@@ -331,7 +331,9 @@ function IWin:IsRageCostAvailable(spell)
 end
 
 function IWin:IsInRange(spell)
-	if not IsSpellInRange then
+	if not IsSpellInRange
+		or not spell
+		or not IWin:IsSpellLearnt(spell) then
         return CheckInteractDistance("target", 3) ~= nil
 	else
 		return IsSpellInRange(spell, "target") == 1
@@ -533,7 +535,6 @@ end
 function IWin:BattleShout()
 	if IWin:IsSpellLearnt("Battle Shout")
 		and not IWin:IsBuffActive("player","Battle Shout")
-		and not IWin:IsBuffActive("player","Blessing of Power")
 		and IWin:IsRageAvailable("Battle Shout") then
 			Cast("Battle Shout")
 	end
@@ -579,15 +580,6 @@ function IWin:BerserkerRageImmune()
 			else
 				Cast("Berserker Rage")
 			end
-	end
-end
-
-function IWin:BerserkerStanceInstance()
-	if IWin:IsSpellLearnt("Berserker Stance")
-		and IsInInstance()
-		and not IWin:IsStanceActive("Berserker Stance")
-		and IWin:IsStanceSwapMaxRageLoss(25) then
-			Cast("Berserker Stance")
 	end
 end
 
@@ -724,6 +716,15 @@ function IWin:DPSStance()
 		else
 			Cast("Battle Stance")
 		end
+	end
+end
+
+function IWin:DPSStanceDefault()
+	if IWin:IsSpellLearnt("Berserker Stance")
+		and IWin:IsRageReservedStance("Berserker Stance") then
+			Cast("Berserker Stance")
+	else
+		Cast("Battle Stance")
 	end
 end
 
@@ -963,20 +964,14 @@ function IWin:Rend()
 		and IWin:IsRageAvailable("Rend")
 		and IWin:GetTimeToDie() > 9
 		and not UnitInRaid("player")
-		and not IWin:IsRageReservedStance("Berserker Stance")
 		and not IWin:IsBuffActive("target","Rend")
 		and not (
-					UnitCreatureType("target") == "undead"
-					or UnitCreatureType("target") == "mechanical"
-				) then
-			IWin_CombatVar["reservedRageStance"] = "Battle Stance"
-			if IWin:IsStanceActive("Berserker Stance")
-				and IWin:IsStanceSwapMaxRageLoss(0) then
-					Cast("Battle Stance")
-			end
-			if not IWin:IsStanceActive("Berserker Stance") then
-				Cast("Rend")
-			end
+					UnitCreatureType("target") == "Undead"
+					or UnitCreatureType("target") == "Mechanical"
+					or UnitCreatureType("target") == "Elemental"
+				)
+		and not IWin:IsStanceActive("Berserker Stance") then
+			Cast("Rend")
 	end
 end
 
@@ -1057,7 +1052,7 @@ function IWin:Shoot()
 end
 
 function IWin:Slam()
-	local slamCastSpeed = (2.5 - IWin:GetTalentRank(1,15) * 0.25) / (1 + IWin:GetTalentRank(2, 15) * 0.06)
+	local slamCastSpeed = (2.5 - IWin:GetTalentRank(1, 15) * 0.25) / (1 + IWin:GetTalentRank(2, 15) * 0.06)
 	if IWin:IsSpellLearnt("Slam")
 		and IWin:IsRageAvailable("Slam")
 		and IWin:Is2HanderEquipped()
@@ -1330,6 +1325,7 @@ function SlashCmdList.IDPS()
 	IWin:MasterStrike()
 	IWin:SetReservedRage("Master Strike", "cooldown")
 	IWin:Overpower()
+	IWin:DPSStanceDefault()
 	IWin:ConcussionBlow()
 	IWin:BattleShoutRefresh()
 	IWin:Slam()
@@ -1374,6 +1370,7 @@ function SlashCmdList.ICLEAVE()
 	IWin:MasterStrike()
 	IWin:SetReservedRage("Master Strike", "cooldown")
 	IWin:Overpower()
+	IWin:DPSStanceDefault()
 	IWin:ConcussionBlow()
 	IWin:BattleShoutRefresh()
 	IWin:Slam()
@@ -1381,6 +1378,7 @@ function SlashCmdList.ICLEAVE()
 	IWin:DemoralizingShout()
 	IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
 	IWin:BerserkerRage()
+	IWin:DPSStanceDefault()
 	IWin:Cleave()
 	IWin:StartAttack()
 end
@@ -1461,6 +1459,8 @@ end
 ---- ichase button ----
 SLASH_ICHASE1 = '/ichase'
 function SlashCmdList.ICHASE()
+	IWin_CombatVar["reservedRage"] = 0
+	IWin_CombatVar["reservedRageStance"] = nil
 	IWin:TargetEnemy()
 	IWin:Charge()
 	IWin:Intercept()
@@ -1472,6 +1472,8 @@ end
 ---- ikick button ----
 SLASH_IKICK1 = '/ikick'
 function SlashCmdList.IKICK()
+	IWin_CombatVar["reservedRage"] = 0
+	IWin_CombatVar["reservedRageStance"] = nil
 	IWin:TargetEnemy()
 	IWin:ShieldBash()
 	IWin:Pummel()
@@ -1481,6 +1483,8 @@ end
 ---- ifeardance button ----
 SLASH_IFEARDANCE1 = '/ifeardance'
 function SlashCmdList.IFEARDANCE()
+	IWin_CombatVar["reservedRage"] = 0
+	IWin_CombatVar["reservedRageStance"] = nil
 	IWin:TargetEnemy()
 	IWin:BerserkerRageImmune()
 	IWin:StartAttack()
@@ -1489,6 +1493,8 @@ end
 ---- itaunt button ----
 SLASH_ITAUNT1 = '/itaunt'
 function SlashCmdList.ITAUNT()
+	IWin_CombatVar["reservedRage"] = 0
+	IWin_CombatVar["reservedRageStance"] = nil
 	IWin:TargetEnemy()
 	IWin:Taunt()
 	IWin:MockingBlow()
@@ -1498,6 +1504,8 @@ end
 ---- ishoot button ----
 SLASH_ISHOOT1 = '/ishoot'
 function SlashCmdList.ISHOOT()
+	IWin_CombatVar["reservedRage"] = 0
+	IWin_CombatVar["reservedRageStance"] = nil
 	IWin:TargetEnemy()
 	IWin:MarkSkull()
 	IWin:Shoot()
