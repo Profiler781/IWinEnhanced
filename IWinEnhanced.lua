@@ -334,7 +334,11 @@ function IWin:IsInRange(spell)
 	if not IsSpellInRange
 		or not spell
 		or not IWin:IsSpellLearnt(spell) then
-        return CheckInteractDistance("target", 3) ~= nil
+			if spell == "Charge" or spell == "Intercept" then
+				return not (CheckInteractDistance("target", 3) ~= nil)
+			else
+        		return CheckInteractDistance("target", 3) ~= nil
+        	end
 	else
 		return IsSpellInRange(spell, "target") == 1
 	end
@@ -637,10 +641,7 @@ end
 function IWin:Charge()
 	if IWin:IsSpellLearnt("Charge")
 		and not IWin:IsOnCooldown("Charge")
-		and (
-				IWin:IsInRange("Charge")
-				or not (CheckInteractDistance("target", 3) ~= nil)
-			)
+		and IWin:IsInRange("Charge")
 		and not UnitAffectingCombat("player") then
 			if not IWin:IsStanceActive("Battle Stance")
 				and (
@@ -807,10 +808,7 @@ end
 function IWin:Intercept()
 	if IWin:IsSpellLearnt("Intercept")
 		and not IWin:IsOnCooldown("Intercept")
-		and (
-				IWin:IsInRange("Intercept")
-				or not (CheckInteractDistance("target", 3) ~= nil)
-			)
+		and IWin:IsInRange("Intercept")
 		and not IWin:IsCharging()
 		and (
 				(
