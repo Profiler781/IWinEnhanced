@@ -330,11 +330,11 @@ function IWin:IsRageCostAvailable(spell)
 	return UnitMana("player") >= IWin_RageCost[spell]
 end
 
-function IWin:IsInRange(spell)
+function IWin:IsInRange(spell, distance)
 	if not IsSpellInRange
 		or not spell
 		or not IWin:IsSpellLearnt(spell) then
-			if spell == "Charge" or spell == "Intercept" then
+			if distance == "ranged" then
 				return not (CheckInteractDistance("target", 3) ~= nil)
 			else
         		return CheckInteractDistance("target", 3) ~= nil
@@ -641,7 +641,7 @@ end
 function IWin:Charge()
 	if IWin:IsSpellLearnt("Charge")
 		and not IWin:IsOnCooldown("Charge")
-		and IWin:IsInRange("Charge")
+		and IWin:IsInRange("Charge","ranged")
 		and not UnitAffectingCombat("player") then
 			if not IWin:IsStanceActive("Battle Stance")
 				and (
@@ -726,9 +726,16 @@ end
 function IWin:DPSStanceDefault()
 	if IWin:IsSpellLearnt("Berserker Stance")
 		and IWin:IsRageReservedStance("Berserker Stance") then
-			Cast("Berserker Stance")
-	else
-		Cast("Battle Stance")
+			IWin_CombatVar["reservedRageStance"] = "Berserker Stance"
+			if not IWin:IsStanceActive("Berserker Stance") then
+				Cast("Berserker Stance")
+			end
+	elseif IWin:IsSpellLearnt("Battle Stance")
+		and IWin:IsRageReservedStance("Battle Stance") then
+			IWin_CombatVar["reservedRageStance"] = "Battle Stance"
+			if not IWin:IsStanceActive("Battle Stance") then
+				Cast("Battle Stance")
+			end
 	end
 end
 
@@ -808,7 +815,7 @@ end
 function IWin:Intercept()
 	if IWin:IsSpellLearnt("Intercept")
 		and not IWin:IsOnCooldown("Intercept")
-		and IWin:IsInRange("Intercept")
+		and IWin:IsInRange("Intercept","ranged")
 		and not IWin:IsCharging()
 		and (
 				(
@@ -1382,7 +1389,6 @@ function SlashCmdList.ICLEAVE()
 	IWin:DemoralizingShout()
 	IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
 	IWin:BerserkerRage()
-	IWin:DPSStanceDefault()
 	IWin:Cleave()
 	IWin:StartAttack()
 end
