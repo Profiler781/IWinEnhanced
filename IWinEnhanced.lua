@@ -13,10 +13,13 @@ if UnitClass("player") ~= "Warrior" then return end
 IWin = CreateFrame("frame",nil,UIParent)
 IWin.t = CreateFrame("GameTooltip", "IWin_T", UIParent, "GameTooltipTemplate")
 IWin_CombatVar = {
+	["gcd"] = 0,
 	["dodge"] = 0,
 	["reservedRage"] = 0,
 	["reservedRageStance"] = nil,
+	["reservedRageStanceLast"] = 0,
 	["charge"] = 0,
+	["queueGCD"] = true,
 }
 local Cast = CastSpellByName
 IWin_PartySize = {
@@ -27,6 +30,7 @@ IWin_PartySize = {
 }
 
 ---- Event Register ----
+IWin:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
 IWin:RegisterEvent("CHAT_MSG_COMBAT_SELF_MISSES")
 IWin:RegisterEvent("CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF")
 IWin:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE")
@@ -55,6 +59,8 @@ IWin:SetScript("OnEvent", function()
 		if string.find(arg1,"dodged") then
 			IWin_CombatVar["dodge"] = GetTime()
 		end
+	elseif event == "ACTIONBAR_UPDATE_COOLDOWN" and arg1 == nil then
+		IWin_CombatVar["gcd"] = GetTime()
 	end
 end)
 
@@ -271,7 +277,8 @@ end
 
 function IWin:IsOverpowerAvailable()
 	local overpowerTimeActive = GetTime() - IWin_CombatVar["dodge"]
- 	return overpowerTimeActive < 5
+	local gcdRemaining = math.min(0, 1.5 - (GetTime() - IWin_CombatVar["gcd"]))
+ 	return overpowerTimeActive < 5 - gcdRemaining
  end
 
 function IWin:IsCharging()
@@ -418,11 +425,21 @@ function IWin:IsElite()
 	return IWin_UnitClassification[classification]
 end
 
-function IWin:IsRageReservedStance(stance)
+function IWin:IsReservedRageStance(stance)
 	if IWin_CombatVar["reservedRageStance"] then
 		return IWin_CombatVar["reservedRageStance"] == stance
 	end
 	return true
+end
+
+function IWin:SetReservedRageStance(stance)
+	if IWin_CombatVar["reservedRageStanceLast"] + 2 < GetTime() then
+		IWin_CombatVar["reservedRageStance"] = stance
+	end
+end
+
+function IWin:SetReservedRageStanceCast()
+	IWin_CombatVar["reservedRageStanceLast"] = GetTime()
 end
 
 function IWin:IsTaunted()
@@ -535,35 +552,50 @@ function IWin:MarkSkull()
 	end
 end
 
+function IWin:InitializeRotation()
+	IWin_CombatVar["reservedRage"] = 0
+	IWin_CombatVar["queueGCD"] = true
+	if IWin_CombatVar["reservedRageStanceLast"] + 2 < GetTime() then
+		IWin_CombatVar["reservedRageStance"] = nil
+	end
+end
+
 ---- Class Actions ----
 function IWin:BattleShout()
 	if IWin:IsSpellLearnt("Battle Shout")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsBuffActive("player","Battle Shout")
 		and IWin:IsRageAvailable("Battle Shout") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Battle Shout")
 	end
 end
 
 function IWin:BattleShoutRefresh()
 	if IWin:IsSpellLearnt("Battle Shout")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:GetBuffRemaining("player","Battle Shout") < 9
 		and IWin:IsRageAvailable("Battle Shout") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Battle Shout")
 	end
 end
 
 function IWin:BattleShoutRefreshOOC()
 	if IWin:IsSpellLearnt("Battle Shout")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:GetBuffRemaining("player","Battle Shout") < 30
 		and IWin:IsRageAvailable("Battle Shout")
 		and UnitMana("player") > 60
 		and not UnitAffectingCombat("player") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Battle Shout")
 	end
 end
 
 function IWin:BerserkerRage()
 	if IWin:IsSpellLearnt("Berserker Rage")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsStanceActive("Berserker Stance")
 		and not IWin:IsBlacklistFear()
 		and not IWin:IsOnCooldown("Berserker Rage")
@@ -572,16 +604,19 @@ function IWin:BerserkerRage()
 				IWin:IsTanking()
 				or IWin:GetTalentRank(2, 14) ~= 0
 			) then
-			Cast("Berserker Rage")
+				IWin_CombatVar["queueGCD"] = false
+				Cast("Berserker Rage")
 	end
 end
 
 function IWin:BerserkerRageImmune()
 	if IWin:IsSpellLearnt("Berserker Rage")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Berserker Rage") then
 			if not IWin:IsStanceActive("Berserker Stance") then
 				Cast("Berserker Stance")
 			else
+				IWin_CombatVar["queueGCD"] = false
 				Cast("Berserker Rage")
 			end
 	end
@@ -592,6 +627,7 @@ function IWin:Bloodrage()
 		and UnitMana("player") < 70
 		and IWin:GetHealthPercent("player") > 25
 		and not IWin:IsBuffActive("player","Enrage")
+		and not IWin:IsOnCooldown("Bloodrage")
 		and (
 				IWin:IsStanceActive("Defensive Stance")
 				or (
@@ -610,8 +646,10 @@ end
 
 function IWin:Bloodthirst()
 	if IWin:IsSpellLearnt("Bloodthirst")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Bloodthirst")
 		and IWin:IsRageAvailable("Bloodthirst") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Bloodthirst")
 	end
 end
@@ -624,10 +662,12 @@ end
 
 function IWin:BloodthirstHighAP()
 	if IWin:IsSpellLearnt("Bloodthirst")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Bloodthirst")
 		and IWin:IsRageAvailable("Bloodthirst")
 		and UnitMana("player") < 60
 		and IWin:IsHighAP() then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Bloodthirst")
 	end
 end
@@ -651,6 +691,7 @@ function IWin:Charge()
 					Cast("Battle Stance")
 			end
 			if IWin:IsStanceActive("Battle Stance") then
+				IWin_CombatVar["queueGCD"] = false
 				Cast("Charge")
 				IWin_CombatVar["charge"] = GetTime()
 			end
@@ -696,19 +737,23 @@ end
 
 function IWin:ConcussionBlow()
 	if IWin:IsSpellLearnt("Concussion Blow")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Concussion Blow") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Concussion Blow")
 	end
 end
 
 function IWin:DemoralizingShout()
 	if IWin:IsSpellLearnt("Demoralizing Shout")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Demoralizing Shout")
 		and not IWin:IsBlacklistDemoralizingShout()
 		and IWin_Settings["demo"] == "on"
 		and IWin:IsInRange("Intimidating Shout")
 		and not IWin:IsBuffActive("target", "Demoralizing Shout")
 		and IWin:GetTimeToDie() > 10 then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Demoralizing Shout")
 	end
 end
@@ -725,15 +770,17 @@ end
 
 function IWin:DPSStanceDefault()
 	if IWin:IsSpellLearnt("Berserker Stance")
-		and IWin:IsRageReservedStance("Berserker Stance") then
-			IWin_CombatVar["reservedRageStance"] = "Berserker Stance"
+		and IWin:IsReservedRageStance("Berserker Stance") then
+			IWin:SetReservedRageStance("Berserker Stance")
 			if not IWin:IsStanceActive("Berserker Stance") then
+				IWin:SetReservedRageStanceCast()
 				Cast("Berserker Stance")
 			end
 	elseif IWin:IsSpellLearnt("Battle Stance")
-		and IWin:IsRageReservedStance("Battle Stance") then
-			IWin_CombatVar["reservedRageStance"] = "Battle Stance"
+		and IWin:IsReservedRageStance("Battle Stance") then
+			IWin:SetReservedRageStance("Battle Stance")
 			if not IWin:IsStanceActive("Battle Stance") then
+				IWin:SetReservedRageStanceCast()
 				Cast("Battle Stance")
 			end
 	end
@@ -741,11 +788,13 @@ end
 
 function IWin:Execute()
 	if IWin:IsSpellLearnt("Execute")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsExecutePhase()
 		and IWin:IsRageAvailable("Execute") then
 			if IWin:IsStanceActive("Defensive Stance") then
 				Cast("Battle Stance")
 			else
+				IWin_CombatVar["queueGCD"] = false
 				Cast("Execute")
 			end
 	end
@@ -761,6 +810,7 @@ end
 
 function IWin:ExecuteDefensiveTactics()
 	if IWin:IsSpellLearnt("Execute")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsExecutePhase()
 		and IWin:IsRageAvailable("Execute") then
 			if IWin:IsStanceActive("Defensive Stance")
@@ -774,6 +824,7 @@ function IWin:ExecuteDefensiveTactics()
 			end
 			if IWin:IsStanceActive("Battle Stance")
 				or IWin:IsStanceActive("Berserker Stance") then
+					IWin_CombatVar["queueGCD"] = false
 					Cast("Execute")
 			end
 	end
@@ -795,9 +846,11 @@ end
 
 function IWin:Hamstring()
 	if IWin:IsSpellLearnt("Hamstring")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Hamstring")
 		and IWin:IsInRange("Hamstring")
 		and IWin:IsRageCostAvailable("Hamstring") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Hamstring")
 	end
 end
@@ -814,6 +867,7 @@ end
 
 function IWin:Intercept()
 	if IWin:IsSpellLearnt("Intercept")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Intercept")
 		and IWin:IsInRange("Intercept","ranged")
 		and not IWin:IsCharging()
@@ -841,6 +895,7 @@ function IWin:Intercept()
 				Cast("Bloodrage")
 			end
 			if IWin:IsStanceActive("Berserker Stance") then
+				IWin_CombatVar["queueGCD"] = false
 				Cast("Intercept")
 			end
 	end
@@ -864,14 +919,17 @@ end
 
 function IWin:MasterStrike()
 	if IWin:IsSpellLearnt("Master Strike")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Master Strike")
 		and IWin:IsRageAvailable("Master Strike") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Master Strike")
 	end
 end
 
 function IWin:MockingBlow()
 	if IWin:IsSpellLearnt("Mocking Blow")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsTanking()
 		and IWin:IsOnCooldown("Taunt")
 		and not IWin:IsOnCooldown("Mocking Blow")
@@ -879,6 +937,7 @@ function IWin:MockingBlow()
 			if not IWin:IsStanceActive("Battle Stance") then
 				Cast("Battle Stance")
 			else
+				IWin_CombatVar["queueGCD"] = false
 				Cast("Mocking Blow")
 			end
 	end
@@ -886,39 +945,53 @@ end
 
 function IWin:MortalStrike()
 	if IWin:IsSpellLearnt("Mortal Strike")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Mortal Strike")
 		and IWin:IsRageAvailable("Mortal Strike") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Mortal Strike")
 	end
 end
 
 function IWin:Overpower()
 	if IWin:IsSpellLearnt("Overpower")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsOverpowerAvailable()
 		and not IWin:IsOnCooldown("Overpower")
-		and IWin:IsRageAvailable("Overpower")
-		and IWin:IsRageReservedStance("Battle Stance") then
-			IWin_CombatVar["reservedRageStance"] = "Battle Stance"
-			if not IWin:IsStanceActive("Battle Stance")
-				and (
-						IWin:IsStanceSwapMaxRageLoss(25)
-						or UnitIsPVP("target")
-					) then
-					Cast("Battle Stance")
-			end
-			if IWin:IsStanceActive("Battle Stance") then
-				Cast("Overpower")
-			end
+		and (
+				IWin:IsRageAvailable("Overpower")
+				or IWin:IsStanceActive("Battle Stance")
+			) then
+				if IWin:IsReservedRageStance("Battle Stance")
+					and (
+							IWin:IsStanceSwapMaxRageLoss(10)
+							or UnitIsPVP("target")
+							or IWin:IsStanceActive("Battle Stance")
+						) then
+							IWin:SetReservedRageStance("Battle Stance")
+							if not IWin:IsStanceActive("Battle Stance") then
+								IWin:SetReservedRageStanceCast()
+								Cast("Battle Stance")
+							end
+				end
+				if IWin:IsStanceActive("Battle Stance") then
+					IWin_CombatVar["queueGCD"] = false
+					Cast("Overpower")
+				end
 	end
 end
 
 function IWin:OverpowerDefensiveTactics()
 	if IWin:IsSpellLearnt("Overpower")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsOverpowerAvailable()
 		and not IWin:IsOnCooldown("Overpower")
-		and IWin:IsRageAvailable("Overpower")
-		and IWin:IsRageReservedStance("Battle Stance") then
-			IWin_CombatVar["reservedRageStance"] = "Battle Stance"
+		and (
+				IWin:IsRageAvailable("Overpower")
+				or IWin:IsStanceActive("Battle Stance")
+			)
+		and IWin:IsReservedRageStance("Battle Stance") then
+			IWin:SetReservedRageStance("Battle Stance")
 			if not IWin:IsStanceActive("Battle Stance")
 				and IWin:IsDefensiveTacticsActive("Battle Stance")
 				and not IWin:IsDefensiveTacticsActive()
@@ -926,9 +999,11 @@ function IWin:OverpowerDefensiveTactics()
 						IWin:IsStanceSwapMaxRageLoss(25)
 						or UnitIsPVP("target")
 					) then
-					Cast("Battle Stance")
+						IWin:SetReservedRageStanceCast()
+						Cast("Battle Stance")
 			end
 			if IWin:IsStanceActive("Battle Stance") then
+				IWin_CombatVar["queueGCD"] = false
 				Cast("Overpower")
 			end
 	end
@@ -936,14 +1011,17 @@ end
 
 function IWin:PiercingHowl()
 	if IWin:IsSpellLearnt("Piercing Howl")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsInRange("Intimidating Shout")
 		and IWin:IsRageCostAvailable("Piercing Howl") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Piercing Howl")
 	end
 end
 
 function IWin:Pummel()
 	if IWin:IsSpellLearnt("Pummel")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Pummel")
 		and (
 				(
@@ -965,6 +1043,7 @@ function IWin:Pummel()
 			if not IWin:IsRageCostAvailable("Pummel") then
 				Cast("Bloodrage")
 			end
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Pummel")
 		end
 	end
@@ -972,6 +1051,7 @@ end
 
 function IWin:Rend()
 	if IWin:IsSpellLearnt("Rend")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Rend")
 		and IWin:GetTimeToDie() > 9
 		and not UnitInRaid("player")
@@ -982,12 +1062,14 @@ function IWin:Rend()
 					or UnitCreatureType("target") == "Elemental"
 				)
 		and not IWin:IsStanceActive("Berserker Stance") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Rend")
 	end
 end
 
 function IWin:Revenge()
 	if IWin:IsSpellLearnt("Revenge")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Revenge")
 		and IWin:IsRageCostAvailable("Revenge") then
 			if not IWin:IsStanceActive("Defensive Stance")
@@ -1001,6 +1083,7 @@ function IWin:Revenge()
 				Cast("Defensive Stance")
 			end
 			if IWin:IsStanceActive("Defensive Stance") then
+				IWin_CombatVar["queueGCD"] = false
 				Cast("Revenge")
 			end
 	end
@@ -1014,6 +1097,7 @@ end
 
 function IWin:ShieldBash()
 	if IWin:IsSpellLearnt("Shield Bash")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Shield Bash")
 		and IWin:IsShieldEquipped() 
 		and (
@@ -1032,6 +1116,7 @@ function IWin:ShieldBash()
 			if not IWin:IsRageCostAvailable("Shield Bash") then
 				Cast("Bloodrage")
 			end
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Shield Bash")
 		end
 	end
@@ -1039,8 +1124,10 @@ end
 
 function IWin:ShieldSlam()
 	if IWin:IsSpellLearnt("Shield Slam")
+		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Shield Slam")
 		and IWin:IsRageAvailable("Shield Slam") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Shield Slam")
 	end
 end
@@ -1065,6 +1152,8 @@ end
 function IWin:Slam()
 	local slamCastSpeed = (2.5 - IWin:GetTalentRank(1, 15) * 0.25) / (1 + IWin:GetTalentRank(2, 15) * 0.06)
 	if IWin:IsSpellLearnt("Slam")
+		and IWin_CombatVar["queueGCD"]
+		and IWin_CombatVar["reservedRageStanceLast"] + 2 < GetTime()
 		and IWin:IsRageAvailable("Slam")
 		and IWin:Is2HanderEquipped()
 		and (
@@ -1072,6 +1161,7 @@ function IWin:Slam()
 				or st_timer > UnitAttackSpeed("player") * 0.9
 				or st_timer > slamCastSpeed
 			) then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Slam")
 	end
 end
@@ -1084,25 +1174,31 @@ end
 
 function IWin:SunderArmor()
 	if IWin:IsSpellLearnt("Sunder Armor")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Sunder Armor") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Sunder Armor")
 	end
 end
 
 function IWin:SunderArmorFirstStack()
 	if IWin:IsSpellLearnt("Sunder Armor")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageCostAvailable("Sunder Armor")
 		and not IWin:IsBuffActive("target", "Sunder Armor") then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Sunder Armor")
 	end
 end
 
 function IWin:SunderArmorDPS()
 	if IWin:IsSpellLearnt("Sunder Armor")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Sunder Armor")
 		and not IWin_Settings["sunder"] == "off"
 		and IWin:GetTimeToDie() > 10
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5) then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Sunder Armor")
 	end
 end
@@ -1118,39 +1214,46 @@ end
 
 function IWin:SunderArmorRaid()
 	if IWin:IsSpellLearnt("Sunder Armor")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Sunder Armor")
 		and IWin_Settings["sunder"] == "high"
 		and UnitInRaid("player")
 		and IWin:IsElite()
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5) then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Sunder Armor")
 	end
 end
 
 function IWin:SunderArmorDPSRefresh()
 	if IWin:IsSpellLearnt("Sunder Armor")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Sunder Armor")
 		and not IWin_Settings["sunder"] == "off"
 		and IWin:GetTimeToDie() > 10
 		and IWin:IsBuffActive("target", "Sunder Armor")
 		and IWin:GetBuffRemaining("target", "Sunder Armor") < 9 then
+			IWin_CombatVar["queueGCD"] = false
 			Cast("Sunder Armor")
 	end
 end
 
 function IWin:SweepingStrikes()
 	if IWin:IsSpellLearnt("Sweeping Strikes")
-		and IWin:IsRageReservedStance("Battle Stance") then
+		and IWin_CombatVar["queueGCD"]
+		and IWin:IsReservedRageStance("Battle Stance") then
 			if IWin:IsTimeToReserveRage("Sweeping Strikes", "cooldown")
 				and UnitAffectingCombat("player") then
-					IWin_CombatVar["reservedRageStance"] = "Battle Stance"
+					IWin:SetReservedRageStance("Battle Stance")
 					if not IWin:IsStanceActive("Battle Stance") then
+						IWin:SetReservedRageStanceCast()
 						Cast("Battle Stance")
 					end
 			end
 			if not IWin:IsOnCooldown("Sweeping Strikes")
 				and IWin:IsRageAvailable("Sweeping Strikes")
 				and IWin:IsStanceActive("Battle Stance") then 
+					IWin_CombatVar["queueGCD"] = false
 					Cast("Sweeping Strikes")
 			end
 	end
@@ -1199,12 +1302,14 @@ end
 
 function IWin:ThunderClap()
 	if IWin:IsSpellLearnt("Thunder Clap")
+		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Thunder Clap")
-		and IWin:IsInRange("Rend")
+		and IWin:IsInRange()
 		and not IWin:IsOnCooldown("Thunder Clap") then
 			if IWin:IsStanceActive("Berserker Stance") then
 				Cast("Battle Stance")
 			else
+				IWin_CombatVar["queueGCD"] = false
 				Cast("Thunder Clap")
 			end
 	end
@@ -1212,18 +1317,21 @@ end
 
 function IWin:Whirlwind()
 	if IWin:IsSpellLearnt("Whirlwind")
-		and IWin:IsRageReservedStance("Berserker Stance") then
+		and IWin_CombatVar["queueGCD"]
+		and IWin:IsReservedRageStance("Berserker Stance") then
 			if IWin:IsTimeToReserveRage("Whirlwind", "cooldown")
 				and UnitAffectingCombat("player") then
-					IWin_CombatVar["reservedRageStance"] = "Berserker Stance"
+					IWin:SetReservedRageStance("Berserker Stance")
 					if not IWin:IsStanceActive("Berserker Stance") then
+						IWin:SetReservedRageStanceCast()
 						Cast("Berserker Stance")
 					end
 			end
 			if not IWin:IsOnCooldown("Whirlwind")
 				and IWin:IsRageAvailable("Whirlwind")
-				and IWin:IsInRange("Rend")
+				and IWin:IsInRange()
 				and IWin:IsStanceActive("Berserker Stance") then 
+					IWin_CombatVar["queueGCD"] = false
 					Cast("Whirlwind")
 			end
 	end
@@ -1309,8 +1417,7 @@ end
 ---- idps button ----
 SLASH_IDPS1 = '/idps'
 function SlashCmdList.IDPS()
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedRageStance"] = nil
+	IWin:InitializeRotation()
 	IWin:TargetEnemy()
 	IWin:BattleShoutRefreshOOC()
 	IWin:ChargePartySize()
@@ -1331,16 +1438,16 @@ function SlashCmdList.IDPS()
 	IWin:SetReservedRage("Mortal Strike", "cooldown")
 	IWin:Bloodthirst()
 	IWin:SetReservedRageBloodthirst()
+	IWin:Overpower()
+	IWin:DPSStanceDefault()
+	IWin:Slam()
+	IWin:SetReservedRageSlam()
 	IWin:Whirlwind()
 	IWin:SetReservedRage("Whirlwind", "cooldown")
 	IWin:MasterStrike()
 	IWin:SetReservedRage("Master Strike", "cooldown")
-	IWin:Overpower()
-	IWin:DPSStanceDefault()
 	IWin:ConcussionBlow()
 	IWin:BattleShoutRefresh()
-	IWin:Slam()
-	IWin:SetReservedRageSlam()
 	IWin:DemoralizingShout()
 	IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
 	IWin:Rend()
@@ -1354,8 +1461,7 @@ end
 ---- icleave button ----
 SLASH_ICLEAVE1 = '/icleave'
 function SlashCmdList.ICLEAVE()
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedRageStance"] = nil
+	IWin:InitializeRotation()
 	IWin:TargetEnemy()
 	IWin:BattleShoutRefreshOOC()
 	IWin:ChargePartySize()
@@ -1396,8 +1502,7 @@ end
 ---- itank button ----
 SLASH_ITANK1 = '/itank'
 function SlashCmdList.ITANK()
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedRageStance"] = nil
+	IWin:InitializeRotation()
 	IWin:TargetEnemy()
 	IWin:MarkSkull()
 	IWin:BattleShoutRefreshOOC()
@@ -1432,8 +1537,7 @@ end
 ---- ihodor button ----
 SLASH_IHODOR1 = '/ihodor'
 function SlashCmdList.IHODOR()
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedRageStance"] = nil
+	IWin:InitializeRotation()
 	IWin:TargetEnemy()
 	IWin:MarkSkull()
 	IWin:BattleShoutRefreshOOC()
@@ -1469,8 +1573,7 @@ end
 ---- ichase button ----
 SLASH_ICHASE1 = '/ichase'
 function SlashCmdList.ICHASE()
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedRageStance"] = nil
+	IWin:InitializeRotation()
 	IWin:TargetEnemy()
 	IWin:Charge()
 	IWin:Intercept()
@@ -1482,8 +1585,7 @@ end
 ---- ikick button ----
 SLASH_IKICK1 = '/ikick'
 function SlashCmdList.IKICK()
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedRageStance"] = nil
+	IWin:InitializeRotation()
 	IWin:TargetEnemy()
 	IWin:ShieldBash()
 	IWin:Pummel()
@@ -1493,8 +1595,7 @@ end
 ---- ifeardance button ----
 SLASH_IFEARDANCE1 = '/ifeardance'
 function SlashCmdList.IFEARDANCE()
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedRageStance"] = nil
+	IWin:InitializeRotation()
 	IWin:TargetEnemy()
 	IWin:BerserkerRageImmune()
 	IWin:StartAttack()
@@ -1503,8 +1604,7 @@ end
 ---- itaunt button ----
 SLASH_ITAUNT1 = '/itaunt'
 function SlashCmdList.ITAUNT()
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedRageStance"] = nil
+	IWin:InitializeRotation()
 	IWin:TargetEnemy()
 	IWin:Taunt()
 	IWin:MockingBlow()
@@ -1514,8 +1614,7 @@ end
 ---- ishoot button ----
 SLASH_ISHOOT1 = '/ishoot'
 function SlashCmdList.ISHOOT()
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedRageStance"] = nil
+	IWin:InitializeRotation()
 	IWin:TargetEnemy()
 	IWin:MarkSkull()
 	IWin:Shoot()
