@@ -1199,6 +1199,7 @@ function IWin:GetSlamCastSpeed()
 end
 
 function IWin:SetSlamQueued()
+	if not st_timer then return end
 	local nextSwing = st_timer + UnitAttackSpeed("player")
 	local nextSlam = GCD + IWin:GetSlamCastSpeed()
 	if IWin:Is2HanderEquipped()
