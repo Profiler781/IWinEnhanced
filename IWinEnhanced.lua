@@ -770,6 +770,15 @@ function IWin:DemoralizingShout()
 	end
 end
 
+function IWin:SetReservedRageDemoralizingShout()
+	if not IWin:IsBlacklistDemoralizingShout()
+		and IWin_Settings["demo"] == "on"
+		and not IWin:IsBuffActive("target", "Demoralizing Shout")
+		and IWin:GetTimeToDie() > 10 then
+			IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
+	end
+end
+
 function IWin:DPSStance()
 	if IWin:IsStanceActive("Defensive Stance") then
 		if IWin:IsSpellLearnt("Berserker Stance") then
@@ -952,6 +961,13 @@ function IWin:MasterStrike()
 		and not IWin_CombatVar["slamQueued"] then
 				IWin_CombatVar["queueGCD"] = false
 				Cast("Master Strike")
+	end
+end
+
+function IWin:SetReservedRageMasterStrike()
+	if IWin:IsTanking()
+		or UnitIsPVP("target") then
+			IWin:SetReservedRage("Master Strike", "cooldown")
 	end
 end
 
@@ -1212,7 +1228,8 @@ function IWin:SetSlamQueued()
 	if not st_timer then return end
 	local nextSwing = st_timer + UnitAttackSpeed("player")
 	local nextSlam = GCD + IWin:GetSlamCastSpeed()
-	if IWin:Is2HanderEquipped()
+	if IWin:IsSpellLearnt("Slam")
+		and IWin:Is2HanderEquipped()
 		and nextSlam > nextSwing then
 			IWin_CombatVar["slamQueued"] = true
 	end
@@ -1262,7 +1279,8 @@ function IWin:SetReservedRageSunderArmorDPS()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and not IWin_Settings["sunder"] == "off"
 		and IWin:GetTimeToDie() > 10
-		and not IWin:IsBuffStack("target", "Sunder Armor", 5) then
+		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
+		and not IWin:Is2HanderEquipped() then
 			IWin:SetReservedRage("Sunder Armor", "nocooldown")
 	end
 end
@@ -1414,13 +1432,14 @@ function SlashCmdList.IWIN(command)
 	for token in string.gfind(command, "%S+") do
 		table.insert(arguments, token)
 	end
+
 	if arguments[1] == "charge"then
 		if arguments[2] ~= "raid"
 			and arguments[2] ~= "group"
 			and arguments[2] ~= "solo"
 			and arguments[2] ~= "off"
 			and arguments[2] ~= nil then
-				DEFAULT_CHAT_FRAME:AddMessage("Unkown parameter. Possible values: raid, group, solo, off.")
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: raid, group, solo, off.|r")
 				return
 		end
 	elseif arguments[1] == "sunder" then
@@ -1428,14 +1447,14 @@ function SlashCmdList.IWIN(command)
 			and arguments[2] ~= "low"
 			and arguments[2] ~= "off"
 			and arguments[2] ~= nil then
-				DEFAULT_CHAT_FRAME:AddMessage("Unkown parameter. Possible values: high, low, off.")
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: high, low, off.|r")
 				return
 		end
 	elseif arguments[1] == "demo" then
 		if arguments[2] ~= "on"
 			and arguments[2] ~= "off"
 			and arguments[2] ~= nil then
-				DEFAULT_CHAT_FRAME:AddMessage("Unkown parameter. Possible values: on, off.")
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
 	elseif arguments[1] == "dt" then
@@ -1443,37 +1462,58 @@ function SlashCmdList.IWIN(command)
 			and arguments[2] ~= "defensive"
 			and arguments[2] ~= "berserker"
 			and arguments[2] ~= nil then
-				DEFAULT_CHAT_FRAME:AddMessage("Unkown parameter. Possible values: battle, defensive, berserker.")
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: battle, defensive, berserker.|r")
+				return
+		end
+	elseif arguments[1] == "ragebuffer" then
+		if tonumber(arguments[2]) < 0
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more. 1.5 is the default parameter.|r")
+				return
+		end
+	elseif arguments[1] == "ragegain" then
+		if tonumber(arguments[2]) < 0
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more. 10 is the default parameter.|r")
 				return
 		end
 	end
+
     if arguments[1] == "charge" then
         IWin_Settings["charge"] = arguments[2]
-	    DEFAULT_CHAT_FRAME:AddMessage("Charge: " .. IWin_Settings["charge"])
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Charge: |r" .. IWin_Settings["charge"])
 	elseif arguments[1] == "sunder" then
 	    IWin_Settings["sunder"] = arguments[2]
-	    DEFAULT_CHAT_FRAME:AddMessage("Sunder Armor: " .. IWin_Settings["sunder"])
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Sunder Armor: |r" .. IWin_Settings["sunder"])
 	elseif arguments[1] == "demo" then
 	    IWin_Settings["demo"] = arguments[2]
-	    DEFAULT_CHAT_FRAME:AddMessage("Demoralizing Shout: " .. IWin_Settings["demo"])
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Demoralizing Shout: |r" .. IWin_Settings["demo"])
 	elseif arguments[1] == "dt" and arguments[2] == "battle" then
 	    IWin_Settings["dtBattle"] = not IWin_Settings["dtBattle"]
-	    DEFAULT_CHAT_FRAME:AddMessage("Defensive Tactics Battle Stance: " .. tostring(IWin_Settings["dtBattle"]))
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Defensive Tactics Battle Stance: |r" .. tostring(IWin_Settings["dtBattle"]))
 	elseif arguments[1] == "dt" and arguments[2] == "defensive" then
 	    IWin_Settings["dtDefensive"] = not IWin_Settings["dtDefensive"]
-	    DEFAULT_CHAT_FRAME:AddMessage("Defensive Tactics Defensive Stance: " .. tostring(IWin_Settings["dtDefensive"]))
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Defensive Tactics Defensive Stance: |r" .. tostring(IWin_Settings["dtDefensive"]))
 	elseif arguments[1] == "dt" and arguments[2] == "berserker" then
 	    IWin_Settings["dtBerserker"] = not IWin_Settings["dtBerserker"]
-	    DEFAULT_CHAT_FRAME:AddMessage("Defensive Tactics Berserker Stance: " .. tostring(IWin_Settings["dtBerserker"]))
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Defensive Tactics Berserker Stance: |r" .. tostring(IWin_Settings["dtBerserker"]))
+	elseif arguments[1] == "ragebuffer" then
+	    IWin_Settings["rageTimeToReserveBuffer"] = tonumber(arguments[2])
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Rage Buffer: |r" .. tostring(IWin_Settings["rageTimeToReserveBuffer"]))
+	elseif arguments[1] == "ragegain" then
+	    IWin_Settings["ragePerSecondPrediction"] = tonumber(arguments[2])
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Rage Gain per second: |r" .. tostring(IWin_Settings["ragePerSecondPrediction"]))
 	else
-		DEFAULT_CHAT_FRAME:AddMessage("Usage:")
-		DEFAULT_CHAT_FRAME:AddMessage(" /iwin : Current setup")
-		DEFAULT_CHAT_FRAME:AddMessage(" /iwin charge [" .. IWin_Settings["charge"] .. "] : Setup for Charge and Intercept")
-		DEFAULT_CHAT_FRAME:AddMessage(" /iwin sunder [" .. IWin_Settings["sunder"] .. "] : Setup for Sunder Armor priority as DPS")
-		DEFAULT_CHAT_FRAME:AddMessage(" /iwin demo [" .. IWin_Settings["demo"] .. "] : Setup for Demoralizing Shout")
-		DEFAULT_CHAT_FRAME:AddMessage(" /iwin dt battle : (" .. tostring(IWin_Settings["dtBattle"]) .. ") Setup for Battle Stance with Defensive Tactics")
-		DEFAULT_CHAT_FRAME:AddMessage(" /iwin dt defensive : (" .. tostring(IWin_Settings["dtDefensive"]) .. ") Setup for Defensive Stance with Defensive Tactics")
-		DEFAULT_CHAT_FRAME:AddMessage(" /iwin dt berserker : (" .. tostring(IWin_Settings["dtBerserker"]) .. ") Setup for Berserker Stance with Defensive Tactics")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin : Current setup")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin charge [" .. IWin_Settings["charge"] .. "] : |r Setup for Charge and Intercept")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin sunder [" .. IWin_Settings["sunder"] .. "] : |r Setup for Sunder Armor priority as DPS")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin demo [" .. IWin_Settings["demo"] .. "] : |r Setup for Demoralizing Shout")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin dt battle : |r (" .. tostring(IWin_Settings["dtBattle"]) .. ") Setup for Battle Stance with Defensive Tactics")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin dt defensive : |r (" .. tostring(IWin_Settings["dtDefensive"]) .. ") Setup for Defensive Stance with Defensive Tactics")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin dt berserker : |r (" .. tostring(IWin_Settings["dtBerserker"]) .. ") Setup for Berserker Stance with Defensive Tactics")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin ragebuffer [" .. tostring(IWin_Settings["rageTimeToReserveBuffer"]) .. "] : |r Setup to save 100% required rage for spells X seconds before the spells are used. 1.5 is the default parameter.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin ragegain [" .. tostring(IWin_Settings["ragePerSecondPrediction"]) .. "] : |r Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used. 10 is the default parameter. Increase the value if rage is wasted.")
     end
 end
 
@@ -1509,15 +1549,16 @@ function SlashCmdList.IDPS()
 	IWin:Whirlwind()
 	IWin:SetReservedRage("Whirlwind", "cooldown")
 	IWin:MasterStrike()
-	IWin:SetReservedRage("Master Strike", "cooldown")
+	IWin:SetReservedRageMasterStrike()
 	IWin:ConcussionBlow()
 	IWin:BattleShoutRefresh()
 	IWin:DemoralizingShout()
-	IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
+	IWin:SetReservedRageDemoralizingShout()
 	IWin:Rend()
 	IWin:SunderArmorDPS()
 	IWin:SetReservedRageSunderArmorDPS()
 	IWin:BerserkerRage()
+	DEFAULT_CHAT_FRAME:AddMessage(IWin_CombatVar["reservedRage"])
 	IWin:HeroicStrike()
 	IWin:StartAttack()
 end
@@ -1554,11 +1595,11 @@ function SlashCmdList.ICLEAVE()
 	IWin:Bloodthirst()
 	IWin:SetReservedRageBloodthirst()
 	IWin:MasterStrike()
-	IWin:SetReservedRage("Master Strike", "cooldown")
+	IWin:SetReservedRageMasterStrike()
 	IWin:ConcussionBlow()
 	IWin:BattleShoutRefresh()
 	IWin:DemoralizingShout()
-	IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
+	IWin:SetReservedRageDemoralizingShout()
 	IWin:BerserkerRage()
 	IWin:Cleave()
 	IWin:StartAttack()
@@ -1594,7 +1635,7 @@ function SlashCmdList.ITANK()
 	IWin:BattleShoutRefresh()
 	IWin:SetReservedRage("Battle Shout", "buff", "player")
 	IWin:DemoralizingShout()
-	IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
+	IWin:SetReservedRageDemoralizingShout()
 	IWin:SunderArmor()
 	IWin:SetReservedRage("Sunder Armor", "nocooldown")
 	IWin:BerserkerRage()
@@ -1616,7 +1657,7 @@ function SlashCmdList.IHODOR()
 	IWin:ThunderClap()
 	IWin:SetReservedRage("Thunder Clap", "cooldown")
 	IWin:DemoralizingShout()
-	IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
+	IWin:SetReservedRageDemoralizingShout()
 	IWin:Slam()
 	IWin:SetReservedRageSlam()
 	IWin:SetSlamQueued()
