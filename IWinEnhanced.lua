@@ -790,6 +790,7 @@ function IWin:DPSStanceDefault()
 				Cast("Berserker Stance")
 			end
 	elseif IWin:IsSpellLearnt("Battle Stance")
+		and IWin:IsInRange("Rend")
 		and IWin:IsReservedRageStance("Battle Stance") then
 			IWin:SetReservedRageStance("Battle Stance")
 			if not IWin:IsStanceActive("Battle Stance") then
@@ -988,7 +989,10 @@ function IWin:Overpower()
 		and not IWin_CombatVar["slamQueued"] then
 				if IWin:IsReservedRageStance("Battle Stance")
 					and (
-							IWin:IsStanceSwapMaxRageLoss(25)
+							(
+								IWin:IsStanceSwapMaxRageLoss(25)
+								and IWin:GetStanceSwapRageRetain() >= IWin_RageCost["Overpower"]
+							)
 							or UnitIsPVP("target")
 							or IWin:IsStanceActive("Battle Stance")
 						) then
@@ -1383,7 +1387,7 @@ function IWin:Whirlwind()
 			end
 			if not IWin:IsOnCooldown("Whirlwind")
 				and IWin:IsRageAvailable("Whirlwind")
-				and IWin:IsInRange()
+				and IWin:IsInRange("Rend")
 				and IWin:IsStanceActive("Berserker Stance") then 
 					IWin_CombatVar["queueGCD"] = false
 					Cast("Whirlwind")
