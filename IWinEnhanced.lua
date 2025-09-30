@@ -1558,7 +1558,6 @@ function SlashCmdList.IDPS()
 	IWin:SunderArmorDPS()
 	IWin:SetReservedRageSunderArmorDPS()
 	IWin:BerserkerRage()
-	DEFAULT_CHAT_FRAME:AddMessage(IWin_CombatVar["reservedRage"])
 	IWin:HeroicStrike()
 	IWin:StartAttack()
 end
