@@ -19,15 +19,22 @@ Discord: Agamemnoth#5566
 ## Setup commands
 
     /iwin                             Current setup
-    /iwin charge <partySize>          Setup for Charge and Intercept
-    /iwin sunder <priority>           Setup for Sunder Armor priority as DPS
-    /iwin demo <toggle>               Setup for Demoralizing Shout
-    /iwin dt <stance>                 Setup to allow stances with Defensive Tactics
+    /iwin charge <partySize>          Setup for Charge and Intercept.
+    /iwin sunder <priority>           Setup for Sunder Armor priority as DPS.
+    /iwin demo <toggle>               Setup for Demoralizing Shout.
+    /iwin dt <stance>                 Setup to allow stances with Defensive Tactics.
+    /iwin ragebuffer <number>         Setup to save 100% required rage for spells X seconds before the spells are used.
+    /iwin ragegain <number>           Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used.
 
 partySize possible values: raid, group, solo, off.
+
 priority possible values: high, low, off.
+
 toggle possible values: on, off.
+
 stance possible values: battle, defensive, berserker.
+
+number possible values: 0 or more.
 
 Example: /iwin charge group
 => Will setup charge usable in rotations while in group or solo.
