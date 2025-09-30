@@ -894,6 +894,11 @@ function IWin:Intercept()
 					and IWin:IsOnCooldown("Charge")
 				)
 				or UnitAffectingCombat("player")
+				or (
+						IWin:IsStanceActive("Berserker Stance")
+						and not IWin:IsStanceSwapMaxRageLoss(25)
+						and not UnitIsPVP("target")
+					)
 			)
 		and (
 				(
