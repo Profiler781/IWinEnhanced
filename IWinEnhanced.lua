@@ -670,7 +670,7 @@ function IWin:SetReservedRageBloodthirst()
 	end
 end
 
-function IWin:BloodthirstHighAP()
+function IWin:BloodthirstHighAP(queueTime)
 	if IWin:IsSpellLearnt("Bloodthirst")
 		and IWin_CombatVar["queueGCD"]
 		and IWin:GetCooldownRemaining("Bloodthirst") < queueTime
