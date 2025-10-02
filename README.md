@@ -25,6 +25,7 @@ Discord: Agamemnoth#5566
     /iwin dt <stance>                 Setup to allow stances with Defensive Tactics.
     /iwin ragebuffer <number>         Setup to save 100% required rage for spells X seconds before the spells are used.
     /iwin ragegain <number>           Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used.
+    /iwin jousting <toggle>           Setup for jousting solo DPS.
 
 partySize possible values: raid, group, solo, off.
 
