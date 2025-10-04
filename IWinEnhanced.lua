@@ -834,8 +834,52 @@ end
 
 function IWin:SetReservedRageExecute()
 	local lowHealthTarget = (UnitHealthMax("player") * 0.3 > UnitHealth("target"))
-	if lowHealthTarget
-		or IWin:IsExecutePhase() then 
+	if (
+			lowHealthTarget
+			or IWin:IsExecutePhase()
+		)
+		and (
+				UnitIsPVP("target")
+				or IWin:IsElite()
+				or IWin:GetHealthPercent("player") < 40
+				or UnitInRaid("player")
+				or UnitMana("player") < 40
+			) then 
+			IWin:SetReservedRage("Execute", "cooldown")
+	end
+end
+
+function IWin:ExecuteAOE()
+	if IWin:IsSpellLearnt("Execute")
+		and IWin_CombatVar["queueGCD"]
+		and IWin:IsExecutePhase()
+		and IWin:IsRageAvailable("Execute")
+		and (
+				UnitIsPVP("target")
+				or IWin:GetHealthPercent("player") < 40
+				or UnitMana("player") < 30
+			)
+		and not IWin_CombatVar["slamQueued"] then
+			if IWin:IsStanceActive("Defensive Stance") then
+				Cast("Battle Stance")
+			else
+				IWin_CombatVar["queueGCD"] = false
+				Cast("Execute")
+			end
+	end
+end
+
+function IWin:SetReservedRageExecuteAOE()
+	local lowHealthTarget = (UnitHealthMax("player") * 0.3 > UnitHealth("target"))
+	if (
+			lowHealthTarget
+			or IWin:IsExecutePhase()
+		)
+		and (
+				UnitIsPVP("target")
+				or IWin:GetHealthPercent("player") < 40
+				or UnitMana("player") < 30
+			) then 
 			IWin:SetReservedRage("Execute", "cooldown")
 	end
 end
@@ -1157,7 +1201,6 @@ function IWin:Revenge()
 				Cast("Defensive Stance")
 			end
 			if IWin:IsStanceActive("Defensive Stance") then
-				IWin_CombatVar["queueGCD"] = false
 				Cast("Revenge")
 			end
 	end
@@ -1611,8 +1654,8 @@ function SlashCmdList.ICLEAVE()
 	IWin:SetReservedRage("Whirlwind", "cooldown")
 	IWin:BloodthirstHighAP(GCD)
 	IWin:SetReservedRageBloodthirstHighAP()
-	IWin:Execute()
-	IWin:SetReservedRageExecute()
+	IWin:ExecuteAOE()
+	IWin:SetReservedRageExecuteAOE()
 	IWin:Slam()
 	IWin:SetReservedRageSlam()
 	IWin:SetSlamQueued()
