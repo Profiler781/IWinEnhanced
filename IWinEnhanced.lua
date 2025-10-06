@@ -278,6 +278,10 @@ function IWin:IsSpellLearnt(spell)
 	return false
 end
 
+function IWin:IsGCDActive()
+	return GetTime() - IWin_CombatVar["gcd"] < 1.5
+end
+
 function IWin:IsOverpowerAvailable()
 	local overpowerTimeActive = GetTime() - IWin_CombatVar["dodge"]
 	local gcdRemaining = math.min(0, GCD - (GetTime() - IWin_CombatVar["gcd"]))
@@ -1340,6 +1344,7 @@ function IWin:SunderArmorDPS()
 						and IWin:GetBuffRemaining("target", "Sunder Armor") < 9
 					)
 			)
+		and not IWin:IsGCDActive()
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			Cast("Sunder Armor")
@@ -1364,6 +1369,7 @@ function IWin:SunderArmorRaid()
 		and UnitInRaid("player")
 		and IWin:IsElite()
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
+		and not IWin:IsGCDActive()
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			Cast("Sunder Armor")
@@ -1378,6 +1384,7 @@ function IWin:SunderArmorDPSRefresh()
 		and IWin:GetTimeToDie() > 10
 		and IWin:IsBuffActive("target", "Sunder Armor")
 		and IWin:GetBuffRemaining("target", "Sunder Armor") < 6
+		and not IWin:IsGCDActive()
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			Cast("Sunder Armor")
