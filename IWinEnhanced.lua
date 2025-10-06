@@ -1331,9 +1331,15 @@ function IWin:SunderArmorDPS()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Sunder Armor")
-		and not IWin_Settings["sunder"] == "off"
+		and not (IWin_Settings["sunder"] == "off")
 		and IWin:GetTimeToDie() > 10
-		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
+		and (
+				not IWin:IsBuffStack("target", "Sunder Armor", 5)
+				or (
+						IWin:IsBuffActive("target", "Sunder Armor")
+						and IWin:GetBuffRemaining("target", "Sunder Armor") < 9
+					)
+			)
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			Cast("Sunder Armor")
@@ -1342,7 +1348,7 @@ end
 
 function IWin:SetReservedRageSunderArmorDPS()
 	if IWin:IsSpellLearnt("Sunder Armor")
-		and not IWin_Settings["sunder"] == "off"
+		and not (IWin_Settings["sunder"] == "off")
 		and IWin:GetTimeToDie() > 10
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
 		and not IWin:Is2HanderEquipped() then
@@ -1368,10 +1374,10 @@ function IWin:SunderArmorDPSRefresh()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Sunder Armor")
-		and not IWin_Settings["sunder"] == "off"
+		and not (IWin_Settings["sunder"] == "off")
 		and IWin:GetTimeToDie() > 10
 		and IWin:IsBuffActive("target", "Sunder Armor")
-		and IWin:GetBuffRemaining("target", "Sunder Armor") < 9
+		and IWin:GetBuffRemaining("target", "Sunder Armor") < 6
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			Cast("Sunder Armor")
@@ -1602,9 +1608,9 @@ function SlashCmdList.IDPS()
 	IWin:Bloodrage()
 	IWin:BattleShout()
 	IWin:SetReservedRage("Battle Shout", "buff", "player")
+	IWin:SunderArmorDPSRefresh()
 	IWin:BloodthirstHighAP(GCD)
 	IWin:SetReservedRageBloodthirstHighAP()
-	IWin:SunderArmorDPSRefresh()
 	IWin:SunderArmorRaid()
 	IWin:Execute()
 	IWin:SetReservedRageExecute()
