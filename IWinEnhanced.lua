@@ -21,6 +21,7 @@ IWin_CombatVar = {
 	["charge"] = 0,
 	["queueGCD"] = true,
 	["slamQueued"] = false,
+	["swingAttackQueued"] = false,
 }
 local Cast = CastSpellByName
 IWin_PartySize = {
@@ -32,7 +33,7 @@ IWin_PartySize = {
 local GCD = 1.5
 
 ---- Event Register ----
-IWin:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
+IWin:RegisterEvent("ACTIONBAR_UPDATE_STATE")
 IWin:RegisterEvent("CHAT_MSG_COMBAT_SELF_MISSES")
 IWin:RegisterEvent("CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF")
 IWin:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE")
@@ -62,7 +63,7 @@ IWin:SetScript("OnEvent", function()
 		if string.find(arg1,"dodged") then
 			IWin_CombatVar["dodge"] = GetTime()
 		end
-	elseif event == "ACTIONBAR_UPDATE_COOLDOWN" and arg1 == nil then
+	elseif event == "ACTIONBAR_UPDATE_STATE" and arg1 == nil then
 		IWin_CombatVar["gcd"] = GetTime()
 	end
 end)
@@ -535,6 +536,7 @@ function IWin:TargetEnemy()
 end
 
 function IWin:StartAttack()
+	if IWin_CombatVar["swingAttackQueued"] then return end
 	local attackActionFound = false
 	for action = 1, 172 do
 		if IsAttackAction(action) then
@@ -563,8 +565,18 @@ function IWin:InitializeRotation()
 	IWin_CombatVar["reservedRage"] = 0
 	IWin_CombatVar["queueGCD"] = true
 	IWin_CombatVar["slamQueued"] = false
+	IWin_CombatVar["swingAttackQueued"] = false
 	if IWin_CombatVar["reservedRageStanceLast"] + GCD < GetTime() then
 		IWin_CombatVar["reservedRageStance"] = nil
+	end
+end
+
+function IWin:Perception()
+	if IWin:IsSpellLearnt("Perception")
+		and not IWin:IsOnCooldown("Perception")
+		and IWin_CombatVar["queueGCD"] then
+			IWin_CombatVar["queueGCD"] = false
+			Cast("Perception")
 	end
 end
 
@@ -732,6 +744,7 @@ end
 function IWin:Cleave()
 	if IWin:IsSpellLearnt("Cleave") then
 		if IWin:IsRageAvailable("Cleave") then
+			IWin_CombatVar["swingAttackQueued"] = true
 			Cast("Cleave")
 		else
 			--SpellStopCasting()
@@ -954,6 +967,7 @@ end
 function IWin:HeroicStrike()
 	if IWin:IsSpellLearnt("Heroic Strike") then
 		if IWin:IsRageAvailable("Heroic Strike") then
+			IWin_CombatVar["swingAttackQueued"] = true
 			Cast("Heroic Strike")
 		else
 			--SpellStopCasting()
@@ -1646,6 +1660,7 @@ function SlashCmdList.IDPS()
 	IWin:SetReservedRageSunderArmorDPS()
 	IWin:BerserkerRage()
 	IWin:HeroicStrike()
+	IWin:Perception()
 	IWin:StartAttack()
 end
 
@@ -1688,6 +1703,7 @@ function SlashCmdList.ICLEAVE()
 	IWin:SetReservedRageDemoralizingShout()
 	IWin:BerserkerRage()
 	IWin:Cleave()
+	IWin:Perception()
 	IWin:StartAttack()
 end
 
@@ -1726,6 +1742,7 @@ function SlashCmdList.ITANK()
 	IWin:SetReservedRage("Sunder Armor", "nocooldown")
 	IWin:BerserkerRage()
 	IWin:HeroicStrike()
+	IWin:Perception()
 	IWin:StartAttack()
 end
 
@@ -1765,6 +1782,7 @@ function SlashCmdList.IHODOR()
 	IWin:SetReservedRage("Sunder Armor", "nocooldown")
 	IWin:BerserkerRage()
 	IWin:Cleave()
+	IWin:Perception()
 	IWin:StartAttack()
 end
 
