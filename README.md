@@ -3,6 +3,7 @@
 Smart macros for Turtle Warriors v1.18.0. Make macros with commands. Put them on your action bars. Enjoy!
 
 Author: Agamemnoth (discord)
+
 Special thanks to contributor: Vlad (discord tfw.vlad)
 
 ## Commands
