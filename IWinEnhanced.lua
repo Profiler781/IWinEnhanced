@@ -14,7 +14,8 @@ IWin = CreateFrame("frame",nil,UIParent)
 IWin.t = CreateFrame("GameTooltip", "IWin_T", UIParent, "GameTooltipTemplate")
 IWin_CombatVar = {
 	["gcd"] = 0,
-	["dodge"] = 0,
+	["overpowerAvailable"] = 0,
+	["revengeAvailable"] = 0,
 	["reservedRage"] = 0,
 	["reservedRageStance"] = nil,
 	["reservedRageStanceLast"] = 0,
@@ -22,6 +23,7 @@ IWin_CombatVar = {
 	["queueGCD"] = true,
 	["slamQueued"] = false,
 	["swingAttackQueued"] = false,
+	["slamCasting"] = 0,
 }
 local Cast = CastSpellByName
 IWin_PartySize = {
@@ -33,6 +35,9 @@ IWin_PartySize = {
 local GCD = 1.5
 
 ---- Event Register ----
+IWin:RegisterEvent("CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS")
+IWin:RegisterEvent("CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES")
+IWin:RegisterEvent("SPELLCAST_START")
 IWin:RegisterEvent("ACTIONBAR_UPDATE_STATE")
 IWin:RegisterEvent("CHAT_MSG_COMBAT_SELF_MISSES")
 IWin:RegisterEvent("CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF")
@@ -57,14 +62,24 @@ IWin:SetScript("OnEvent", function()
 		IWin:UnregisterEvent("ADDON_LOADED")
 	elseif event == "CHAT_MSG_COMBAT_SELF_MISSES" or event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF" then
 		if string.find(arg1,"dodge") then
-			IWin_CombatVar["dodge"] = GetTime()
+			IWin_CombatVar["overpowerAvailable"] = GetTime() + 5
 		end
 	elseif event == "CHAT_MSG_SPELL_SELF_DAMAGE" then
 		if string.find(arg1,"dodged") then
-			IWin_CombatVar["dodge"] = GetTime()
+			IWin_CombatVar["overpowerAvailable"] = GetTime() + 5
 		end
 	elseif event == "ACTIONBAR_UPDATE_STATE" and arg1 == nil then
 		IWin_CombatVar["gcd"] = GetTime()
+	elseif event == "SPELLCAST_START" and arg1 == "Slam" then
+		IWin_CombatVar["slamCasting"] = GetTime() + (arg2 / 1000)
+	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS" then
+		if string.find(arg1,"blocked") then
+			IWin_CombatVar["revengeAvailable"] = GetTime() + 5
+		end
+	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES" then
+		if string.find(arg1,"dodge") or string.find(arg1,"parry") then
+			IWin_CombatVar["revengeAvailable"] = GetTime() + 5
+		end
 	end
 end)
 
@@ -284,10 +299,10 @@ function IWin:IsGCDActive()
 end
 
 function IWin:IsOverpowerAvailable()
-	local overpowerTimeActive = GetTime() - IWin_CombatVar["dodge"]
-	local gcdRemaining = math.min(0, GCD - (GetTime() - IWin_CombatVar["gcd"]))
- 	return overpowerTimeActive < 5 - gcdRemaining
- end
+	local overpowerRemaining = IWin_CombatVar["overpowerAvailable"] - GetTime()
+	local gcdRemaining = math.max(0, GCD - (GetTime() - IWin_CombatVar["gcd"]))
+ 	return overpowerRemaining > gcdRemaining
+end
 
 function IWin:IsCharging()
 	local chargeTimeActive = GetTime() - IWin_CombatVar["charge"]
@@ -346,6 +361,7 @@ function IWin:IsRageCostAvailable(spell)
 end
 
 function IWin:IsInRange(spell, distance)
+	if not UnitExists("target") then return false end
 	if not IsSpellInRange
 		or not spell
 		or not IWin:IsSpellLearnt(spell) then
@@ -417,6 +433,15 @@ end
 function IWin:Is2HanderEquipped()
 	local offHandLink = GetInventoryItemLink("player", 17)
 	return not offHandLink
+end
+
+function IWin:IsItemEquipped(slot, name)
+	local itemLink = GetInventoryItemLink("player", slot)
+	if itemLink then
+		local itemName = GetItemInfo(tonumber(IWin:GetItemID(itemLink)))
+		return itemName == name
+	end
+	return false
 end
 
 IWin_UnitClassification = {
@@ -574,6 +599,7 @@ end
 function IWin:Perception()
 	if IWin:IsSpellLearnt("Perception")
 		and not IWin:IsOnCooldown("Perception")
+		and UnitAffectingCombat("player")
 		and IWin_CombatVar["queueGCD"] then
 			IWin_CombatVar["queueGCD"] = false
 			Cast("Perception")
@@ -662,6 +688,7 @@ function IWin:Bloodrage()
 							or IWin:IsSpellLearnt("Bloodthirst")
 							or IWin:IsSpellLearnt("Shield Slam")
 							or IWin:GetTalentRank(2, 9) ~= 0
+							or GetNumPartyMembers() ~= 0
 						)
 					)
 			) then
@@ -736,6 +763,8 @@ function IWin:ChargePartySize()
 		) or (
 			GetNumPartyMembers() == 0
 			and IWin_PartySize[partySize] >= 1
+		) or (
+			UnitAffectingCombat("target")
 		) then
 			IWin:Charge()
 	end
@@ -810,15 +839,19 @@ end
 function IWin:DPSStanceDefault()
 	if IWin:IsSpellLearnt("Berserker Stance")
 		and IWin:IsReservedRageStance("Berserker Stance")
-		and UnitAffectingCombat("player") then
+		and UnitExists("target")
+		and (
+				UnitAffectingCombat("player")
+				or IWin:IsInRange()
+			) then
 			IWin:SetReservedRageStance("Berserker Stance")
 			if not IWin:IsStanceActive("Berserker Stance") then
 				IWin:SetReservedRageStanceCast()
 				Cast("Berserker Stance")
 			end
 	elseif IWin:IsSpellLearnt("Battle Stance")
-		and IWin:IsInRange("Rend")
-		and IWin:IsReservedRageStance("Battle Stance") then
+		and IWin:IsReservedRageStance("Battle Stance")
+		and UnitExists("target") then
 			IWin:SetReservedRageStance("Battle Stance")
 			if not IWin:IsStanceActive("Battle Stance") then
 				IWin:SetReservedRageStanceCast()
@@ -1004,7 +1037,11 @@ function IWin:Intercept()
 				or not IWin:IsOnCooldown("Bloodrage")
 			)
 		and not IWin_CombatVar["slamQueued"] then
-			if not IWin:IsStanceActive("Berserker Stance") then
+			if IWin:IsStanceActive("Battle Stance")
+				or (
+						IWin:IsStanceActive("Defensive Stance")
+						and not IWin:IsTanking()
+					) then
 				Cast("Berserker Stance")
 			end
 			if not IWin:IsRageCostAvailable("Intercept") then
@@ -1028,6 +1065,8 @@ function IWin:InterceptPartySize()
 		) or (
 			GetNumPartyMembers() == 0
 			and IWin_PartySize[partySize] >= 1
+		) or (
+			UnitAffectingCombat("target")
 		) then
 			IWin:Intercept()
 	end
@@ -1207,6 +1246,7 @@ function IWin:Revenge()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Revenge")
 		and IWin:IsRageCostAvailable("Revenge")
+		and IWin:IsRevengeAvailable()
 		and not IWin_CombatVar["slamQueued"] then
 			if not IWin:IsStanceActive("Defensive Stance")
 				and (
@@ -1219,9 +1259,16 @@ function IWin:Revenge()
 				Cast("Defensive Stance")
 			end
 			if IWin:IsStanceActive("Defensive Stance") then
+				IWin_CombatVar["queueGCD"] = false
 				Cast("Revenge")
 			end
 	end
+end
+
+function IWin:IsRevengeAvailable()
+	local revengeRemaining = IWin_CombatVar["revengeAvailable"] - GetTime()
+	local gcdRemaining = math.max(0, GCD - (GetTime() - IWin_CombatVar["gcd"]))
+ 	return revengeRemaining > gcdRemaining
 end
 
 function IWin:SetReservedRageRevenge()
@@ -1255,6 +1302,29 @@ function IWin:ShieldBash()
 				IWin_CombatVar["queueGCD"] = false
 				Cast("Shield Bash")
 			end
+	end
+end
+
+function IWin:ShieldBlock()
+	if IWin:IsSpellLearnt("Shield Block")
+		and not IWin:IsOnCooldown("Shield Block")
+		and IWin:IsShieldEquipped()
+		and IWin:IsTanking()
+		and IWin:IsRageAvailable("Shield Block")
+		and IWin:GetCooldownRemaining("Revenge") < GCD
+		and not IWin:IsRevengeAvailable() then
+			Cast("Shield Block")
+	end
+end
+
+function IWin:ShieldBlockFRD()
+	if IWin:IsSpellLearnt("Shield Block")
+		and not IWin:IsOnCooldown("Shield Block")
+		and IWin:IsShieldEquipped()
+		and IWin:IsTanking()
+		and IWin:IsRageAvailable("Shield Block")
+		and IWin:IsItemEquipped(17, "Force Reactive Disk") then
+			Cast("Shield Block")
 	end
 end
 
@@ -1303,7 +1373,13 @@ function IWin:Slam()
 end
 
 function IWin:GetSlamCastSpeed()
-	local slamCastSpeed = (2.5 - IWin:GetTalentRank(1, 16) * 0.25) / (1 + IWin:GetTalentRank(2, 15) * 0.06)
+	local flurryActive
+	if IWin:IsBuffActive("Flurry") then
+		flurryActive = 1
+	else
+		flurryActive = 0
+	end
+	local slamCastSpeed = (2.5 - IWin:GetTalentRank(1, 16) * 0.25) / (1 + IWin:GetTalentRank(2, 15) * 0.06 * flurryActive)
 	return slamCastSpeed
 end
 
@@ -1320,6 +1396,9 @@ end
 
 function IWin:SetReservedRageSlam()
 	if IWin:Is2HanderEquipped() then
+		IWin:SetReservedRage("Slam", "nocooldown")
+	end
+	if IWin_CombatVar["slamCasting"] > GetTime() then
 		IWin:SetReservedRage("Slam", "nocooldown")
 	end
 end
@@ -1479,6 +1558,19 @@ function IWin:ThunderClap(queueTime)
 				IWin_CombatVar["queueGCD"] = false
 				Cast("Thunder Clap")
 			end
+	end
+end
+
+function IWin:ThunderClapDPS()
+	if IWin:IsSpellLearnt("Thunder Clap")
+		and IWin_CombatVar["queueGCD"]
+		and IWin:IsRageAvailable("Thunder Clap")
+		and IWin:IsInRange()
+		and not IWin:IsOnCooldown("Thunder Clap")
+		and not IWin_CombatVar["slamQueued"]
+		and not IWin:IsStanceActive("Berserker Stance") then
+			IWin_CombatVar["queueGCD"] = false
+			Cast("Thunder Clap")
 	end
 end
 
@@ -1689,6 +1781,7 @@ function SlashCmdList.ICLEAVE()
 	IWin:SetSlamQueued()
 	IWin:Overpower()
 	IWin:DPSStanceDefault()
+	IWin:ThunderClapDPS()
 	IWin:ShieldSlam(GCD)
 	IWin:SetReservedRage("Shield Slam", "cooldown")
 	IWin:MortalStrike(GCD)
@@ -1718,6 +1811,7 @@ function SlashCmdList.ITANK()
 	IWin:InterceptPartySize()
 	IWin:TankStance()
 	IWin:Bloodrage()
+	IWin:ShieldBlock()
 	IWin:Slam()
 	IWin:SetReservedRageSlam()
 	IWin:SetSlamQueued()
@@ -1757,6 +1851,7 @@ function SlashCmdList.IHODOR()
 	IWin:InterceptPartySize()
 	IWin:TankStance()
 	IWin:Bloodrage()
+	IWin:ShieldBlockFRD()
 	IWin:ThunderClap(GCD)
 	IWin:SetReservedRage("Thunder Clap", "cooldown")
 	IWin:DemoralizingShout()
