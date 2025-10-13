@@ -1557,6 +1557,22 @@ function IWin:SunderArmorDPSRefresh()
 	end
 end
 
+function IWin:SunderArmorWindfury()
+	if IWin:IsSpellLearnt("Sunder Armor")
+		and IWin_CombatVar["queueGCD"]
+		and IWin:IsRageAvailable("Sunder Armor")
+		and IWin:IsBuffActive("Windfury Totem") then
+			IWin_CombatVar["queueGCD"] = false
+			Cast("Sunder Armor")
+	end
+end
+
+function IWin:SetReservedRageSunderArmorWindfury()
+	if IWin:IsBuffActive("Windfury Totem") then
+		IWin:SetReservedRage("Sunder Armor", "nocooldown")
+	end
+end
+
 function IWin:SweepingStrikes()
 	if IWin:IsSpellLearnt("Sweeping Strikes")
 		and IWin_CombatVar["queueGCD"]
@@ -1829,6 +1845,10 @@ function SlashCmdList.IDPS()
 	IWin:Perception()
 	IWin:PummelWindfury()
 	IWin:SetReservedRagePummelWindfury()
+	IWin:HamstringWindfury()
+	IWin:SetReservedRageHamstringWindfury()
+	IWin:SunderArmorWindfury()
+	IWin:SetReservedRageSunderArmorWindfury()
 	IWin:StartAttack()
 end
 
