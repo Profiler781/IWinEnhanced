@@ -553,6 +553,32 @@ function IWin:IsBlacklistDemoralizingShout()
 	return false
 end
 
+IWin_BlacklistKick = {
+	-- Naxxramas
+	"Kel'Thuzad",
+	-- AQ40
+	"Eye of C'Thun",
+	"Eye Tentacle",
+	"Claw Tentacle",
+	"Giant Claw Tentacle",
+	"Giant Eye Tentacle",
+	-- Molten Core
+	"Flamewaker Priest",
+}
+
+function IWin:IsBlacklistKick()
+	if not UnitExists("target") then
+		return true
+	end
+	local name = UnitName("target")
+	for unit in IWin_BlacklistKick do
+		if IWin_BlacklistKick[unit] == name then
+			return true
+		end
+	end
+	return false
+end
+
 ---- General Actions ----
 function IWin:TargetEnemy()
 	if not UnitExists("target") or UnitIsDead("target") or UnitIsFriend("target", "player") then
@@ -692,7 +718,7 @@ function IWin:Bloodrage()
 						)
 					)
 			) then
-		Cast("Bloodrage")
+				Cast("Bloodrage")
 	end
 end
 
@@ -997,6 +1023,25 @@ function IWin:HamstringJousting()
 	end
 end
 
+function IWin:HamstringWindfury()
+	if IWin:IsSpellLearnt("Hamstring")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Hamstring")
+		and IWin:IsRageAvailable("Hamstring")
+		and not IWin:IsStanceActive("Defensive Stance")
+		and IWin:IsBuffActive("Windfury Totem") then
+			IWin_CombatVar["queueGCD"] = false
+			Cast("Hamstring")
+	end
+end
+
+function IWin:SetReservedRageHamstringWindfury()
+	if not IWin:IsStanceActive("Defensive Stance")
+		and IWin:IsBuffActive("Windfury Totem") then
+		IWin:SetReservedRage("Hamstring", "cooldown")
+	end
+end
+
 function IWin:HeroicStrike()
 	if IWin:IsSpellLearnt("Heroic Strike") then
 		if IWin:IsRageAvailable("Heroic Strike") then
@@ -1216,9 +1261,33 @@ function IWin:Pummel()
 					if not IWin:IsRageCostAvailable("Pummel") then
 						Cast("Bloodrage")
 					end
+					if IWin_CombatVar["slamCasting"] > GetTime() then
+						SpellStopCasting()
+					end
 					IWin_CombatVar["queueGCD"] = false
 					Cast("Pummel")
 				end
+	end
+end
+
+function IWin:PummelWindfury()
+	if IWin:IsSpellLearnt("Pummel")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Pummel")
+		and IWin:IsRageAvailable("Pummel")
+		and not IWin:IsStanceActive("Defensive Stance")
+		and IWin:IsBuffActive("Windfury Totem")
+		and not IWin:IsBlacklistKick() then
+			IWin_CombatVar["queueGCD"] = false
+			Cast("Pummel")
+	end
+end
+
+function IWin:SetReservedRagePummelWindfury()
+	if not IWin:IsStanceActive("Defensive Stance")
+		and IWin:IsBuffActive("Windfury Totem")
+		and not IWin:IsBlacklistKick() then
+		IWin:SetReservedRage("Pummel", "cooldown")
 	end
 end
 
@@ -1366,9 +1435,13 @@ function IWin:Slam()
 				not st_timer
 				or st_timer > UnitAttackSpeed("player") * 0.9
 				or st_timer > IWin:GetSlamCastSpeed()
+			)
+		and (
+				not IWin:IsStanceActive("Battle Stance")
+				or not IWin:IsSpellLearnt("Berserker Stance")
 			) then
-			IWin_CombatVar["queueGCD"] = false
-			Cast("Slam")
+				IWin_CombatVar["queueGCD"] = false
+				Cast("Slam")
 	end
 end
 
@@ -1752,7 +1825,10 @@ function SlashCmdList.IDPS()
 	IWin:SetReservedRageSunderArmorDPS()
 	IWin:BerserkerRage()
 	IWin:HeroicStrike()
+	IWin:SetReservedRage("Heroic Strike", "nocooldown")
 	IWin:Perception()
+	IWin:PummelWindfury()
+	IWin:SetReservedRagePummelWindfury()
 	IWin:StartAttack()
 end
 
