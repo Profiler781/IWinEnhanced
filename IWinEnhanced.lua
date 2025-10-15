@@ -453,9 +453,21 @@ IWin_UnitClassification = {
 	["trivial"] = false,
 }
 
+function IWin:IsTrainingDummy()
+	local name = UnitName("target")
+	if name and string.find(name,"Training Dummy") then
+		return true
+	end
+	return false
+end
+
 function IWin:IsElite()
 	local classification = UnitClassification("target")
-	return IWin_UnitClassification[classification]
+	if IWin_UnitClassification[classification]
+		or IWin:IsTrainingDummy() then
+			return true
+	end
+	return false
 end
 
 function IWin:IsReservedRageStance(stance)
@@ -554,9 +566,17 @@ function IWin:IsBlacklistDemoralizingShout()
 end
 
 IWin_BlacklistKick = {
+	-- Karazhan
+	"Echo of Medivh",
+	"Shadowclaw Darkbringer",
+	"Blue Owl",
+	"Red Owl",
 	-- Naxxramas
 	"Kel'Thuzad",
-	-- AQ40
+	"Spectral Rider",
+	"Naxxramas Acolyte",
+	"Stitched Spewer",
+	-- Ahn'Qiraj
 	"Eye of C'Thun",
 	"Eye Tentacle",
 	"Claw Tentacle",
@@ -1784,17 +1804,17 @@ function SlashCmdList.IWIN(command)
 	    IWin_Settings["jousting"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Jousting: |r" .. IWin_Settings["jousting"])
 	else
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin : Current setup")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin charge [" .. IWin_Settings["charge"] .. "] : |r Setup for Charge and Intercept")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin sunder [" .. IWin_Settings["sunder"] .. "] : |r Setup for Sunder Armor priority as DPS")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin demo [" .. IWin_Settings["demo"] .. "] : |r Setup for Demoralizing Shout")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin dt battle : |r (" .. tostring(IWin_Settings["dtBattle"]) .. ") Setup for Battle Stance with Defensive Tactics")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin dt defensive : |r (" .. tostring(IWin_Settings["dtDefensive"]) .. ") Setup for Defensive Stance with Defensive Tactics")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin dt berserker : |r (" .. tostring(IWin_Settings["dtBerserker"]) .. ") Setup for Berserker Stance with Defensive Tactics")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin ragebuffer [" .. tostring(IWin_Settings["rageTimeToReserveBuffer"]) .. "] : |r Setup to save 100% required rage for spells X seconds before the spells are used. 1.5 is the default parameter.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin ragegain [" .. tostring(IWin_Settings["ragePerSecondPrediction"]) .. "] : |r Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used. 10 is the default parameter. Increase the value if rage is wasted.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff   /iwin jousting [" .. IWin_Settings["jousting"] .. "] : |r Setup for Jousting solo DPS")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin : Current setup|r")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin charge [" .. IWin_Settings["charge"] .. "] : |r Setup for Charge and Intercept")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin sunder [" .. IWin_Settings["sunder"] .. "] : |r Setup for Sunder Armor priority as DPS")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin demo [" .. IWin_Settings["demo"] .. "] : |r Setup for Demoralizing Shout")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dt battle : |r (" .. tostring(IWin_Settings["dtBattle"]) .. ") Setup for Battle Stance with Defensive Tactics")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dt defensive : |r (" .. tostring(IWin_Settings["dtDefensive"]) .. ") Setup for Defensive Stance with Defensive Tactics")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dt berserker : |r (" .. tostring(IWin_Settings["dtBerserker"]) .. ") Setup for Berserker Stance with Defensive Tactics")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin ragebuffer [" .. tostring(IWin_Settings["rageTimeToReserveBuffer"]) .. "] : |r Setup to save 100% required rage for spells X seconds before the spells are used. 1.5 is the default parameter.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin ragegain [" .. tostring(IWin_Settings["ragePerSecondPrediction"]) .. "] : |r Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used. 10 is the default parameter. Increase the value if rage is wasted.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin jousting [" .. IWin_Settings["jousting"] .. "] : |r Setup for Jousting solo DPS")
     end
 end
 
