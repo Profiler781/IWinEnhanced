@@ -499,10 +499,17 @@ function IWin:IsTaunted()
 	return false
 end
 
+function IWin:IsDefensiveTacticsAvailable()
+	if IWin:GetTalentRank(3, 18) ~= 0
+		and IWin:IsShieldEquipped() then
+			return true
+	end
+	return false
+end
+
 function IWin:IsDefensiveTacticsActive(stance)
 	local dtStance = stance or IWin:GetStance()
-	if IWin:GetTalentRank(3, 18) ~= 0
-		and IWin:IsShieldEquipped()
+	if IWin:IsDefensiveTacticsAvailable()
 		and (
 				(
 					IWin_Settings["dtBattle"]
@@ -518,6 +525,28 @@ function IWin:IsDefensiveTacticsActive(stance)
 				)
 			) then
 			return true
+	else
+		return false
+	end
+end
+
+function IWin:IsDefensiveTacticsStanceAvailable(stance)
+	if IWin:IsDefensiveTacticsAvailable()
+		and (
+				(
+					IWin_Settings["dtBattle"]
+					and stance == "Battle Stance"
+				) or (
+					IWin_Settings["dtDefensive"]
+					and stance == "Defensive Stance"
+					and IWin:IsSpellLearnt("Defensive Stance")
+				) or (
+					IWin_Settings["dtBerserker"]
+					and stance == "Berserker Stance"
+					and IWin:IsSpellLearnt("Berserker Stance")
+				)
+			) then
+				return true
 	else
 		return false
 	end
@@ -1195,8 +1224,10 @@ function IWin:Overpower()
 				IWin:IsRageAvailable("Overpower")
 				or IWin:IsStanceActive("Battle Stance")
 			)
-		and not IWin_CombatVar["slamQueued"] then
-			if IWin:IsReservedRageStance("Battle Stance")
+		and not IWin_CombatVar["slamQueued"]
+		and IWin:IsReservedRageStance("Battle Stance") then
+			IWin:SetReservedRageStance("Battle Stance")
+			if not IWin:IsStanceActive("Battle Stance")
 				and (
 						(
 							IWin:IsStanceSwapMaxRageLoss(25)
@@ -1205,7 +1236,6 @@ function IWin:Overpower()
 						or UnitIsPVP("target")
 						or IWin:IsStanceActive("Battle Stance")
 					) then
-						IWin:SetReservedRageStance("Battle Stance")
 						if not IWin:IsStanceActive("Battle Stance") then
 							IWin:SetReservedRageStanceCast()
 							Cast("Battle Stance")
@@ -1228,13 +1258,12 @@ function IWin:OverpowerDefensiveTactics()
 				or IWin:IsStanceActive("Battle Stance")
 			)
 		and IWin:IsReservedRageStance("Battle Stance")
+		and IWin:IsDefensiveTacticsStanceAvailable("Battle Stance")
 		and not IWin_CombatVar["slamQueued"] then
 			IWin:SetReservedRageStance("Battle Stance")
 			if not IWin:IsStanceActive("Battle Stance")
-				and IWin:IsDefensiveTacticsActive("Battle Stance")
-				and not IWin:IsDefensiveTacticsActive()
 				and (
-						IWin:IsStanceSwapMaxRageLoss(25)
+						IWin:IsStanceSwapMaxRageLoss(0)
 						or UnitIsPVP("target")
 					) then
 						IWin:SetReservedRageStanceCast()
@@ -1336,21 +1365,25 @@ function IWin:Revenge()
 		and not IWin:IsOnCooldown("Revenge")
 		and IWin:IsRageCostAvailable("Revenge")
 		and IWin:IsRevengeAvailable()
-		and not IWin_CombatVar["slamQueued"] then
-			if not IWin:IsStanceActive("Defensive Stance")
-				and (
-						(
-							IWin:IsDefensiveTacticsActive("Defensive Stance")
-							and not IWin:IsDefensiveTacticsActive("Battle Stance")
-						)
-						or IWin:GetTalentRank(3, 18) == 0
-					) then
-				Cast("Defensive Stance")
-			end
-			if IWin:IsStanceActive("Defensive Stance") then
-				IWin_CombatVar["queueGCD"] = false
-				Cast("Revenge")
-			end
+		and IWin:IsReservedRageStance("Defensive Stance")
+		and not IWin_CombatVar["slamQueued"]
+		and (
+				not IWin:IsDefensiveTacticsAvailable()
+				or IWin:IsDefensiveTacticsStanceAvailable("Defensive Stance")
+			) then
+				IWin:SetReservedRageStance("Defensive Stance")
+				if not IWin:IsStanceActive("Defensive Stance")
+					and (
+							IWin:IsStanceSwapMaxRageLoss(5)
+							or UnitIsPVP("target")
+						) then
+							IWin:SetReservedRageStanceCast()
+							Cast("Defensive Stance")
+				end
+				if IWin:IsStanceActive("Defensive Stance") then
+					IWin_CombatVar["queueGCD"] = false
+					Cast("Revenge")
+				end
 	end
 end
 
@@ -1401,7 +1434,8 @@ function IWin:ShieldBlock()
 		and IWin:IsTanking()
 		and IWin:IsRageAvailable("Shield Block")
 		and IWin:GetCooldownRemaining("Revenge") < GCD
-		and not IWin:IsRevengeAvailable() then
+		and not IWin:IsRevengeAvailable()
+		and IWin:IsStanceActive("Defensive Stance") then
 			Cast("Shield Block")
 	end
 end
@@ -1412,7 +1446,8 @@ function IWin:ShieldBlockFRD()
 		and IWin:IsShieldEquipped()
 		and IWin:IsTanking()
 		and IWin:IsRageAvailable("Shield Block")
-		and IWin:IsItemEquipped(17, "Force Reactive Disk") then
+		and IWin:IsItemEquipped(17, "Force Reactive Disk")
+		and IWin:IsStanceActive("Defensive Stance") then
 			Cast("Shield Block")
 	end
 end
@@ -1616,26 +1651,31 @@ end
 function IWin:TankStance()
 	if IWin:IsSpellLearnt("Defensive Stance")
 		and (
-				IWin:IsDefensiveTacticsActive("Defensive Stance")
-				or not IWin:IsDefensiveTacticsActive()
+				not IWin:IsDefensiveTacticsAvailable()
+				or (
+						not IWin:IsDefensiveTacticsActive()
+						and IWin:IsDefensiveTacticsStanceAvailable("Defensive Stance")
+					)
 			)
 		and UnitAffectingCombat("player")
 		and not IWin:IsStanceActive("Defensive Stance") then
 			Cast("Defensive Stance")
 	elseif IWin:IsSpellLearnt("Battle Stance")
 		and (
-				IWin:IsDefensiveTacticsActive("Battle Stance")
-				--or not IWin:IsDefensiveTacticsActive()
+					(
+						not IWin:IsDefensiveTacticsAvailable()
+						and not IWin:IsSpellLearnt("Defensive Stance")
+					)
+				or (
+						not IWin:IsDefensiveTacticsActive()
+						and IWin:IsDefensiveTacticsStanceAvailable("Battle Stance")
+					)
 			)
-		and not IWin:IsDefensiveTacticsActive()
 		and not IWin:IsStanceActive("Battle Stance") then
 			Cast("Battle Stance")
 	elseif IWin:IsSpellLearnt("Berserker Stance")
-		and (
-				IWin:IsDefensiveTacticsActive("Berserker Stance")
-				--or not IWin:IsDefensiveTacticsActive()
-			)
 		and not IWin:IsDefensiveTacticsActive()
+		and IWin:IsDefensiveTacticsStanceAvailable("Berserker Stance")
 		and not IWin:IsStanceActive("Berserker Stance") then
 			Cast("Berserker Stance")
 	end
