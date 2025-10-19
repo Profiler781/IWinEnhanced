@@ -379,8 +379,12 @@ function IWin:GetStanceSwapRageRetain()
 	return math.min(IWin:GetTalentRank(1, 2) * 5, UnitMana("player"))
 end
 
-function IWin:IsStanceSwapMaxRageLoss(rage)
-	return rage >= math.max(0, UnitMana("player") - IWin:GetStanceSwapRageRetain() + IWin_CombatVar["reservedRage"])
+function IWin:IsStanceSwapMaxRageLoss(rage, spell)
+	local spellCost = 0
+	if spell then
+		spellCost = IWin_RageCost[spell]
+	end
+	return rage >= math.max(0, UnitMana("player") - IWin:GetStanceSwapRageRetain() + IWin_CombatVar["reservedRage"] + spellCost)
 end
 
 function IWin:GetRageToReserve(spell, trigger, unit)
@@ -814,7 +818,7 @@ function IWin:Charge()
 		and not UnitAffectingCombat("player") then
 			if not IWin:IsStanceActive("Battle Stance")
 				and (
-						IWin:IsStanceSwapMaxRageLoss(25)
+						IWin:IsStanceSwapMaxRageLoss(25, "Charge")
 						or UnitIsPVP("target")
 					) then
 					Cast("Battle Stance")
@@ -897,7 +901,7 @@ function IWin:SetReservedRageDemoralizingShout()
 		and IWin_Settings["demo"] == "on"
 		and not IWin:IsBuffActive("target", "Demoralizing Shout")
 		and IWin:GetTimeToDie() > 10 then
-			IWin:SetReservedRage("Demoralizing Shout", "debuff", "target")
+			IWin:SetReservedRage("Demoralizing Shout", "buff", "target")
 	end
 end
 
