@@ -1643,12 +1643,10 @@ function IWin:SweepingStrikes()
 				IWin:SetReservedRageStanceCast()
 				Cast("Battle Stance")
 			end
-			if not IWin:IsOnCooldown("Sweeping Strikes")
-				and IWin:IsRageAvailable("Sweeping Strikes")
-				and IWin:IsStanceActive("Battle Stance") then
-					IWin:SetReservedRageStance("Battle Stance")
-					IWin_CombatVar["queueGCD"] = false
-					Cast("Sweeping Strikes")
+			if  IWin:IsStanceActive("Battle Stance") then
+				IWin:SetReservedRageStance("Battle Stance")
+				IWin_CombatVar["queueGCD"] = false
+				Cast("Sweeping Strikes")
 			end
 	end
 end
@@ -1740,12 +1738,7 @@ function IWin:Whirlwind(queueTime)
 				IWin:SetReservedRageStanceCast()
 				Cast("Berserker Stance")
 			end
-			if (
-					IWin:GetCooldownRemaining("Whirlwind") < queueTime
-					or not IWin:IsOnCooldown("Whirlwind")
-				)
-				and IWin:IsRageAvailable("Whirlwind")
-				and IWin:IsInRange("Rend")
+			if IWin:IsInRange("Rend")
 				and IWin:IsStanceActive("Berserker Stance") then
 					IWin:SetReservedRageStance("Berserker Stance")
 					IWin_CombatVar["queueGCD"] = false
