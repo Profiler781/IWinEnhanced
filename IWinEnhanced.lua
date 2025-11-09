@@ -394,8 +394,12 @@ end
 
 function IWin:GetRageToReserve(spell, trigger, unit)
 	local spellTriggerTime = 0
+	local rageCost = IWin_RageCost[spell]
+	if spell == "Heroic Strike" or spell == "Cleave" then
+		rageCost = rageCost + IWin_Settings["ragePerSecondPrediction"]
+	end
 	if trigger == "nocooldown" then
-		return IWin_RageCost[spell]
+		return rageCost
 	elseif trigger == "cooldown" then
 		spellTriggerTime = IWin:GetCooldownRemaining(spell) or 0
 	elseif trigger == "buff" or trigger == "partybuff" then
@@ -407,7 +411,7 @@ function IWin:GetRageToReserve(spell, trigger, unit)
 	end
 	local timeToReserveRage = math.max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
 	if trigger == "partybuff" or IWin:IsSpellLearnt(spell) then
-		return math.max(0, IWin_RageCost[spell] - IWin_Settings["ragePerSecondPrediction"] * timeToReserveRage)
+		return math.max(0, rageCost - IWin_Settings["ragePerSecondPrediction"] * timeToReserveRage)
 	end
 	return 0
 end
@@ -1253,6 +1257,7 @@ function IWin:Overpower()
 				IWin:IsRageAvailable("Overpower")
 				or IWin:IsStanceActive("Battle Stance")
 			)
+		and IWin:IsRageCostAvailable("Overpower")
 		and not IWin_CombatVar["slamQueued"]
 		and IWin:IsReservedRageStance("Battle Stance") then
 			IWin_CombatVar["queueGCD"] = false
@@ -1284,6 +1289,7 @@ function IWin:OverpowerDefensiveTactics()
 				IWin:IsRageAvailable("Overpower")
 				or IWin:IsStanceActive("Battle Stance")
 			)
+		and IWin:IsRageCostAvailable("Overpower")
 		and IWin:IsReservedRageStance("Battle Stance")
 		and IWin:IsDefensiveTacticsStanceAvailable("Battle Stance")
 		and not IWin_CombatVar["slamQueued"] then
@@ -1687,9 +1693,11 @@ function IWin:SweepingStrikes()
 					IWin:SetReservedRageStanceCast()
 					Cast("Battle Stance")
 			end
-			if  IWin:IsStanceActive("Battle Stance") then
+			if IWin:IsStanceActive("Battle Stance") then
 				IWin:SetReservedRageStance("Battle Stance")
-				Cast("Sweeping Strikes")
+				if IWin:IsRageAvailable("Sweeping Strikes") then
+					Cast("Sweeping Strikes")
+				end
 			end
 	end
 end
@@ -1789,7 +1797,9 @@ function IWin:Whirlwind(queueTime)
 			if IWin:IsInRange("Rend")
 				and IWin:IsStanceActive("Berserker Stance") then
 					IWin:SetReservedRageStance("Berserker Stance")
-					Cast("Whirlwind")
+					if IWin:IsRageAvailable("Whirlwind") then
+						Cast("Whirlwind")
+					end
 			end
 	end
 end
