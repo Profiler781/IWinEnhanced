@@ -128,7 +128,7 @@ IWin_RageCost = {
 	["Berserker Rage"] = 0 - IWin:GetTalentRank(2, 14) * 5,
 	["Bloodrage"] = - 10 - IWin:GetBloodrageCostReduction(),
 	["Bloodthirst"] = 30,
-	["Charge"] = - 12 - IWin:GetTalentRank(1, 4) * 5,
+	["Charge"] = - 15 - IWin:GetTalentRank(1, 4) * 5,
 	["Cleave"] = 20,
 	["Concussion Blow"] = - 10,
 	["Demoralizing Shout"] = 10,
@@ -149,8 +149,8 @@ IWin_RageCost = {
 	["Shield Block"] = 10,
 	["Shield Slam"] = 20,
 	["Slam"] = 15,
-	["Sunder Armor"] = 15,
-	["Sweeping Strikes"] = 30,
+	["Sunder Armor"] = 10,
+	["Sweeping Strikes"] = 20,
 	["Thunder Clap"] = 20 - IWin:GetThunderClapCostReduction(),
 	["Whirlwind"] = 25,
 }
@@ -1361,6 +1361,8 @@ function IWin:PummelWindfury()
 		and not IWin:IsStanceActive("Defensive Stance")
 		and IWin:IsBuffActive("Windfury Totem")
 		and not IWin:IsBlacklistKick() then
+			--DEFAULT_CHAT_FRAME:AddMessage(IWin:IsBlacklistKick())
+			--DEFAULT_CHAT_FRAME:AddMessage("|"..UnitName("target").."|")
 			IWin_CombatVar["queueGCD"] = false
 			Cast("Pummel")
 	end
