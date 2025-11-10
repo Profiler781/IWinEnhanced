@@ -873,6 +873,7 @@ function IWin:Charge()
 			if IWin:IsStanceActive("Battle Stance") then
 				Cast("Charge")
 				IWin_CombatVar["charge"] = GetTime()
+				IWin:MarkSkull()
 			end
 	end
 end
@@ -1557,6 +1558,7 @@ function IWin:Shoot()
 	elseif itemSubType == "Thrown" then
 		Cast("Throw")
 	end
+	IWin:MarkSkull()
 end
 
 function IWin:Slam()
@@ -2076,7 +2078,6 @@ SLASH_ITANK1 = '/itank'
 function SlashCmdList.ITANK()
 	IWin:InitializeRotation()
 	IWin:TargetEnemy()
-	IWin:MarkSkull()
 	IWin:BattleShoutRefreshOOC()
 	IWin:ChargePartySize()
 	IWin:InterceptPartySize()
@@ -2116,7 +2117,6 @@ SLASH_IHODOR1 = '/ihodor'
 function SlashCmdList.IHODOR()
 	IWin:InitializeRotation()
 	IWin:TargetEnemy()
-	IWin:MarkSkull()
 	IWin:BattleShoutRefreshOOC()
 	IWin:ChargePartySize()
 	IWin:InterceptPartySize()
