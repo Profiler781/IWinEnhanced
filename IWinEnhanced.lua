@@ -24,12 +24,16 @@ IWin_CombatVar = {
 	["slamQueued"] = false,
 	["swingAttackQueued"] = false,
 	["slamCasting"] = 0,
+	["slamGCDAllowed"] = 0,
+	["slamClipAllowedMax"] = 0,
+	["slamClipAllowedMin"] = 0,
 }
 local Cast = CastSpellByName
 IWin_PartySize = {
 	["raid"] = 40,
 	["group"] = 5,
 	["solo"] = 1,
+	["combat"] = 0,
 	["off"] = 0,
 }
 local GCD = 1.5
@@ -52,6 +56,7 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["outOfRaidCombatLength"] == nil then IWin_Settings["outOfRaidCombatLength"] = 25 end
 		if IWin_Settings["playerToNPCHealthRatio"] == nil then IWin_Settings["playerToNPCHealthRatio"] = 0.75 end
 		if IWin_Settings["charge"] == nil then IWin_Settings["charge"] = "solo" end
+		if IWin_Settings["chargewl"] == nil then IWin_Settings["chargewl"] = "off" end
 		if IWin_Settings["sunder"] == nil then IWin_Settings["sunder"] = "high" end
 		if IWin_Settings["demo"] == nil then IWin_Settings["demo"] = "off" end
 		if IWin_Settings["dtBattle"] == nil then IWin_Settings["dtBattle"] = true end
@@ -72,6 +77,11 @@ IWin:SetScript("OnEvent", function()
 		IWin_CombatVar["gcd"] = GetTime()
 	elseif event == "SPELLCAST_START" and arg1 == "Slam" then
 		IWin_CombatVar["slamCasting"] = GetTime() + (arg2 / 1000)
+		if st_timer > UnitAttackSpeed("player") * 0.9 then
+			IWin_CombatVar["slamGCDAllowed"] = IWin_CombatVar["slamCasting"] + 0.2
+			IWin_CombatVar["slamClipAllowedMax"] = IWin_CombatVar["slamGCDAllowed"] + GCD
+			IWin_CombatVar["slamClipAllowedMin"] = st_timer + GetTime()
+		end
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS" then
 		if string.find(arg1,"blocked") then
 			IWin_CombatVar["revengeAvailable"] = GetTime() + 5
@@ -641,6 +651,30 @@ function IWin:IsBlacklistKick()
 	return false
 end
 
+IWin_WhitelistCharge = {
+	-- Karazhan
+
+	-- Naxxramas
+
+	-- Ahn'Qiraj
+
+	-- Molten Core
+	"Ragnaros",
+}
+
+function IWin:IsWhitelistCharge()
+	if not UnitExists("target") then
+		return true
+	end
+	local name = UnitName("target")
+	for unit in IWin_WhitelistCharge do
+		if IWin_WhitelistCharge[unit] == name then
+			return true
+		end
+	end
+	return false
+end
+
 ---- General Actions ----
 function IWin:TargetEnemy()
 	if not UnitExists("target") or UnitIsDead("target") or UnitIsFriend("target", "player") then
@@ -855,7 +889,11 @@ function IWin:ChargePartySize()
 			GetNumPartyMembers() == 0
 			and IWin_PartySize[partySize] >= 1
 		) or (
-			UnitAffectingCombat("target")
+			IWin_Settings["charge"] == "targetincombat"
+			and UnitAffectingCombat("target")
+		) or (
+			IWin_Settings["chargewl"] == "on"
+			and IWin:IsWhitelistCharge()
 		) then
 			IWin:Charge()
 	end
@@ -1176,7 +1214,11 @@ function IWin:InterceptPartySize()
 			GetNumPartyMembers() == 0
 			and IWin_PartySize[partySize] >= 1
 		) or (
-			UnitAffectingCombat("target")
+			IWin_Settings["charge"] == "targetincombat"
+			and UnitAffectingCombat("target")
+		) or (
+			IWin_Settings["chargewl"] == "on"
+			and IWin:IsWhitelistCharge()
 		) then
 			IWin:Intercept()
 	end
@@ -1527,6 +1569,10 @@ function IWin:Slam()
 				not st_timer
 				or st_timer > UnitAttackSpeed("player") * 0.9
 				or st_timer > IWin:GetSlamCastSpeed()
+				or (
+						IWin_CombatVar["slamClipAllowedMax"] > GetTime()
+						and IWin_CombatVar["slamClipAllowedMin"] < GetTime()
+					)
 			)
 		and (
 				not IWin:IsStanceActive("Battle Stance")
@@ -1544,11 +1590,9 @@ function IWin:SlamThreat()
 end
 
 function IWin:GetSlamCastSpeed()
-	local flurryActive
+	local flurryActive = 0
 	if IWin:IsBuffActive("Flurry") then
 		flurryActive = 1
-	else
-		flurryActive = 0
 	end
 	local slamCastSpeed = (2.5 - IWin:GetTalentRank(1, 16) * 0.25) / (1 + IWin:GetTalentRank(2, 15) * 0.06 * flurryActive)
 	return slamCastSpeed
@@ -1560,7 +1604,8 @@ function IWin:SetSlamQueued()
 	local nextSlam = GCD + IWin:GetSlamCastSpeed()
 	if IWin:IsSpellLearnt("Slam")
 		and IWin:Is2HanderEquipped()
-		and nextSlam > nextSwing then
+		and nextSlam > nextSwing
+		and IWin_CombatVar["slamGCDAllowed"] < GetTime() then
 			IWin_CombatVar["slamQueued"] = true
 	end
 end
@@ -1825,9 +1870,17 @@ function SlashCmdList.IWIN(command)
 		if arguments[2] ~= "raid"
 			and arguments[2] ~= "group"
 			and arguments[2] ~= "solo"
+			and arguments[2] ~= "targetincombat"
 			and arguments[2] ~= "off"
 			and arguments[2] ~= nil then
-				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: raid, group, solo, off.|r")
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: raid, group, solo, targetincombat, off.|r")
+				return
+		end
+	elseif arguments[1] == "chargewl"then
+		if arguments[2] ~= "on"
+			and arguments[2] ~= "off"
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
 	elseif arguments[1] == "sunder" then
@@ -1877,6 +1930,9 @@ function SlashCmdList.IWIN(command)
     if arguments[1] == "charge" then
         IWin_Settings["charge"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Charge: |r" .. IWin_Settings["charge"])
+	elseif arguments[1] == "chargewl" then
+        IWin_Settings["chargewl"] = arguments[2]
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Charge whitelist: |r" .. IWin_Settings["chargewl"])
 	elseif arguments[1] == "sunder" then
 	    IWin_Settings["sunder"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Sunder Armor: |r" .. IWin_Settings["sunder"])
@@ -1905,6 +1961,7 @@ function SlashCmdList.IWIN(command)
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin : Current setup|r")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin charge [" .. IWin_Settings["charge"] .. "] : |r Setup for Charge and Intercept")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin chargewl [" .. IWin_Settings["chargewl"] .. "] : |r Setup for Charge and Intercept whitelist")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin sunder [" .. IWin_Settings["sunder"] .. "] : |r Setup for Sunder Armor priority as DPS")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin demo [" .. IWin_Settings["demo"] .. "] : |r Setup for Demoralizing Shout")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dt battle : |r (" .. tostring(IWin_Settings["dtBattle"]) .. ") Setup for Battle Stance with Defensive Tactics")
