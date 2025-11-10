@@ -22,6 +22,7 @@ Special thanks to contributor: Vlad (discord tfw.vlad)
 
     /iwin                             Current setup
     /iwin charge <partySize>          Setup for Charge and Intercept.
+    /iwin chargewl <toggle>           Setup to allow Charge and Intercept on whitelist targets.
     /iwin sunder <priority>           Setup for Sunder Armor priority as DPS.
     /iwin demo <toggle>               Setup for Demoralizing Shout.
     /iwin dt <stance>                 Setup to allow stances with Defensive Tactics.
@@ -29,7 +30,7 @@ Special thanks to contributor: Vlad (discord tfw.vlad)
     /iwin ragegain <number>           Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used.
     /iwin jousting <toggle>           Setup for jousting solo DPS.
 
-partySize possible values: raid, group, solo, off.
+partySize possible values: raid, group, solo, targetincombat, off.
 
 priority possible values: high, low, off.
 
