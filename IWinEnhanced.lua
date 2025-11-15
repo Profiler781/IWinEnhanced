@@ -646,6 +646,8 @@ end
 IWin_BlacklistDemoralizingShout = {
 	"Vek'lor",
 	"Vek'nilash",
+	"Qiraji Scarab",
+	"Qiraji Scorpion",
 }
 
 function IWin:GetBlacklistDemoralizingShout()
@@ -672,6 +674,8 @@ end
 IWin_BlacklistAOE = {
 	"Vek'lor",
 	"Vek'nilash",
+	"Qiraji Scarab",
+	"Qiraji Scorpion",
 }
 
 function IWin:GetBlacklistAOE()
@@ -1886,9 +1890,14 @@ function IWin:ThunderClapDPS()
 end
 
 function IWin:Whirlwind(queueTime)
+	if not IWin:IsBlacklistAOE() then
+		IWin:WhirlwindAOE(queueTime)
+	end
+end
+
+function IWin:WhirlwindAOE(queueTime)
 	if IWin:IsSpellLearnt("Whirlwind")
 		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsBlacklistAOE()
 		and IWin:IsReservedRageStance("Berserker Stance")
 		and not IWin_CombatVar["slamQueued"]
 		and IWin:IsTimeToReserveRage("Whirlwind", "cooldown")
@@ -2105,7 +2114,7 @@ function SlashCmdList.ICLEAVE()
 	IWin:SetReservedRage("Battle Shout", "buff", "player")
 	IWin:SweepingStrikes()
 	IWin:SetReservedRage("Sweeping Strikes", "cooldown")
-	IWin:Whirlwind(GCD)
+	IWin:WhirlwindAOE(GCD)
 	IWin:SetReservedRage("Whirlwind", "cooldown")
 	IWin:DPSStanceDefault()
 	IWin:BloodthirstHighAP(GCD)
