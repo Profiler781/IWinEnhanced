@@ -28,6 +28,15 @@ IWin_CombatVar = {
 	["slamClipAllowedMax"] = 0,
 	["slamClipAllowedMin"] = 0,
 }
+IWin_Target = {
+	["trainingDummy"] = false,
+	["elite"] = false,
+	["blacklistFear"] = false,
+	["blacklistDemoralizingShout"] = false,
+	["blacklistKick"] = false,
+	["whitelistCharge"] = false,
+	["blacklistAOE"] = false,
+}
 local Cast = CastSpellByName
 IWin_PartySize = {
 	["raid"] = 40,
@@ -47,6 +56,7 @@ IWin:RegisterEvent("CHAT_MSG_COMBAT_SELF_MISSES")
 IWin:RegisterEvent("CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF")
 IWin:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE")
 IWin:RegisterEvent("ADDON_LOADED")
+IWin:RegisterEvent("PLAYER_TARGET_CHANGED")
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced system loaded.|r")
@@ -57,7 +67,7 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["playerToNPCHealthRatio"] == nil then IWin_Settings["playerToNPCHealthRatio"] = 0.75 end
 		if IWin_Settings["charge"] == nil then IWin_Settings["charge"] = "solo" end
 		if IWin_Settings["chargewl"] == nil then IWin_Settings["chargewl"] = "off" end
-		if IWin_Settings["sunder"] == nil then IWin_Settings["sunder"] = "high" end
+		if IWin_Settings["sunder"] == nil then IWin_Settings["sunder"] = "off" end
 		if IWin_Settings["demo"] == nil then IWin_Settings["demo"] = "off" end
 		if IWin_Settings["dtBattle"] == nil then IWin_Settings["dtBattle"] = true end
 		if IWin_Settings["dtDefensive"] == nil then IWin_Settings["dtDefensive"] = true end
@@ -90,6 +100,14 @@ IWin:SetScript("OnEvent", function()
 		if string.find(arg1,"dodge") or string.find(arg1,"parry") then
 			IWin_CombatVar["revengeAvailable"] = GetTime() + 5
 		end
+	elseif event == "PLAYER_TARGET_CHANGED" or (event == "ADDON_LOADED" and arg1 == "IWinEnhanced") then
+		IWin:SetTrainingDummy()
+		IWin:SetElite()
+		IWin:SetBlacklistFear()
+		IWin:SetBlacklistDemoralizingShout()
+		IWin:SetBlacklistAOE()
+		IWin:SetBlacklistKick()
+		IWin:SetWhitelistCharge()
 	end
 end)
 
@@ -476,21 +494,39 @@ IWin_UnitClassification = {
 	["trivial"] = false,
 }
 
-function IWin:IsTrainingDummy()
+function IWin:GetTrainingDummy()
 	local name = UnitName("target")
 	if name and string.find(name,"Training Dummy") then
 		return true
+	else
+		return false
 	end
-	return false
 end
 
-function IWin:IsElite()
+function IWin:SetTrainingDummy()
+	IWin_Target["trainingDummy"] = IWin:GetTrainingDummy()
+end
+
+function IWin:IsTrainingDummy()
+	return IWin_Target["trainingDummy"]
+end
+
+function IWin:GetElite()
 	local classification = UnitClassification("target")
 	if IWin_UnitClassification[classification]
 		or IWin:IsTrainingDummy() then
 			return true
+	else
+		return false
 	end
-	return false
+end
+
+function IWin:SetElite()
+	IWin_Target["elite"] = IWin:GetElite()
+end
+
+function IWin:IsElite()
+	return IWin_Target["elite"]
 end
 
 function IWin:IsReservedRageStance(stance)
@@ -586,7 +622,7 @@ IWin_BlacklistFear = {
 	"Nefarian",
 }
 
-function IWin:IsBlacklistFear()
+function IWin:GetBlacklistFear()
 	if not UnitExists("target") then
 		return true
 	end
@@ -599,12 +635,20 @@ function IWin:IsBlacklistFear()
 	return false
 end
 
+function IWin:SetBlacklistFear()
+	IWin_Target["blacklistFear"] = IWin:GetBlacklistFear()
+end
+
+function IWin:IsBlacklistFear()
+	return IWin_Target["blacklistFear"]
+end
+
 IWin_BlacklistDemoralizingShout = {
 	"Vek'lor",
 	"Vek'nilash",
 }
 
-function IWin:IsBlacklistDemoralizingShout()
+function IWin:GetBlacklistDemoralizingShout()
 	if not UnitExists("target") then
 		return true
 	end
@@ -615,6 +659,40 @@ function IWin:IsBlacklistDemoralizingShout()
 		end
 	end
 	return false
+end
+
+function IWin:SetBlacklistDemoralizingShout()
+	IWin_Target["blacklistDemoralizingShout"] = IWin:GetBlacklistDemoralizingShout()
+end
+
+function IWin:IsBlacklistDemoralizingShout()
+	return IWin_Target["blacklistDemoralizingShout"]
+end
+
+IWin_BlacklistAOE = {
+	"Vek'lor",
+	"Vek'nilash",
+}
+
+function IWin:GetBlacklistAOE()
+	if not UnitExists("target") then
+		return true
+	end
+	local name = UnitName("target")
+	for unit in IWin_BlacklistAOE do
+		if IWin_BlacklistAOE[unit] == name then
+			return true
+		end
+	end
+	return false
+end
+
+function IWin:SetBlacklistAOE()
+	IWin_Target["blacklistAOE"] = IWin:GetBlacklistAOE()
+end
+
+function IWin:IsBlacklistAOE()
+	return IWin_Target["blacklistAOE"]
 end
 
 IWin_BlacklistKick = {
@@ -638,7 +716,7 @@ IWin_BlacklistKick = {
 	"Flamewaker Priest",
 }
 
-function IWin:IsBlacklistKick()
+function IWin:GetBlacklistKick()
 	if not UnitExists("target") then
 		return true
 	end
@@ -649,6 +727,14 @@ function IWin:IsBlacklistKick()
 		end
 	end
 	return false
+end
+
+function IWin:SetBlacklistKick()
+	IWin_Target["blacklistKick"] = IWin:GetBlacklistKick()
+end
+
+function IWin:IsBlacklistKick()
+	return IWin_Target["blacklistKick"]
 end
 
 IWin_WhitelistCharge = {
@@ -662,7 +748,7 @@ IWin_WhitelistCharge = {
 	"Ragnaros",
 }
 
-function IWin:IsWhitelistCharge()
+function IWin:GetWhitelistCharge()
 	if not UnitExists("target") then
 		return true
 	end
@@ -673,6 +759,14 @@ function IWin:IsWhitelistCharge()
 		end
 	end
 	return false
+end
+
+function IWin:SetWhitelistCharge()
+	IWin_Target["whitelistCharge"] = IWin:GetWhitelistCharge()
+end
+
+function IWin:IsWhitelistCharge()
+	return IWin_Target["whitelistCharge"]
 end
 
 ---- General Actions ----
@@ -1024,41 +1118,6 @@ function IWin:SetReservedRageExecute()
 				or IWin:GetHealthPercent("player") < 40
 				or UnitInRaid("player")
 				or UnitMana("player") < 40
-			) then 
-			IWin:SetReservedRage("Execute", "cooldown")
-	end
-end
-
-function IWin:ExecuteAOE()
-	if IWin:IsSpellLearnt("Execute")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsExecutePhase()
-		and IWin:IsRageAvailable("Execute")
-		and (
-				UnitIsPVP("target")
-				or IWin:GetHealthPercent("player") < 40
-				or UnitMana("player") < 30
-			)
-		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			if IWin:IsStanceActive("Defensive Stance") then
-				Cast("Battle Stance")
-			else
-				Cast("Execute")
-			end
-	end
-end
-
-function IWin:SetReservedRageExecuteAOE()
-	local lowHealthTarget = (UnitHealthMax("player") * 0.3 > UnitHealth("target"))
-	if (
-			lowHealthTarget
-			or IWin:IsExecutePhase()
-		)
-		and (
-				UnitIsPVP("target")
-				or IWin:GetHealthPercent("player") < 40
-				or UnitMana("player") < 30
 			) then 
 			IWin:SetReservedRage("Execute", "cooldown")
 	end
@@ -1806,7 +1865,7 @@ function IWin:ThunderClap(queueTime)
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			if IWin:IsStanceActive("Berserker Stance") then
-				Cast("Battle Stance")
+				Cast("Defensive Stance")
 			else
 				Cast("Thunder Clap")
 			end
@@ -1829,6 +1888,7 @@ end
 function IWin:Whirlwind(queueTime)
 	if IWin:IsSpellLearnt("Whirlwind")
 		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsBlacklistAOE()
 		and IWin:IsReservedRageStance("Berserker Stance")
 		and not IWin_CombatVar["slamQueued"]
 		and IWin:IsTimeToReserveRage("Whirlwind", "cooldown")
@@ -2198,6 +2258,5 @@ SLASH_ISHOOT1 = '/ishoot'
 function SlashCmdList.ISHOOT()
 	IWin:InitializeRotation()
 	IWin:TargetEnemy()
-	IWin:MarkSkull()
 	IWin:Shoot()
 end
