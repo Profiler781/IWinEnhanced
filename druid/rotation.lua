@@ -1,0 +1,110 @@
+if UnitClass("player") ~= "Druid" then return end
+
+SLASH_IBLASTDRUID1 = "/iblast"
+function SlashCmdList.IBLASTDRUID()
+	IWin:TargetEnemy()
+	IWin:InitializeRotation()
+	IWin:StartAttack()
+	IWin:MarkOfTheWild()
+	IWin:Thorns()
+	IWin:CancelRoot()
+	IWin:MoonkinForm()
+	IWin:WrathOOC()
+	IWin:StarfireOOC()
+	IWin:InsectSwarm()
+	IWin:Moonfire()
+	IWin:Wrath()
+	IWin:Starfire()
+	IWin:WrathFiller()
+end
+
+SLASH_IRUETOODRUID1 = "/iruetoo"
+function SlashCmdList.IRUETOODRUID()
+	IWin:TargetEnemy()
+	IWin:InitializeRotation()
+	IWin:MarkOfTheWild()
+	IWin:Thorns()
+	IWin:CancelRoot()
+	IWin:CatForm()
+	IWin:BerserkCat()
+	IWin:TigersFury()
+	IWin:SetReservedEnergyTigersFury()
+	IWin:FaerieFireFeral()
+	IWin:Rip()
+	IWin:SetReservedEnergyRip()
+	IWin:FerociousBite()
+	IWin:SetReservedEnergyFerocious()
+	IWin:Rake()
+	IWin:SetReservedEnergyRake()
+	IWin:Shred()
+	IWin:SetReservedEnergyShred()
+	IWin:Claw()
+	IWin:StartAttack()
+end
+
+SLASH_ITANKDRUID1 = "/itank"
+function SlashCmdList.ITANKDRUID()
+	IWin:TargetEnemy()
+	IWin:InitializeRotation()
+	IWin:MarkSkull()
+	IWin:MarkOfTheWild()
+	IWin:Thorns()
+	IWin:CancelRoot()
+	IWin:BearForm()
+	IWin:FeralCharge()
+	IWin:FaerieFireFeral()
+	IWin:DemoralizingRoar()
+	IWin:SetReservedRage("Demoralizing Roar", "buff", "target")
+	IWin:Enrage()
+	IWin:SavageBite(IWin_Settings["GCD"])
+	IWin:SetReservedRage("Savage Bite", "cooldown")
+	IWin:Maul()
+	IWin:SetReservedRage("Maul", "nocooldown")
+	IWin:Swipe()
+	IWin:StartAttack()
+end
+
+SLASH_IHODORDRUID1 = "/ihodor"
+function SlashCmdList.IHODORDRUID()
+	IWin:TargetEnemy()
+	IWin:InitializeRotation()
+	IWin:MarkSkull()
+	IWin:MarkOfTheWild()
+	IWin:Thorns()
+	IWin:BearForm()
+	IWin:FeralCharge()
+	IWin:DemoralizingRoar()
+	IWin:SetReservedRage("Demoralizing Roar", "buff", "target")
+	IWin:Swipe()
+	IWin:SetReservedRage("Swipe", "nocooldown")
+	IWin:FaerieFireFeral()
+	IWin:Maul()
+	IWin:StartAttack()
+end
+
+SLASH_ICHASEDRUID1 = "/ichase"
+function SlashCmdList.ICHASEDRUID()
+	IWin:TargetEnemy()
+	IWin:InitializeRotation()
+	IWin:CancelRootReact()
+	IWin:CancelSlow()
+	IWin:StartAttack()
+end
+
+SLASH_IRUNDRUID1 = "/irun"
+function SlashCmdList.IRUNDRUID()
+	IWin:TargetEnemy()
+	IWin:InitializeRotation()
+	IWin:CancelRootReact()
+	IWin:CancelSlowReact()
+	IWin:StartAttack()
+end
+
+SLASH_ITAUNTDRUID1 = "/itaunt"
+function SlashCmdList.ITAUNTDRUID()
+	IWin:TargetEnemy()
+	IWin:InitializeRotation()
+	IWin:BearForm()
+	IWin:Growl()
+	IWin:StartAttack()
+end

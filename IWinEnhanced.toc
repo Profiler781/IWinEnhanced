@@ -1,8 +1,41 @@
 ## Interface: 11200
 ## Title: IWinEnhanced
-## Notes: Smart macros for turtle warriors
-## Version: 1.3
+## Notes: 1-button rotation macros for turtle druids, paladins and warriors.
+## Version: 2.0
 ## SavedVariablesPerCharacter: IWin_Settings
-## OptionalDeps: ShaguTweaks, pfUI, SP_SwingTimer
+## Dependencies: SuperCleveRoidMacros
+## OptionalDeps: SP_SwingTimer, PallyPowerTW, LibramSwap
 
 IWinEnhanced.lua
+
+core\data.lua
+druid\data.lua
+paladin\data.lua
+warrior\data.lua
+
+druid\init.lua
+paladin\init.lua
+warrior\init.lua
+
+core\condition.lua
+druid\condition.lua
+paladin\condition.lua
+warrior\condition.lua
+
+core\action.lua
+druid\action.lua
+paladin\action.lua
+warrior\action.lua
+
+druid\event.lua
+paladin\event.lua
+warrior\event.lua
+
+druid\setup.lua
+paladin\setup.lua
+warrior\setup.lua
+
+core\rotation.lua
+druid\rotation.lua
+paladin\rotation.lua
+warrior\rotation.lua
