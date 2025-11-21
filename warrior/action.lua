@@ -891,6 +891,7 @@ function IWin:SunderArmorFirstStack()
 		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageCostAvailable("Sunder Armor")
 		and not IWin:IsBuffActive("target", "Sunder Armor")
+		and not IWin:IsBuffActive("target", "Expose Armor")
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Sunder Armor")
@@ -910,6 +911,7 @@ function IWin:SunderArmorDPS()
 						and IWin:GetBuffRemaining("target", "Sunder Armor") < 9
 					)
 			)
+		and not IWin:IsBuffActive("target", "Expose Armor")
 		and not IWin:IsGCDActive()
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
@@ -922,6 +924,7 @@ function IWin:SetReservedRageSunderArmorDPS()
 		and not (IWin_Settings["sunder"] == "off")
 		and IWin:GetTimeToDie() > 10
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
+		and not IWin:IsBuffActive("target", "Expose Armor")
 		and not IWin:Is2HanderEquipped() then
 			IWin:SetReservedRage("Sunder Armor", "nocooldown")
 	end
@@ -935,6 +938,7 @@ function IWin:SunderArmorRaid()
 		and UnitInRaid("player")
 		and IWin:IsElite()
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
+		and not IWin:IsBuffActive("target", "Expose Armor")
 		and not IWin:IsGCDActive()
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
@@ -950,6 +954,7 @@ function IWin:SunderArmorDPSRefresh()
 		and IWin:GetTimeToDie() > 10
 		and IWin:IsBuffActive("target", "Sunder Armor")
 		and IWin:GetBuffRemaining("target", "Sunder Armor") < 6
+		and not IWin:IsBuffActive("target", "Expose Armor")
 		and not IWin:IsGCDActive()
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
