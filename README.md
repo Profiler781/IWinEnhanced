@@ -100,7 +100,9 @@ Example: /iwin judgement wisdom
     /iwin chargewl <toggle>           Setup to allow Charge and Intercept on whitelist targets.
     /iwin sunder <priority>           Setup for Sunder Armor priority as DPS.
     /iwin demo <toggle>               Setup for Demoralizing Shout.
-    /iwin dt <stance>                 Setup to allow stances with Defensive Tactics.
+    /iwin dtbattle <toggle>           Setup to allow Battle stance with Defensive Tactics.
+    /iwin dtdefensive <toggle>        Setup to allow Defensive stance with Defensive Tactics.
+    /iwin dtberserker <toggle>        Setup to allow Berserker stance with Defensive Tactics.
     /iwin ragebuffer <number>         Setup to save 100% required rage for spells X seconds before the spells are used.
     /iwin ragegain <number>           Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used.
     /iwin jousting <toggle>           Setup for jousting solo DPS.
@@ -110,8 +112,6 @@ partySize possible values: raid, group, solo, targetincombat, off.
 priority possible values: high, low, off.
 
 toggle possible values: on, off.
-
-stance possible values: battle, defensive, berserker.
 
 number possible values: 0 or more.
 

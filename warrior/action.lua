@@ -278,10 +278,16 @@ function IWin:Execute()
 		and IWin:IsRageAvailable("Execute")
 		and (
 				UnitIsPVP("target")
-				or IWin:IsElite()
 				or IWin:GetHealthPercent("player") < 40
-				or UnitInRaid("player")
-				or UnitMana("player") < 40
+				or IWin:IsElite()
+				or (
+						not IWin:Is2HanderEquipped()
+						and (
+								UnitInRaid("player")
+								or UnitMana("player") < 40
+							)
+					)
+				or IWin:GetTimeToDie() < 4
 			)
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
@@ -301,12 +307,34 @@ function IWin:SetReservedRageExecute()
 		)
 		and (
 				UnitIsPVP("target")
-				or IWin:IsElite()
 				or IWin:GetHealthPercent("player") < 40
-				or UnitInRaid("player")
-				or UnitMana("player") < 40
+				or IWin:IsElite()
+				or (
+						not IWin:Is2HanderEquipped()
+						and (
+								UnitInRaid("player")
+								or UnitMana("player") < 40
+							)
+					)
+				or IWin:GetTimeToDie() < 4
 			) then 
 			IWin:SetReservedRage("Execute", "cooldown")
+	end
+end
+
+function IWin:Execute2Hander()
+	if IWin:IsSpellLearnt("Execute")
+		and IWin_CombatVar["queueGCD"]
+		and IWin:IsExecutePhase()
+		and IWin:IsRageAvailable("Execute")
+		and IWin:Is2HanderEquipped()
+		and not IWin_CombatVar["slamQueued"] then
+			IWin_CombatVar["queueGCD"] = false
+			if IWin:IsStanceActive("Defensive Stance") then
+				CastSpellByName("Battle Stance")
+			else
+				CastSpellByName("Execute")
+			end
 	end
 end
 
@@ -980,11 +1008,9 @@ end
 
 function IWin:SweepingStrikes()
 	if IWin:IsSpellLearnt("Sweeping Strikes")
-		and IWin_CombatVar["queueGCD"]
 		and IWin:IsReservedRageStance("Battle Stance")
 		and not IWin_CombatVar["slamQueued"]
 		and IWin:IsTimeToReserveRage("Sweeping Strikes", "cooldown") then
-			IWin_CombatVar["queueGCD"] = false
 			if not IWin:IsStanceActive("Battle Stance")
 				and UnitAffectingCombat("player") then
 					IWin:SetReservedRageStance("Battle Stance")

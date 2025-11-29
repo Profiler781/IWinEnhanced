@@ -50,7 +50,7 @@ IWin:SetScript("OnEvent", function()
 		IWin_CombatVar["slamCasting"] = GetTime() + (arg2 / 1000)
 		if st_timer > UnitAttackSpeed("player") * 0.9 then
 			IWin_CombatVar["slamGCDAllowed"] = IWin_CombatVar["slamCasting"] + 0.2
-			IWin_CombatVar["slamClipAllowedMax"] = IWin_CombatVar["slamGCDAllowed"] +  IWin_Settings["GCD"]
+			IWin_CombatVar["slamClipAllowedMax"] = IWin_CombatVar["slamGCDAllowed"] + IWin_Settings["GCD"]
 			IWin_CombatVar["slamClipAllowedMin"] = st_timer + GetTime()
 		end
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS" then

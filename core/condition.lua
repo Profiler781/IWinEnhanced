@@ -208,7 +208,7 @@ function IWin:IsRageAvailable(spell)
 	local rageRequired = IWin_RageCost[spell] + IWin_CombatVar["reservedRage"]
 	-- Replacing auto attack will prevent getting rage from next swing, so rage cost is higher.
 	if spell == "Heroic Strike" or spell == "Cleave" or spell == "Maul" then
-		rageRequired = rageRequired + IWin_Settings["ragePerSecondPrediction"]
+		rageRequired = rageRequired + 10 --fix before rework
 	end
 	return UnitMana("player") >= rageRequired or IWin:IsBuffActive("player", "Clearcasting")
 end
@@ -222,7 +222,7 @@ function IWin:GetRageToReserve(spell, trigger, unit)
 	local rageCost = IWin_RageCost[spell]
 	-- Replacing auto attack will prevent getting rage from next swing, so rage cost is higher.
 	if spell == "Heroic Strike" or spell == "Cleave" or spell == "Maul" then
-		rageCost = rageCost + IWin_Settings["ragePerSecondPrediction"]
+		rageCost = rageCost + 10 --fix before rework
 	end
 	if trigger == "nocooldown" then
 		return rageCost
