@@ -29,7 +29,7 @@ function IWin:TargetEnemy()
 end
 
 function IWin:StartAttack()
-	if IWin_CombatVar["swingAttackQueued"] then return end
+	if IWin_CombatVar["swingAttackQueued"] or IWin_CombatVar["startAttackThrottle"] > GetTime() then return end
 	local attackActionFound = false
 	for action = 1, 172 do
 		if IsAttackAction(action) then

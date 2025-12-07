@@ -2,6 +2,7 @@ if UnitClass("player") ~= "Warrior" then return end
 
 IWin_CombatVar = {
 	["GCD"] = 0,
+	["startAttackThrottle"] = 0,
 	["overpowerAvailable"] = 0,
 	["revengeAvailable"] = 0,
 	["reservedRage"] = 0,

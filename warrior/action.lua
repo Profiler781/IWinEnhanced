@@ -185,6 +185,7 @@ function IWin:Cleave()
 	if IWin:IsSpellLearnt("Cleave") then
 		if IWin:IsRageAvailable("Cleave") then
 			IWin_CombatVar["swingAttackQueued"] = true
+			IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
 			CastSpellByName("Cleave")
 		else
 			--SpellStopCasting()
@@ -424,6 +425,7 @@ function IWin:HeroicStrike()
 	if IWin:IsSpellLearnt("Heroic Strike") then
 		if IWin:IsRageAvailable("Heroic Strike") then
 			IWin_CombatVar["swingAttackQueued"] = true
+			IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
 			CastSpellByName("Heroic Strike")
 		else
 			--SpellStopCasting()
@@ -963,7 +965,6 @@ function IWin:SunderArmorRaid()
 		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Sunder Armor")
 		and IWin_Settings["sunder"] == "high"
-		and UnitInRaid("player")
 		and IWin:IsElite()
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
 		and not IWin:IsBuffActive("target", "Expose Armor")

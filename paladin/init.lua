@@ -4,6 +4,7 @@ IWin.hasPallyPower = PallyPower_SealAssignments and true or false
 
 IWin_CombatVar = {
 	["GCD"] = 0,
+	["startAttackThrottle"] = 0,
 	["weaponAttackSpeed"] = 0,
 	["queueGCD"] = true,
 }

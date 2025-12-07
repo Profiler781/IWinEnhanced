@@ -187,6 +187,7 @@ function IWin:Maul()
 	if IWin:IsSpellLearnt("Maul") then
 		if IWin:IsRageAvailable("Maul") then
 			IWin_CombatVar["swingAttackQueued"] = true
+			IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
 			CastSpellByName("Maul")
 		else
 			--SpellStopCasting()

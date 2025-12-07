@@ -38,7 +38,7 @@ function IWin:GetBuffRemaining(unit, spell, owner)
 	end
 	-- Buff scan only for player
 	if unit == "player" then
-		for index = 0, 32 do
+		for index = 0, 63 do
 	        spellID = GetPlayerBuffID(index)
 	        if not spellID then break end
 	        if spell == SpellInfo(spellID) then
@@ -52,7 +52,7 @@ function IWin:GetBuffRemaining(unit, spell, owner)
 	    end
     end
     -- Debuff scan overflow as buff
-	for index = 1, 32 do
+	for index = 1, 64 do
 	    local effect, _, texture, stacks, dtype, duration, timeleft, caster = IWin.libdebuff:UnitBuff(unit, index)
 	    if not effect then break end
 	    if effect == spell and ((not owner) or (caster == owner)) then
@@ -83,7 +83,7 @@ function IWin:GetBuffStack(unit, spell, owner)
 		return stack or 0
 	end
 	-- Debuff scan overflow as buff
-	for index = 1, 32 do
+	for index = 1, 64 do
 	    local effect, _, texture, stacks, dtype, duration, timeleft, caster = IWin.libdebuff:UnitBuff(unit, index)
 	    if not effect then break end
 	    if effect == spell and ((not owner) or (caster == owner)) then
