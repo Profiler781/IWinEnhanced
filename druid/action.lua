@@ -295,6 +295,16 @@ function IWin:SetReservedEnergyRake()
 	end
 end
 
+function IWin:Reshift()
+	if IWin:IsSpellLearnt("Reshift")
+		and IWin_CombatVar["queueGCD"]
+		and IWin:GetTalentRank(3, 2) ~= 0
+		and UnitMana("player") < 20 then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Reshift")
+	end
+end
+
 function IWin:Rip()
 	if IWin:IsSpellLearnt("Rip")
 		and IWin_CombatVar["queueGCD"]
@@ -356,11 +366,15 @@ function IWin:Shred()
 		and not IWin:IsOnCooldown("Shred")
 		and IWin:IsEnergyAvailable("Shred")
 		and (
+				not IWin:IsBuffActive("target", "Rake", "player")
+				or not IWin:IsBuffActive("target", "Rip", "player")
+			)
+		and (
 				(
 					UnitMana("player") < 100
 					and IWin_Settings["frontShred"] == "on"
 				)
-				or not IWin:IsTanking()
+				or IWin:IsBehind()
 			) then
 				IWin_CombatVar["queueGCD"] = false
 				CastSpellByName("Shred")
@@ -369,10 +383,16 @@ end
 
 function IWin:SetReservedEnergyShred()
 	if (
-			UnitMana("player") < 100
-			and IWin_Settings["frontShred"] == "on"
+			not IWin:IsBuffActive("target", "Rake", "player")
+			or not IWin:IsBuffActive("target", "Rip", "player")
 		)
-		or not IWin:IsTanking() then
+		and (
+				(
+					UnitMana("player") < 100
+					and IWin_Settings["frontShred"] == "on"
+				)
+				or IWin:IsBehind()
+			) then
 			IWin:SetReservedEnergy("Shred", "nocooldown")
 	end
 end

@@ -47,7 +47,7 @@ IWin_PartySize = {
 	["raid"] = 40,
 	["group"] = 5,
 	["solo"] = 1,
-	["combat"] = 0,
+	["targetincombat"] = 0,
 	["off"] = 0,
 }
 

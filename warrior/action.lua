@@ -52,6 +52,7 @@ function IWin:BerserkerRage()
 		and not IWin:IsBlacklistFear()
 		and not IWin:IsOnCooldown("Berserker Rage")
 		and UnitAffectingCombat("player")
+		and UnitMana("player") < 70
 		and (
 				IWin:IsTanking()
 				or IWin:GetTalentRank(2, 14) ~= 0
@@ -183,10 +184,11 @@ end
 
 function IWin:Cleave()
 	if IWin:IsSpellLearnt("Cleave") then
-		if IWin:IsRageAvailable("Cleave") then
-			IWin_CombatVar["swingAttackQueued"] = true
-			IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
-			CastSpellByName("Cleave")
+		if IWin:IsRageAvailable("Cleave")
+			or UnitMana("player") > 80 then
+				IWin_CombatVar["swingAttackQueued"] = true
+				IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
+				CastSpellByName("Cleave")
 		else
 			--SpellStopCasting()
 		end
@@ -344,15 +346,14 @@ function IWin:ExecuteDefensiveTactics()
 		and IWin_CombatVar["queueGCD"]
 		and IWin:IsExecutePhase()
 		and IWin:IsRageAvailable("Execute")
+		and IWin:IsDefensiveTacticsActive()
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			if IWin:IsStanceActive("Defensive Stance")
-				and IWin:IsDefensiveTacticsActive("Battle Stance")
-				and not IWin:IsDefensiveTacticsActive() then
+				and IWin:IsDefensiveTacticsActive("Battle Stance") then
 					CastSpellByName("Battle Stance")
 			elseif IWin:IsStanceActive("Defensive Stance")
-				and IWin:IsDefensiveTacticsActive("Berserker Stance")
-				and not IWin:IsDefensiveTacticsActive() then
+				and IWin:IsDefensiveTacticsActive("Berserker Stance") then
 					CastSpellByName("Berserker Stance")
 			end
 			if IWin:IsStanceActive("Battle Stance")
@@ -423,10 +424,17 @@ end
 
 function IWin:HeroicStrike()
 	if IWin:IsSpellLearnt("Heroic Strike") then
-		if IWin:IsRageAvailable("Heroic Strike") then
-			IWin_CombatVar["swingAttackQueued"] = true
-			IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
-			CastSpellByName("Heroic Strike")
+		if IWin:IsRageAvailable("Heroic Strike")
+			or (
+					UnitMana("player") > 75
+					and (
+							not IWin:IsSpellLearnt("Whirlwind")
+							or IWin:GetCooldownRemaining("Whirlwind") > 0
+						)
+				) then
+					IWin_CombatVar["swingAttackQueued"] = true
+					IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
+					CastSpellByName("Heroic Strike")
 		else
 			--SpellStopCasting()
 		end
@@ -786,6 +794,7 @@ function IWin:ShieldBlock()
 		and not IWin:IsOnCooldown("Shield Block")
 		and IWin:IsShieldEquipped()
 		and IWin:IsTanking()
+		and IWin:IsBuffStack("target", "Sunder Armor", 5)
 		and IWin:IsRageAvailable("Shield Block")
 		and IWin:GetCooldownRemaining("Revenge") <  IWin_Settings["GCD"]
 		and not IWin:IsRevengeAvailable()
@@ -809,6 +818,7 @@ end
 function IWin:ShieldSlam(queueTime)
 	if IWin:IsSpellLearnt("Shield Slam")
 		and IWin_CombatVar["queueGCD"]
+		and IWin:IsShieldEquipped() 
 		and IWin:GetCooldownRemaining("Shield Slam") < queueTime
 		and IWin:IsRageAvailable("Shield Slam")
 		and not IWin_CombatVar["slamQueued"] then
@@ -843,12 +853,12 @@ function IWin:Slam()
 		and IWin:Is2HanderEquipped()
 		and (
 				not st_timer
-				or st_timer > UnitAttackSpeed("player") * 0.9
-				or st_timer > IWin:GetSlamCastSpeed()
-				or (
-						IWin_CombatVar["slamClipAllowedMax"] > GetTime()
-						and IWin_CombatVar["slamClipAllowedMin"] < GetTime()
-					)
+				or st_timer > UnitAttackSpeed("player") * 0.5
+				--or st_timer > IWin:GetCastTime("Slam")
+				--or (
+				--		IWin_CombatVar["slamClipAllowedMax"] > GetTime()
+				--		and IWin_CombatVar["slamClipAllowedMin"] < GetTime()
+				--	)
 			)
 		and (
 				not IWin:IsStanceActive("Battle Stance")
@@ -865,24 +875,16 @@ function IWin:SlamThreat()
 	end
 end
 
-function IWin:GetSlamCastSpeed()
-	local flurryActive = 0
-	if IWin:IsBuffActive("player", "Flurry") then
-		flurryActive = 1
-	end
-	local slamCastSpeed = (2.5 - IWin:GetTalentRank(1, 16) * 0.25) / (1 + IWin:GetTalentRank(2, 15) * 0.06 * flurryActive)
-	return slamCastSpeed
-end
-
 function IWin:SetSlamQueued()
 	if not st_timer then return end
-	local nextSwing = st_timer + UnitAttackSpeed("player")
-	local nextSlam =  IWin_Settings["GCD"] + IWin:GetSlamCastSpeed()
 	if IWin:IsSpellLearnt("Slam")
-		and IWin:Is2HanderEquipped()
-		and nextSlam > nextSwing
-		and IWin_CombatVar["slamGCDAllowed"] < GetTime() then
-			IWin_CombatVar["slamQueued"] = true
+		and IWin:Is2HanderEquipped() then
+			local nextSwing = st_timer + UnitAttackSpeed("player")
+			local nextSlam =  IWin_Settings["GCD"] + IWin:GetCastTime("Slam")
+			if nextSlam > nextSwing
+				and IWin_CombatVar["slamGCDAllowed"] < GetTime() then
+					IWin_CombatVar["slamQueued"] = true
+			end
 	end
 end
 
@@ -933,14 +935,8 @@ function IWin:SunderArmorDPS()
 		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Sunder Armor")
 		and not (IWin_Settings["sunder"] == "off")
-		and IWin:GetTimeToDie() > 10
-		and (
-				not IWin:IsBuffStack("target", "Sunder Armor", 5)
-				or (
-						IWin:IsBuffActive("target", "Sunder Armor")
-						and IWin:GetBuffRemaining("target", "Sunder Armor") < 9
-					)
-			)
+		and IWin:GetTimeToDie() > 5
+		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
 		and not IWin:IsBuffActive("target", "Expose Armor")
 		and not IWin:IsGCDActive()
 		and not IWin_CombatVar["slamQueued"] then
@@ -952,7 +948,7 @@ end
 function IWin:SetReservedRageSunderArmorDPS()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and not (IWin_Settings["sunder"] == "off")
-		and IWin:GetTimeToDie() > 10
+		and IWin:GetTimeToDie() > 5
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
 		and not IWin:IsBuffActive("target", "Expose Armor")
 		and not IWin:Is2HanderEquipped() then
@@ -960,15 +956,32 @@ function IWin:SetReservedRageSunderArmorDPS()
 	end
 end
 
-function IWin:SunderArmorRaid()
+function IWin:SunderArmorDPS2Hander()
+	if IWin:Is2HanderEquipped() then
+		IWin:SunderArmorDPS()
+	end
+end
+
+function IWin:SetReservedRageSunderArmorDPS2Hander()
+	if IWin:IsSpellLearnt("Sunder Armor")
+		and not (IWin_Settings["sunder"] == "off")
+		and IWin:GetTimeToDie() > 5
+		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
+		and not IWin:IsBuffActive("target", "Expose Armor")
+		and IWin:Is2HanderEquipped() then
+			IWin:SetReservedRage("Sunder Armor", "nocooldown")
+	end
+end
+
+function IWin:SunderArmorElite()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageAvailable("Sunder Armor")
 		and IWin_Settings["sunder"] == "high"
+		and IWin:GetTimeToDie() > 5
 		and IWin:IsElite()
 		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
 		and not IWin:IsBuffActive("target", "Expose Armor")
-		and not IWin:IsGCDActive()
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Sunder Armor")
@@ -978,13 +991,12 @@ end
 function IWin:SunderArmorDPSRefresh()
 	if IWin:IsSpellLearnt("Sunder Armor")
 		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageAvailable("Sunder Armor")
+		and IWin:IsRageCostAvailable("Sunder Armor")
 		and not (IWin_Settings["sunder"] == "off")
-		and IWin:GetTimeToDie() > 10
+		and IWin:GetTimeToDie() > IWin:GetBuffRemaining("target", "Sunder Armor")
 		and IWin:IsBuffActive("target", "Sunder Armor")
 		and IWin:GetBuffRemaining("target", "Sunder Armor") < 6
-		and not IWin:IsBuffActive("target", "Expose Armor")
-		and not IWin:IsGCDActive()
+		and IWin:GetBuffRemaining("target", "Sunder Armor") < IWin:GetTimeToDie()
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Sunder Armor")

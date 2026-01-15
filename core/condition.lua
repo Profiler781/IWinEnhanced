@@ -1,14 +1,16 @@
 -- Buff #######################################################################################################################################
-function IWin:GetBuffIndex(unit, spell)
-	local index = 1
-	while UnitBuff(unit, index) do
-		IWin_T:ClearLines()
-		IWin_T:SetUnitBuff(unit, index)
-		local tooltipText = IWin_TTextLeft1:GetText()
-		if spell and tooltipText and string.find(tooltipText, spell) then
-			return index
-		end
+function IWin:GetPlayerBuffIndex(spell)
+	local index = 0
+    spell = string.lower(string.gsub(spell, "_"," "))
+	while true do
+		local auraIndex = GetPlayerBuff(index,"HELPFUL")
 		index = index + 1
+		if auraIndex == -1 then break end
+		local buffIndex = GetPlayerBuffID(auraIndex)
+		buffIndex = (buffIndex < -1) and (buffIndex + 65536) or buffIndex
+		if string.lower(SpellInfo(buffIndex)) == spell then
+			return auraIndex
+		end
 	end
 	return nil
 end
@@ -76,11 +78,13 @@ function IWin:GetBuffStack(unit, spell, owner)
 	        return stacks
 	    end
 	end
-	-- Buff scan
-	local index = IWin:GetBuffIndex(unit, spell)
-	if index then
-		local _, stack = UnitBuff(unit, index)
-		return stack or 0
+	-- Player buff scan
+	if unit == "player" then
+		local index = IWin:GetPlayerBuffIndex(spell)
+		if index then
+			local _, stack = UnitBuff(unit, index)
+			return stack or 0
+		end
 	end
 	-- Debuff scan overflow as buff
 	for index = 1, 64 do
@@ -111,22 +115,28 @@ function IWin:IsTaunted()
 end
 
 -- Spell #######################################################################################################################################
+function IWin:GetSpellSpellbookID(spell, rank)
+    local spellID = 1
+    while true do
+        local spellName, spellRank = GetSpellName(spellID, "BOOKTYPE_SPELL")
+        if not spellName then break end
+        if spellName == spell and ((not rank) or spellRank == rank) then
+            return spellID
+        end
+        spellID = spellID + 1
+    end
+    return nil
+end
+
 function IWin:GetCooldownRemaining(spell)
-	local spellID = 1
-	local bookspell = GetSpellName(spellID, "BOOKTYPE_SPELL")
-	while bookspell do	
-		if spell == bookspell then
-			local start, duration = GetSpellCooldown(spellID, "BOOKTYPE_SPELL")
-			if start ~= 0 and duration ~=  IWin_Settings["GCD"] then
-				return duration - (GetTime() - start)
-			else
-				return 0
-			end
-		end
-		spellID = spellID + 1
-		bookspell = GetSpellName(spellID, "BOOKTYPE_SPELL")
+	local spellID = IWin:GetSpellSpellbookID(spell)
+	if not spellID then return false end
+	local start, duration = GetSpellCooldown(spellID, "BOOKTYPE_SPELL")
+	if start ~= 0 and duration ~=  IWin_Settings["GCD"] then
+		return duration - (GetTime() - start)
+	else
+		return 0
 	end
-	return false
 end
 
 function IWin:IsOnCooldown(spell)
@@ -134,20 +144,52 @@ function IWin:IsOnCooldown(spell)
 end
 
 function IWin:IsSpellLearnt(spell, rank)
-	local spellID = 1
-	local bookspell, bookrank = GetSpellName(spellID, "BOOKTYPE_SPELL")
-	while bookspell do
-		if bookspell == spell and ((not rank) or bookrank == rank) then
-			return true
-		end
-		spellID = spellID + 1
-		bookspell, bookrank = GetSpellName(spellID, "BOOKTYPE_SPELL")
-	end
-	return false
+	local spellID = IWin:GetSpellSpellbookID(spell, rank)
+	if not spellID then return false end
+	return true
 end
 
 function IWin:IsGCDActive()
 	return GetTime() - IWin_CombatVar["GCD"] < 1.5
+end
+
+function IWin:ParseCastTimeFromText(text)
+    if not text then return nil end
+    -- Match patterns like "1.5 sec cast", "1.59 sec cast", "2 sec cast"
+    local castTime = string.match(text, "(%d+%.?%d*) sec cast")
+    if castTime then
+        return tonumber(castTime)
+    end
+    return nil
+end
+
+function IWin:GetCastTime(spell)
+	local spellID = IWin:GetSpellSpellbookID(spell)
+    if not spellID then return nil end
+
+    IWin_T:ClearLines()
+	IWin_T:SetSpell(spellID, "BOOKTYPE_SPELL")
+
+    -- Scan tooltip lines for cast time
+    for i = 1, IWin_T:NumLines() do
+        local leftText = getglobal("IWin_TTextLeft" .. i)
+        if leftText then
+            local text = leftText:GetText()
+            local castTime = IWin:ParseCastTimeFromText(text)
+            if castTime then
+                return castTime
+            end
+        end
+        local rightText = getglobal("IWin_TTextRight" .. i)
+        if rightText then
+            local text = rightText:GetText()
+            local castTime = IWin:ParseCastTimeFromText(text)
+            if castTime then
+                return castTime
+            end
+        end
+    end
+    return nil
 end
 
 -- Stance #######################################################################################################################################
@@ -176,12 +218,11 @@ end
 -- Health #######################################################################################################################################
 function IWin:GetTimeToDie()
 	local ttd = 0
-	if UnitInRaid("player") or UnitIsPVP("target") then
-		ttd = 999
-	elseif GetNumPartyMembers() ~= 0 then
-		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / GetNumPartyMembers() * 2
+	local numPartyMembers = math.max(2, GetNumPartyMembers(), GetNumRaidMembers())
+	if (not UnitInRaid("player")) or type(TimeToKill) ~= "table" or type(TimeToKill.GetTTK) ~= "function" or TimeToKill.GetTTK() == nil then
+		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / numPartyMembers * 2
 	else
-		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"]
+		ttd = TimeToKill.GetTTK() - 1
 	end
 	return ttd
 end
@@ -208,7 +249,7 @@ function IWin:IsRageAvailable(spell)
 	local rageRequired = IWin_RageCost[spell] + IWin_CombatVar["reservedRage"]
 	-- Replacing auto attack will prevent getting rage from next swing, so rage cost is higher.
 	if spell == "Heroic Strike" or spell == "Cleave" or spell == "Maul" then
-		rageRequired = rageRequired + 10 --fix before rework
+		rageRequired = rageRequired + 20 --fix before rework
 	end
 	return UnitMana("player") >= rageRequired or IWin:IsBuffActive("player", "Clearcasting")
 end
@@ -222,7 +263,7 @@ function IWin:GetRageToReserve(spell, trigger, unit)
 	local rageCost = IWin_RageCost[spell]
 	-- Replacing auto attack will prevent getting rage from next swing, so rage cost is higher.
 	if spell == "Heroic Strike" or spell == "Cleave" or spell == "Maul" then
-		rageCost = rageCost + 10 --fix before rework
+		rageCost = rageCost + 20 --fix before rework
 	end
 	if trigger == "nocooldown" then
 		return rageCost
@@ -307,6 +348,11 @@ end
 -- Target #######################################################################################################################################
 function IWin:IsTanking()
 	return UnitIsUnit("targettarget", "player")
+end
+
+function IWin:IsBehind()
+	if not UnitExists("target") then return false end
+    return UnitXP("behind", "player", "target")
 end
 
 function IWin:GetTrainingDummy()
@@ -506,6 +552,15 @@ function IWin:IsShieldEquipped()
 	return false
 end
 
+function IWin:IsWandEquipped()
+	local rangedLink = GetInventoryItemLink("player", 18)
+	if rangedLink then
+		local _, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(rangedLink)))
+		return itemSubType == "Wand"
+	end
+	return false
+end
+
 function IWin:Is2HanderEquipped()
 	local offHandLink = GetInventoryItemLink("player", 17)
 	return not offHandLink
@@ -518,4 +573,29 @@ function IWin:IsItemEquipped(slot, name)
 		return itemName == name
 	end
 	return false
+end
+
+function IWin:IsItemInBag(item)
+	for bag = 0, 4 do
+		for slot = 1, GetContainerNumSlots(bag) do
+			local itemName = GetContainerItemLink(bag, slot)
+			if itemName and strfind(itemName,item) then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+function IWin:GetItemCountInBag(item)
+	local itemCount = 0
+	for bag = 0, 4 do
+		for slot = 1, GetContainerNumSlots(bag) do
+			local itemName = GetContainerItemLink(bag, slot)
+			if itemName and strfind(itemName,item) then
+				itemCount = itemCount + 1
+			end
+		end
+	end
+	return itemCount
 end

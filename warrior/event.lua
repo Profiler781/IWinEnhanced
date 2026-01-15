@@ -48,7 +48,7 @@ IWin:SetScript("OnEvent", function()
 		IWin_CombatVar["GCD"] = GetTime()
 	elseif event == "SPELLCAST_START" and arg1 == "Slam" then
 		IWin_CombatVar["slamCasting"] = GetTime() + (arg2 / 1000)
-		if st_timer > UnitAttackSpeed("player") * 0.9 then
+		if st_timer and st_timer > UnitAttackSpeed("player") * 0.9 then
 			IWin_CombatVar["slamGCDAllowed"] = IWin_CombatVar["slamCasting"] + 0.2
 			IWin_CombatVar["slamClipAllowedMax"] = IWin_CombatVar["slamGCDAllowed"] + IWin_Settings["GCD"]
 			IWin_CombatVar["slamClipAllowedMin"] = st_timer + GetTime()

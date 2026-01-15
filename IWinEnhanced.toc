@@ -4,38 +4,80 @@
 ## Version: 2.0
 ## SavedVariablesPerCharacter: IWin_Settings
 ## Dependencies: SuperCleveRoidMacros
-## OptionalDeps: SP_SwingTimer, PallyPowerTW, LibramSwap
+## OptionalDeps: SP_SwingTimer, PallyPowerTW, LibramSwap, TimeToKill
 
 IWinEnhanced.lua
 
 core\data.lua
 druid\data.lua
+hunter\data.lua
+mage\data.lua
 paladin\data.lua
+priest\data.lua
+rogue\data.lua
+shaman\data.lua
+warlock\data.lua
 warrior\data.lua
 
 druid\init.lua
+hunter\init.lua
+mage\init.lua
 paladin\init.lua
+priest\init.lua
+rogue\init.lua
+shaman\init.lua
+warlock\init.lua
 warrior\init.lua
 
 core\condition.lua
 druid\condition.lua
+hunter\condition.lua
+mage\condition.lua
 paladin\condition.lua
+priest\condition.lua
+rogue\condition.lua
+shaman\condition.lua
+warlock\condition.lua
 warrior\condition.lua
 
 core\action.lua
 druid\action.lua
+hunter\action.lua
+mage\action.lua
 paladin\action.lua
+priest\action.lua
+rogue\action.lua
+shaman\action.lua
+warlock\action.lua
 warrior\action.lua
 
 druid\event.lua
+hunter\event.lua
+mage\event.lua
 paladin\event.lua
+priest\event.lua
+rogue\event.lua
+shaman\event.lua
+warlock\event.lua
 warrior\event.lua
 
 druid\setup.lua
+hunter\setup.lua
+mage\setup.lua
 paladin\setup.lua
+priest\setup.lua
+rogue\setup.lua
+shaman\setup.lua
+warlock\setup.lua
 warrior\setup.lua
 
 core\rotation.lua
 druid\rotation.lua
+hunter\rotation.lua
+mage\rotation.lua
 paladin\rotation.lua
+priest\rotation.lua
+rogue\rotation.lua
+shaman\rotation.lua
+warlock\rotation.lua
 warrior\rotation.lua

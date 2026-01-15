@@ -39,6 +39,7 @@ function SlashCmdList.IRUETOODRUID()
 	IWin:Shred()
 	IWin:SetReservedEnergyShred()
 	IWin:Claw()
+	IWin:Reshift()
 	IWin:StartAttack()
 end
 

@@ -10,12 +10,12 @@ function IWin:InitializeRotationCore()
     	return 0
 	end
 	if not IWin.libdebuff then
-		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
-    	if not IWin.libdebuff then
+		if not CleveRoids.libdebuff then
 	    	DEFAULT_CHAT_FRAME:AddMessage("|cFF00FFFFSuperCleveRoidMacros|r required:")
 	        DEFAULT_CHAT_FRAME:AddMessage("https://github.com/jrc13245/SuperCleveRoidMacros")
 	    	return 0
 	    end
+		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
 	end
 	IWin_CombatVar["queueGCD"] = true
 end
@@ -29,7 +29,7 @@ function IWin:TargetEnemy()
 end
 
 function IWin:StartAttack()
-	if IWin_CombatVar["swingAttackQueued"] or IWin_CombatVar["startAttackThrottle"] > GetTime() then return end
+	if IWin_CombatVar["swingAttackQueued"] or IWin_CombatVar["startAttackThrottle"] and IWin_CombatVar["startAttackThrottle"] > GetTime() then return end
 	local attackActionFound = false
 	for action = 1, 172 do
 		if IsAttackAction(action) then
@@ -42,6 +42,12 @@ function IWin:StartAttack()
 	if not attackActionFound
 		and not PlayerFrame.inCombat then
 			AttackTarget()
+	end
+end
+
+function IWin:PetAttack()
+	if HasPetUI() then
+		PetAttack()
 	end
 end
 
@@ -67,7 +73,7 @@ function IWin:Perception()
 end
 
 function IWin:CancelPlayerBuff(spell)
-	local index = IWin:GetBuffIndex("player", spell)
+	local index = IWin:GetPlayerBuffIndex(spell)
 	if index then
 		CancelPlayerBuff(index)
 	end
@@ -102,5 +108,13 @@ function IWin:UseDrinkItem()
 		if playerLevel >= IWin_DrinkVendor[drinkItem] then
 			IWin:UseItem(drinkItem)
 		end
+	end
+end
+
+function IWin:Shoot()
+	if IWin:IsSpellLearnt("Shoot")
+		and IWin:IsWandEquipped() then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Shoot")
 	end
 end

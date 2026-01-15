@@ -402,7 +402,16 @@ end
 function IWin:JudgementReact()
 	if IWin:IsSpellLearnt("Judgement")
 		and not IWin:IsOnCooldown("Judgement")
-		and IWin:IsSealActive() then
+		and (
+				IWin:IsBuffActive("player","Seal of Wisdom")
+				or IWin:IsBuffActive("player","Seal of Light")
+				or IWin:IsBuffActive("player","Seal of the Crusader")
+				or IWin:IsBuffActive("player","Seal of Justice")
+			)
+		and (
+				not IWin:IsJudgementOverwrite("Judgement of Wisdom","Seal of Wisdom")
+				or IWin:GetManaPercent("player") > 60
+			) then
 			CastSpellByName("Judgement")
 	end
 end
@@ -512,6 +521,7 @@ function IWin:SealOfJusticeElite()
 		and not IWin:IsBuffActive("player","Seal of Justice")
 		and not IWin:IsBuffActive("target","Judgement of Justice")
 		and IWin:IsJudgementTarget("justice")
+		and IWin:GetCooldownRemaining("Judgement") <= IWin_Settings["GCD"]
 		and ((
 				IWin.hasPallyPower
 				and PallyPower_SealAssignments[UnitName("player")] == 3
@@ -529,6 +539,7 @@ function IWin:SealOfLightElite()
 		and not IWin:IsBuffActive("player","Seal of Light")
 		and not IWin:IsBuffActive("target","Judgement of Light")
 		and IWin:IsJudgementTarget("light")
+		and IWin:GetCooldownRemaining("Judgement") <= IWin_Settings["GCD"]
 		and (
 				(
 					IWin.hasPallyPower
@@ -565,6 +576,7 @@ function IWin:SealOfTheCrusaderElite()
 		and not IWin:IsBuffActive("player","Seal of the Crusader")
 		and not IWin:IsBuffActive("target","Judgement of the Crusader")
 		and IWin:IsJudgementTarget("crusader")
+		and IWin:GetCooldownRemaining("Judgement") <= IWin_Settings["GCD"]
 		and ((
 				IWin.hasPallyPower
 				and PallyPower_SealAssignments[UnitName("player")] == 1
@@ -604,6 +616,7 @@ function IWin:SealOfWisdomElite()
 		and not IWin:IsBuffActive("player","Seal of Wisdom")
 		and not IWin:IsBuffActive("target","Judgement of Wisdom")
 		and IWin:IsJudgementTarget("wisdom")
+		and IWin:GetCooldownRemaining("Judgement") <= IWin_Settings["GCD"]
 		and ((
 				IWin.hasPallyPower
 				and PallyPower_SealAssignments[UnitName("player")] == 0
