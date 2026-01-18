@@ -24,19 +24,6 @@ IWin_EnergyCost = {
 	["Tiger's Fury"] = 30,
 }
 
-IWin_StarfireCastTimeReduction = {
-	[0] = 0,
-	[1] = 0.2,
-	[2] = 0.3,
-	[3] = 0.5,
-}
-
-function IWin:GetStarfireCastTimeReduction()
-	local StarfireRank = IWin:GetTalentRank(1, 17)
-	return IWin_StarfireCastTimeReduction[StarfireRank]
-end
-
-IWin_CastTime = {
-	["Starfire"] = 3.5 - IWin:GetStarfireCastTimeReduction(),
-	["Wrath"] = 2 - IWin:GetTalentRank(1, 1) * 0.1,
+IWin_ManaCost = {
+	["Reshift"] = 348,
 }

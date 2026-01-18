@@ -749,12 +749,6 @@ function IWin:Revenge()
 	end
 end
 
-function IWin:IsRevengeAvailable()
-	local revengeRemaining = IWin_CombatVar["revengeAvailable"] - GetTime()
-	local gcdRemaining = math.max(0,  IWin_Settings["GCD"] - (GetTime() - IWin_CombatVar["GCD"]))
- 	return revengeRemaining > gcdRemaining
-end
-
 function IWin:SetReservedRageRevenge()
 	if IWin:IsTanking() then
 		IWin:SetReservedRage("Revenge", "cooldown")

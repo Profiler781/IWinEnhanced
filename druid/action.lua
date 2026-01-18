@@ -19,6 +19,10 @@ function IWin:InitializeRotation()
 	if IWin:IsBuffActive("player", "Berserk") then
 		IWin_CombatVar["energyPerSecondPrediction"] = IWin_CombatVar["energyPerSecondPrediction"] + IWin_Settings["energyPerSecondPrediction"]
 	end
+	IWin_CastTime = {
+		["Wrath"] = nil,
+		["Starfire"] = nil,
+	}
 end
 
 ---- Class Actions ----
@@ -299,9 +303,16 @@ function IWin:Reshift()
 	if IWin:IsSpellLearnt("Reshift")
 		and IWin_CombatVar["queueGCD"]
 		and IWin:GetTalentRank(3, 2) ~= 0
-		and UnitMana("player") < 20 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Reshift")
+		and UnitMana("player") < 20
+		and (
+					IWin:GetPlayerDruidManaPercent() > 70
+				or (
+						GetNumPartyMembers() ~= 0
+						and IWin:IsDruidManaAvailable("Reshift")
+					)
+			) then
+				IWin_CombatVar["queueGCD"] = false
+				CastSpellByName("Reshift")
 	end
 end
 
@@ -425,7 +436,7 @@ function IWin:InsectSwarm()
 		and (
 				not IWin:IsBuffActive("target", "Insect Swarm", "player")
 				or (
-						IWin:GetBuffRemaining("player", "Nature Eclipse") < IWin_CastTime["Starfire"] + 0.3
+						IWin:GetBuffRemaining("player", "Nature Eclipse") < IWin:GetCastTimeWrath() + 0.5
 						and IWin:IsBuffActive("player", "Nature Eclipse")
 						and IWin:GetBuffRemaining("target", "Insect Swarm", "player") < 8
 					)
@@ -444,7 +455,7 @@ function IWin:Moonfire()
 		and (
 				not IWin:IsBuffActive("target", "Moonfire", "player")
 				or (
-						IWin:GetBuffRemaining("player", "Arcane Eclipse") < IWin_CastTime["Wrath"] + 0.3
+						IWin:GetBuffRemaining("player", "Arcane Eclipse") < IWin:GetCastTimeStarfire() + 0.5
 						and IWin:IsBuffActive("player", "Arcane Eclipse")
 						and IWin:GetBuffRemaining("target", "Moonfire", "player") < 8
 					)

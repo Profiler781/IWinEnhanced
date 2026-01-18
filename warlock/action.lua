@@ -14,7 +14,8 @@ end
 
 function IWin:DrainSoul()
 	if IWin:IsSpellLearnt("Drain Soul")
-		and IWin:GetItemCountInBag("Soul Shard") < 12 then
+		and IWin:GetItemCountInBag("Soul Shard") < 12
+		and IWin:GetTimeToDie() < 8 then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Drain Soul")
 	end

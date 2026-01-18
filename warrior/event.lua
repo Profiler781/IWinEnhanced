@@ -23,14 +23,8 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["sunder"] == nil then IWin_Settings["sunder"] = "off" end
 		if IWin_Settings["demo"] == nil then IWin_Settings["demo"] = "off" end
 		if IWin_Settings["dtBattle"] == nil then IWin_Settings["dtBattle"] = "on" end
-		if IWin_Settings["dtBattle"] == true then IWin_Settings["dtBattle"] = "on" end
-		if IWin_Settings["dtBattle"] == false then IWin_Settings["dtBattle"] = "off" end
 		if IWin_Settings["dtDefensive"] == nil then IWin_Settings["dtDefensive"] = "on" end
-		if IWin_Settings["dtDefensive"] == true then IWin_Settings["dtDefensive"] = "on" end
-		if IWin_Settings["dtDefensive"] == false then IWin_Settings["dtDefensive"] = "off" end
 		if IWin_Settings["dtBerserker"] == nil then IWin_Settings["dtBerserker"] = "off" end
-		if IWin_Settings["dtBerserker"] == true then IWin_Settings["dtBerserker"] = "on" end
-		if IWin_Settings["dtBerserker"] == false then IWin_Settings["dtBerserker"] = "off" end
 		if IWin_Settings["jousting"] == nil then IWin_Settings["jousting"] = "off" end
 		IWin.hasSuperwow = SetAutoloot and true or false
 		IWin.hasUnitXP = pcall(UnitXP, "nop", "nop") and true or false
@@ -44,8 +38,6 @@ IWin:SetScript("OnEvent", function()
 		if string.find(arg1,"dodged") then
 			IWin_CombatVar["overpowerAvailable"] = GetTime() + 5
 		end
-	elseif event == "ACTIONBAR_UPDATE_STATE" and arg1 == nil then
-		IWin_CombatVar["GCD"] = GetTime()
 	elseif event == "SPELLCAST_START" and arg1 == "Slam" then
 		IWin_CombatVar["slamCasting"] = GetTime() + (arg2 / 1000)
 		if st_timer and st_timer > UnitAttackSpeed("player") * 0.9 then

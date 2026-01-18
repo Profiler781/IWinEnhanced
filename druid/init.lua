@@ -16,3 +16,5 @@ IWin_Target = {
 	["blacklistAOEDebuff"] = false,
 	["blacklistAOEDamage"] = false,
 }
+
+IWin_CastTime = {}

@@ -18,6 +18,7 @@ end
 function IWin:GetDebuffIndex(unit, spell)
 	local index = 1
 	while UnitDebuff(unit, index) do
+		IWin_T:SetOwner(WorldFrame, "ANCHOR_NONE")
 		IWin_T:ClearLines()
 		IWin_T:SetUnitDebuff(unit, index)
 		local tooltipText = IWin_TTextLeft1:GetText()
@@ -120,7 +121,7 @@ function IWin:GetSpellSpellbookID(spell, rank)
     while true do
         local spellName, spellRank = GetSpellName(spellID, "BOOKTYPE_SPELL")
         if not spellName then break end
-        if spellName == spell and ((not rank) or spellRank == rank) then
+        if spellName == spell and ((not rank) or spellRank == rank) and spellName ~= GetSpellName(spellID + 1, "BOOKTYPE_SPELL") then
             return spellID
         end
         spellID = spellID + 1
@@ -149,8 +150,24 @@ function IWin:IsSpellLearnt(spell, rank)
 	return true
 end
 
+function IWin:GetGCDRemaining()
+	if IWin_CombatVar["GCD"] ~= nil then
+		return IWin_CombatVar["GCD"]
+	end
+	local info = GetCastInfo()
+	if info and info.gcdRemainingMs then
+		IWin_CombatVar["GCD"] = info.gcdRemainingMs
+		return IWin_CombatVar["GCD"]
+	end
+	IWin_CombatVar["GCD"] = 0
+	return 0
+end
+
 function IWin:IsGCDActive()
-	return GetTime() - IWin_CombatVar["GCD"] < 1.5
+	if IWin:GetGCDRemaining() ~= 0 then
+		return true
+	end
+	return false
 end
 
 function IWin:ParseCastTimeFromText(text)
@@ -167,6 +184,7 @@ function IWin:GetCastTime(spell)
 	local spellID = IWin:GetSpellSpellbookID(spell)
     if not spellID then return nil end
 
+    IWin_T:SetOwner(WorldFrame, "ANCHOR_NONE")
     IWin_T:ClearLines()
 	IWin_T:SetSpell(spellID, "BOOKTYPE_SPELL")
 
@@ -242,6 +260,20 @@ end
 
 function IWin:IsManaAvailable(spell)
 	return UnitMana("player") >= IWin_ManaCost[spell]
+end
+
+function IWin:GetPlayerDruidMana()
+	local _, casterMana = UnitMana("player")
+	return casterMana
+end
+
+function IWin:GetPlayerDruidManaPercent()
+	local _, casterManaMax = UnitManaMax("player")
+	return IWin:GetPlayerDruidMana() / casterManaMax * 100
+end
+
+function IWin:IsDruidManaAvailable(spell)
+	return IWin:GetPlayerDruidMana() >= IWin_ManaCost[spell]
 end
 
 -- Rage #######################################################################################################################################
@@ -369,6 +401,7 @@ function IWin:SetTrainingDummy()
 end
 
 function IWin:IsTrainingDummy()
+	if IWin_Target["trainingDummy"] == nil then IWin:SetTrainingDummy() end
 	return IWin_Target["trainingDummy"]
 end
 
@@ -556,7 +589,7 @@ function IWin:IsWandEquipped()
 	local rangedLink = GetInventoryItemLink("player", 18)
 	if rangedLink then
 		local _, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(rangedLink)))
-		return itemSubType == "Wand"
+		return itemSubType == "Wands"
 	end
 	return false
 end

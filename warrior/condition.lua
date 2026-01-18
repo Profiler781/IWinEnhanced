@@ -2,8 +2,12 @@ if UnitClass("player") ~= "Warrior" then return end
 
 function IWin:IsOverpowerAvailable()
 	local overpowerRemaining = IWin_CombatVar["overpowerAvailable"] - GetTime() - 0.2
-	local gcdRemaining = math.max(0,  IWin_Settings["GCD"] - (GetTime() - IWin_CombatVar["GCD"]))
- 	return overpowerRemaining > gcdRemaining
+ 	return overpowerRemaining > IWin:GetGCDRemaining()
+end
+
+function IWin:IsRevengeAvailable()
+	local revengeRemaining = IWin_CombatVar["revengeAvailable"] - GetTime()
+ 	return revengeRemaining > IWin:GetGCDRemaining()
 end
 
 function IWin:IsCharging()

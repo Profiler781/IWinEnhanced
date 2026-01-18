@@ -18,6 +18,7 @@ function IWin:InitializeRotationCore()
 		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
 	end
 	IWin_CombatVar["queueGCD"] = true
+	IWin_CombatVar["GCD"] = nil
 end
 
 function IWin:TargetEnemy()

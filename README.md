@@ -11,8 +11,6 @@ Special thanks to contributor: Vlad (discord tfw.vlad)
 Mandatory Mods:
 * [SuperWoW](https://github.com/balakethelock/SuperWoW), A mod made for fixing client bugs and expanding the lua-based API used by user interface addons. Used for debuff tracking.
 * [UnitXP](https://codeberg.org/konaka/UnitXP_SP3), Advanced macro conditions and syntax.
-
-Optionnal Mods:
 * [Nampower](https://github.com/pepopo978/nampower), Increase cast efficiency on the 1.12.1 client. Used for range checks.
 
 ## Addons Dependencies

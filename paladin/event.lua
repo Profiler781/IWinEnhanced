@@ -24,8 +24,6 @@ IWin:SetScript("OnEvent", function()
 		IWin.hasPallyPower = PallyPower_SealAssignments and true or false
 	elseif event == "ADDON_LOADED" and (arg1 == "SuperCleveRoidMacros" or arg1 == "IWinEnhanced") then
 		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
-	elseif event == "ACTIONBAR_UPDATE_STATE" and arg1 == nil then
-		IWin_CombatVar["GCD"] = GetTime()
 	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" then
 		if not IWin.libdebuff then
 			IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
