@@ -32,12 +32,21 @@ function IWin:CancelForm()
 	IWin:CancelPlayerBuff("Cat Form")
 end
 
+function IWin:Reshift()
+	if IWin:IsSpellLearnt("Reshift")
+		and UnitLevel("player") == 60 then
+			CastSpellByName("Reshift")
+	else
+		IWin:CancelForm()
+	end
+end
+
 function IWin:CancelRoot()
 	if not IWin:IsInRange()
 		or not IWin:IsTanking() then
 			for root in IWin_Root do
 				if IWin:IsBuffActive("player", IWin_Root[root]) then
-					IWin:CancelForm()
+					IWin:Reshift()
 					break
 				end
 			end
@@ -47,7 +56,7 @@ end
 function IWin:CancelRootReact()
 	for root in IWin_Root do
 		if IWin:IsBuffActive("player", IWin_Root[root]) then
-			IWin:CancelForm()
+			IWin:Reshift()
 			break
 		end
 	end
@@ -57,7 +66,7 @@ function IWin:CancelSlow()
 	if not IWin:IsInRange() then
 		for slow in IWin_Slow do
 			if IWin:IsBuffActive("player", IWin_Slow[slow]) then
-				IWin:CancelForm()
+				IWin:Reshift()
 				break
 			end
 		end
@@ -67,9 +76,34 @@ end
 function IWin:CancelSlowReact()
 	for slow in IWin_Slow do
 		if IWin:IsBuffActive("player", IWin_Slow[slow]) then
-			IWin:CancelForm()
+			IWin:Reshift()
 			break
 		end
+	end
+end
+
+function IWin:Powershift()
+	if IWin_CombatVar["queueGCD"]
+		and IWin:GetTalentRank(3, 2) ~= 0
+		and (
+				(
+					UnitMana("player") < 20
+					and UnitPowerType("player") == 3 --energy
+				) or (
+					UnitMana("player") < 10
+					and UnitPowerType("player") == 1 --rage
+				)
+			)
+		and (
+					IWin:GetPlayerDruidManaPercent() > 70
+				or (
+						GetNumPartyMembers() ~= 0
+						and IWin:IsDruidManaAvailable("Reshift")
+						and IWin:GetPlayerDruidManaPercent() > 20
+					)
+			) then
+				IWin_CombatVar["queueGCD"] = false
+				IWin:Reshift()
 	end
 end
 
@@ -259,7 +293,7 @@ function IWin:FerociousBite()
 		and IWin:IsEnergyAvailable("Ferocious Bite")
 		and (
 				GetComboPoints() == 5
-				or IWin:GetTimeToDie() < 10
+				or IWin:GetTimeToDie() < 3
 			) then
 				IWin_CombatVar["queueGCD"] = false
 				CastSpellByName("Ferocious Bite")
@@ -268,7 +302,7 @@ end
 
 function IWin:SetReservedEnergyFerocious()
 	if 	GetComboPoints() == 5
-			or IWin:GetTimeToDie() < 10 then
+			or IWin:GetTimeToDie() < 3 then
 				IWin:SetReservedEnergy("Ferocious Bite", "nocooldown")
 	end
 end
@@ -296,23 +330,6 @@ function IWin:SetReservedEnergyRake()
 				or UnitCreatureType("target") == "Elemental"
 			) then
 				IWin:SetReservedEnergy("Rake", "buff", "target")
-	end
-end
-
-function IWin:Reshift()
-	if IWin:IsSpellLearnt("Reshift")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:GetTalentRank(3, 2) ~= 0
-		and UnitMana("player") < 20
-		and (
-					IWin:GetPlayerDruidManaPercent() > 70
-				or (
-						GetNumPartyMembers() ~= 0
-						and IWin:IsDruidManaAvailable("Reshift")
-					)
-			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Reshift")
 	end
 end
 
@@ -379,6 +396,7 @@ function IWin:Shred()
 		and (
 				not IWin:IsBuffActive("target", "Rake", "player")
 				or not IWin:IsBuffActive("target", "Rip", "player")
+				or IWin:IsBuffActive("player", "Clearcasting")
 			)
 		and (
 				(
@@ -396,6 +414,7 @@ function IWin:SetReservedEnergyShred()
 	if (
 			not IWin:IsBuffActive("target", "Rake", "player")
 			or not IWin:IsBuffActive("target", "Rip", "player")
+			or IWin:IsBuffActive("player", "Clearcasting")
 		)
 		and (
 				(

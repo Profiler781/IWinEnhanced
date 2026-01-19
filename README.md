@@ -19,7 +19,7 @@ Mandatory Addons:
 * [SuperCleveRoidMacros](https://github.com/jrc13245/SuperCleveRoidMacros), Even more advanced macro conditions and syntax.
 
 Optionnal Addons:
-* [SP_SwingTimer](https://github.com/Profiler781/SP_SwingTimer), An auto attack swing timer. Used for Slam.
+* [SP_SwingTimer](https://github.com/MarcelineVQ/SP_SwingTimer), An auto attack swing timer. Used for Slam.
 * [PallyPowerTW](https://github.com/ivanovlk/PallyPowerTW), Paladin blessings, auras and judgements assignements.
 * [LibramSwap](https://github.com/Profiler781/Libramswap), Automatically swap librams based on cast.
 * [TimeToKill](https://github.com/jrc13245/TimeToKill), Advanced time-to-kill estimation using RLS (Recursive Least Squares) algorithm. Used for raid targets.
@@ -28,11 +28,12 @@ Optionnal Addons:
 
 ## Commands
 
-    /iblast      Single target caster rotation
-    /iruetoo     Single target cat rotation
-    /itank       Single target bear rotation
-    /ihodor      Multi target bear rotation
-    /itaunt      Growl if the target is not under another taunt effect
+    /iblast         Single target caster rotation
+    /iruetoo        Single target cat rotation
+    /itank          Single target bear rotation
+    /ihodor         Multi target bear rotation
+    /itaunt         Growl if the target is not under another taunt effect
+    /ihydrate       Use conjured or vendor water
 
 ## Setup commands
 
@@ -82,15 +83,15 @@ Example: /iwin judgement wisdom
 
 ## Commands
 
-    /idps        Single target DPS rotation
-    /icleave     Multi target DPS rotation
-    /itank       Single target threat rotation
-    /ihodor      Multi target threat rotation
-    /ichase      Stick to your target with Charge, Intercept, Hamstring
-    /ikick       Kick with Pummel or Shield Bash
-    /ifeardance  Use Berserker Rage if available
-    /itaunt      Taunt or Mocking Blow if the target is not under another taunt effect
-    /ishoot      Shoot with bow, crossbow, gun or throw
+    /idps           Single target DPS rotation
+    /icleave        Multi target DPS rotation
+    /itank          Single target threat rotation
+    /ihodor         Multi target threat rotation
+    /ichase         Stick to your target with Charge, Intercept, Hamstring
+    /ikick          Kick with Pummel or Shield Bash
+    /ifeardance     Use Berserker Rage if available
+    /itaunt         Taunt or Mocking Blow if the target is not under another taunt effect
+    /ishoot         Shoot with bow, crossbow, gun or throw
 
 ## Setup commands
 

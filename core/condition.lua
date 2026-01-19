@@ -121,7 +121,7 @@ function IWin:GetSpellSpellbookID(spell, rank)
     while true do
         local spellName, spellRank = GetSpellName(spellID, "BOOKTYPE_SPELL")
         if not spellName then break end
-        if spellName == spell and ((not rank) or spellRank == rank) and spellName ~= GetSpellName(spellID + 1, "BOOKTYPE_SPELL") then
+        if spellName == spell and ((not rank) or spellRank == rank) and (rank ~= nil or spellName ~= GetSpellName(spellID + 1, "BOOKTYPE_SPELL")) then
             return spellID
         end
         spellID = spellID + 1
