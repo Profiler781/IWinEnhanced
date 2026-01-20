@@ -1,10 +1,10 @@
 ## Interface: 11200
 ## Title: IWinEnhanced
 ## Notes: 1-button rotation macros for turtle druids, paladins and warriors.
-## Version: 2.0
+## Version: 2.1
 ## SavedVariablesPerCharacter: IWin_Settings
 ## Dependencies: SuperCleveRoidMacros
-## OptionalDeps: SP_SwingTimer, PallyPowerTW, LibramSwap, TimeToKill
+## OptionalDeps: SP_SwingTimer, PallyPowerTW, LibramSwap, TimeToKill, MonkeySpeed
 
 IWinEnhanced.lua
 

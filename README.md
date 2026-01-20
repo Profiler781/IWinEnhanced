@@ -1,4 +1,4 @@
-# IWinEnhanced v2.0
+# IWinEnhanced v2.1
 
 1-button rotation macros for Turtle Druids, Paladins and Warriors.
 
@@ -23,6 +23,7 @@ Optionnal Addons:
 * [PallyPowerTW](https://github.com/ivanovlk/PallyPowerTW), Paladin blessings, auras and judgements assignements.
 * [LibramSwap](https://github.com/Profiler781/Libramswap), Automatically swap librams based on cast.
 * [TimeToKill](https://github.com/jrc13245/TimeToKill), Advanced time-to-kill estimation using RLS (Recursive Least Squares) algorithm. Used for raid targets.
+* [MonkeySpeed](https://github.com/Profiler781/MonkeySpeed), Track player's movement speed. Used to postpone casted spells.
 
 # Druid Module
 

@@ -232,6 +232,7 @@ end
 function IWin:HammerOfWrath(manaPercent)
 	if IWin:IsSpellLearnt("Hammer of Wrath")
 		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsMoving()
 		and not IWin:IsOnCooldown("Hammer of Wrath")
 		and (
 				(
@@ -339,6 +340,7 @@ end
 function IWin:HolyWrath(manaPercent)
 	if IWin:IsSpellLearnt("Holy Wrath")
 		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsMoving()
 		and not IWin:IsOnCooldown("Holy Wrath")
 		and not IWin:IsTanking()
 		and (

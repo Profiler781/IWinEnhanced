@@ -632,3 +632,11 @@ function IWin:GetItemCountInBag(item)
 	end
 	return itemCount
 end
+
+-- Movement #######################################################################################################################################
+function IWin:IsMoving()
+	if MonkeySpeed and MonkeySpeed.m_fSpeed and MonkeySpeed.m_fSpeed ~= 0 then
+		return true
+	end
+	return false
+end

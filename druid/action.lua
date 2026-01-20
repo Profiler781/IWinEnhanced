@@ -82,31 +82,6 @@ function IWin:CancelSlowReact()
 	end
 end
 
-function IWin:Powershift()
-	if IWin_CombatVar["queueGCD"]
-		and IWin:GetTalentRank(3, 2) ~= 0
-		and (
-				(
-					UnitMana("player") < 20
-					and UnitPowerType("player") == 3 --energy
-				) or (
-					UnitMana("player") < 10
-					and UnitPowerType("player") == 1 --rage
-				)
-			)
-		and (
-					IWin:GetPlayerDruidManaPercent() > 70
-				or (
-						GetNumPartyMembers() ~= 0
-						and IWin:IsDruidManaAvailable("Reshift")
-						and IWin:GetPlayerDruidManaPercent() > 20
-					)
-			) then
-				IWin_CombatVar["queueGCD"] = false
-				IWin:Reshift()
-	end
-end
-
 function IWin:MarkOfTheWild()
 	if IWin:IsSpellLearnt("Mark of the Wild")
 		and IWin_CombatVar["queueGCD"]
@@ -162,6 +137,67 @@ function IWin:FaerieFireFeral()
 				CastSpellByName("Faerie Fire (Feral)(Rank 3)")
 				CastSpellByName("Faerie Fire (Feral)(Rank 2)")
 				CastSpellByName("Faerie Fire (Feral)(Rank 1)")
+	end
+end
+
+function IWin:FaerieFireFeralRefresh()
+	if IWin:IsSpellLearnt("Faerie Fire (Feral)")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Faerie Fire (Feral)")
+		and IWin:GetBuffRemaining("target", "Faerie Fire (Feral)") < 10
+		and (
+				IWin:IsStanceActive("Cat Form")
+				or IWin:IsStanceActive("Bear Form")
+				or IWin:IsStanceActive("Dire Bear Form")
+			) then
+				IWin_CombatVar["queueGCD"] = false
+				CastSpellByName("Faerie Fire (Feral)(Rank 4)")
+				CastSpellByName("Faerie Fire (Feral)(Rank 3)")
+				CastSpellByName("Faerie Fire (Feral)(Rank 2)")
+				CastSpellByName("Faerie Fire (Feral)(Rank 1)")
+	end
+end
+
+function IWin:FaerieFireFeralRanged()
+	if IWin:IsSpellLearnt("Faerie Fire (Feral)")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Faerie Fire (Feral)")
+		and not IWin:IsInRange()
+		and (
+				IWin:IsStanceActive("Cat Form")
+				or IWin:IsStanceActive("Bear Form")
+				or IWin:IsStanceActive("Dire Bear Form")
+			) then
+				IWin_CombatVar["queueGCD"] = false
+				CastSpellByName("Faerie Fire (Feral)(Rank 4)")
+				CastSpellByName("Faerie Fire (Feral)(Rank 3)")
+				CastSpellByName("Faerie Fire (Feral)(Rank 2)")
+				CastSpellByName("Faerie Fire (Feral)(Rank 1)")
+	end
+end
+
+function IWin:Powershift()
+	if IWin_CombatVar["queueGCD"]
+		and IWin:GetTalentRank(3, 2) ~= 0
+		and (
+				(
+					UnitMana("player") < 20
+					and UnitPowerType("player") == 3 --energy
+				) or (
+					UnitMana("player") < 10
+					and UnitPowerType("player") == 1 --rage
+				)
+			)
+		and (
+					IWin:GetPlayerDruidManaPercent() > 70
+				or (
+						GetNumPartyMembers() ~= 0
+						and IWin:IsDruidManaAvailable("Reshift")
+						and IWin:GetPlayerDruidManaPercent() > 20
+					)
+			) then
+				IWin_CombatVar["queueGCD"] = false
+				IWin:Reshift()
 	end
 end
 
@@ -465,6 +501,17 @@ function IWin:InsectSwarm()
 	end
 end
 
+function IWin:InsectSwarmMoving()
+	if IWin:IsSpellLearnt("Insect Swarm")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Insect Swarm")
+		and IWin:GetTimeToDie() > 6
+		and IWin:GetBuffRemaining("target", "Insect Swarm", "player") < 8 then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Insect Swarm")
+	end
+end
+
 function IWin:Moonfire()
 	if IWin:IsSpellLearnt("Moonfire")
 		and IWin_CombatVar["queueGCD"]
@@ -484,6 +531,15 @@ function IWin:Moonfire()
 	end
 end
 
+function IWin:MoonfireMoving()
+	if IWin:IsSpellLearnt("Moonfire")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Moonfire") then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Moonfire")
+	end
+end
+
 function IWin:MoonkinForm()
 	if IWin:IsSpellLearnt("Moonkin Form")
 		and not IWin:IsStanceActive("Moonkin Form")
@@ -497,6 +553,7 @@ end
 function IWin:Starfire()
 	if IWin:IsSpellLearnt("Starfire")
 		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsMoving()
 		and not IWin:IsOnCooldown("Starfire")
 		and (
 				IWin:IsBuffActive("player", "Arcane Eclipse")
@@ -539,6 +596,7 @@ end
 function IWin:Wrath()
 	if IWin:IsSpellLearnt("Wrath")
 		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsMoving()
 		and not IWin:IsOnCooldown("Wrath")
 		and (
 				IWin:IsBuffActive("player", "Nature Eclipse")
@@ -567,16 +625,6 @@ function IWin:Wrath()
 			) then
 				IWin_CombatVar["queueGCD"] = false
 				CastSpellByName("Wrath")
-	end
-end
-
-function IWin:WrathFiller()
-	if IWin:IsSpellLearnt("Wrath")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Wrath") then
-			IWin_CombatVar["queueGCD"] = false
-			DEFAULT_CHAT_FRAME:AddMessage("filler")
-			CastSpellByName("Wrath")
 	end
 end
 
