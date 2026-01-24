@@ -30,6 +30,7 @@ function IWin:TargetEnemy()
 end
 
 function IWin:StartAttack()
+	if IWin:IsBuffActive("player", "Prowl") then return end
 	if IWin_CombatVar["swingAttackQueued"] or IWin_CombatVar["startAttackThrottle"] and IWin_CombatVar["startAttackThrottle"] > GetTime() then return end
 	local attackActionFound = false
 	for action = 1, 172 do

@@ -48,6 +48,7 @@ IWin_RageCost = {
 	["Hamstring"] = 10,
 	["Heroic Strike"] = 15 - IWin:GetTalentRank(1, 1),
 	["Intercept"] = 10,
+	["Intervene"] = 10,
 	["Master Strike"] = 20,
 	["Mocking Blow"] = 10,
 	["Mortal Strike"] = 30,

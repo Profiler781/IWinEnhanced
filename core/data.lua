@@ -28,10 +28,17 @@ IWin_Root = {
 	"Web Spray",
 }
 
-IWin_Slow = {
+IWin_Snare = {
 	"Chilled",
 	"Frostbolt",
 	"Hamstring",
+	"Wing Clip",
+}
+
+IWin_Fear = {
+	"Fear",
+	"Psychic Scream",
+	"Howl of Terror",
 }
 
 IWin_UnitClassification = {

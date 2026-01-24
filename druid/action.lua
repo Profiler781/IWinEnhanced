@@ -34,10 +34,25 @@ end
 
 function IWin:Reshift()
 	if IWin:IsSpellLearnt("Reshift")
-		and UnitLevel("player") == 60 then
-			CastSpellByName("Reshift")
-	else
-		IWin:CancelForm()
+		and (
+				UnitLevel("player") == 60
+				or (
+						IWin:IsTanking()
+						and (
+								IWin:IsStanceActive("Bear Form")
+								or IWin:IsStanceActive("Dire Bear Form")
+							)
+					)
+			) then
+				CastSpellByName("Reshift")
+	elseif not (
+					IWin:IsTanking()
+					and (
+							IWin:IsStanceActive("Bear Form")
+							or IWin:IsStanceActive("Dire Bear Form")
+						)
+				) then
+					IWin:CancelForm()
 	end
 end
 
@@ -62,10 +77,10 @@ function IWin:CancelRootReact()
 	end
 end
 
-function IWin:CancelSlow()
+function IWin:CancelSnare()
 	if not IWin:IsInRange() then
-		for slow in IWin_Slow do
-			if IWin:IsBuffActive("player", IWin_Slow[slow]) then
+		for snare in IWin_Snare do
+			if IWin:IsBuffActive("player", IWin_Snare[snare]) then
 				IWin:Reshift()
 				break
 			end
@@ -73,9 +88,9 @@ function IWin:CancelSlow()
 	end
 end
 
-function IWin:CancelSlowReact()
-	for slow in IWin_Slow do
-		if IWin:IsBuffActive("player", IWin_Slow[slow]) then
+function IWin:CancelSnareReact()
+	for snare in IWin_Snare do
+		if IWin:IsBuffActive("player", IWin_Snare[snare]) then
 			IWin:Reshift()
 			break
 		end
@@ -118,7 +133,24 @@ function IWin:Thorns()
 end
 
 function IWin:NaturesGrasp()
+	if IWin:IsSpellLearnt("Nature's Grasp")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Nature's Grasp")
+		and IWin:IsInRange() then
+			IWin_CombatVar["queueGCD"] = false
+			IWin:CancelForm()
+			CastSpellByName("Nature's Grasp")
+	end
+end
 
+function IWin:TravelForm()
+	if IWin:IsSpellLearnt("Travel Form")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Travel Form")
+		and not IWin:IsStanceActive("Travel Form") then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Travel Form")
+	end
 end
 
 ---- Feral Actions ----
@@ -180,6 +212,10 @@ function IWin:Powershift()
 	if IWin_CombatVar["queueGCD"]
 		and IWin:GetTalentRank(3, 2) ~= 0
 		and (
+				not IWin:IsBuffActive("player", "Tiger's Fury")
+				or IWin:GetBuffRemaining("player", "Tiger's Fury") < 7
+			)
+		and (
 				(
 					UnitMana("player") < 20
 					and UnitPowerType("player") == 3 --energy
@@ -198,6 +234,20 @@ function IWin:Powershift()
 			) then
 				IWin_CombatVar["queueGCD"] = false
 				IWin:Reshift()
+	end
+end
+
+function IWin:BerserkFear()
+	if IWin:IsSpellLearnt("Berserk")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Berserk") then
+			for fear in IWin_Fear do
+				if IWin:IsBuffActive("player", IWin_Fear[fear]) then
+					IWin_CombatVar["queueGCD"] = false
+					CastSpellByName("Berserk")
+					break
+				end
+			end
 	end
 end
 
@@ -226,6 +276,7 @@ function IWin:DemoralizingRoar()
 		and not IWin:IsBlacklistAOEDebuff()
 		and IWin:IsInRange()
 		and not IWin:IsBuffActive("target", "Demoralizing Roar")
+		and not IWin:IsBuffActive("target", "Demoralizing Shout")
 		and IWin:GetTimeToDie() > 10 then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Demoralizing Roar")
@@ -329,7 +380,10 @@ function IWin:FerociousBite()
 		and IWin:IsEnergyAvailable("Ferocious Bite")
 		and (
 				GetComboPoints() == 5
-				or IWin:GetTimeToDie() < 3
+				or (
+						IWin:GetTimeToDie() < 3
+						and GetComboPoints() >= 3
+					)
 			) then
 				IWin_CombatVar["queueGCD"] = false
 				CastSpellByName("Ferocious Bite")
@@ -366,6 +420,17 @@ function IWin:SetReservedEnergyRake()
 				or UnitCreatureType("target") == "Elemental"
 			) then
 				IWin:SetReservedEnergy("Rake", "buff", "target")
+	end
+end
+
+function IWin:Ravage()
+	if IWin:IsSpellLearnt("Ravage")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Ravage")
+		and IWin:IsBuffActive("player", "Prowl")
+		and IWin:IsBehind() then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Ravage")
 	end
 end
 
@@ -433,6 +498,7 @@ function IWin:Shred()
 				not IWin:IsBuffActive("target", "Rake", "player")
 				or not IWin:IsBuffActive("target", "Rip", "player")
 				or IWin:IsBuffActive("player", "Clearcasting")
+				or IWin:IsBuffActive("player", "Berserk")
 			)
 		and (
 				(
@@ -469,8 +535,11 @@ function IWin:TigersFury()
 		and IWin:GetTalentRank(2,12) ~= 0
 		and IWin:IsEnergyAvailable("Tiger's Fury")
 		and not IWin:IsBuffActive("player", "Tiger's Fury")
-		and IWin:GetTimeToDie() > 6 then
-			CastSpellByName("Tiger's Fury")
+		and (
+				IWin:GetTimeToDie() > 6
+				or not UnitExists("target")
+			) then
+				CastSpellByName("Tiger's Fury")
 	end
 end
 
@@ -486,7 +555,7 @@ function IWin:InsectSwarm()
 	if IWin:IsSpellLearnt("Insect Swarm")
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Insect Swarm")
-		and IWin:GetTimeToDie() > 6
+		and IWin:GetTimeToDie() > 9
 		and not IWin:IsBuffActive("player", "Arcane Eclipse")
 		and (
 				not IWin:IsBuffActive("target", "Insect Swarm", "player")
@@ -516,7 +585,7 @@ function IWin:Moonfire()
 	if IWin:IsSpellLearnt("Moonfire")
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Moonfire")
-		and IWin:GetTimeToDie() > 6
+		and IWin:GetTimeToDie() > 9
 		and not IWin:IsBuffActive("player", "Nature Eclipse")
 		and (
 				not IWin:IsBuffActive("target", "Moonfire", "player")

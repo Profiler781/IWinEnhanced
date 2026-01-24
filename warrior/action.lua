@@ -509,6 +509,74 @@ function IWin:InterceptPartySize()
 	end
 end
 
+function IWin:Intervene()
+	if IWin:IsSpellLearnt("Intervene")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Intervene")
+		and (
+				(
+					IWin:IsInRange("Intervene","ranged","target")
+					and UnitIsFriend("player", "target")
+				) or (
+					IWin:IsInRange("Intervene","ranged","targettarget")
+					and UnitIsFriend("player", "targettarget")
+				)
+			)
+		and not IWin:IsCharging()
+		and IWin:IsBehind()
+		and not IWin:IsTanking()
+		and (
+				(
+					IWin:IsRageCostAvailable("Intervene")
+					and (
+							IWin:IsStanceActive("Defensive Stance")
+							or IWin:GetStanceSwapRageRetain() >= IWin_RageCost["Intervene"]
+						)
+				)
+				or not IWin:IsOnCooldown("Bloodrage")
+			)
+		and not IWin_CombatVar["slamQueued"] then
+			if IWin:IsStanceActive("Defensive Stance") then
+				CastSpellByName("Defensive Stance")
+			end
+			if not IWin:IsRageCostAvailable("Intervene") then
+				CastSpellByName("Bloodrage")
+			end
+			if IWin:IsStanceActive("Defensive Stance") then
+				IWin_CombatVar["queueGCD"] = false
+				if IWin:IsInRange("Intervene","ranged","target")
+					and UnitIsFriend("player", "target") then
+						CastSpellByName("Intervene", "target")
+				elseif IWin:IsInRange("Intervene","ranged","targettarget")
+					and UnitIsFriend("player", "targettarget") then
+						CastSpellByName("Intervene", "targettarget")
+				end
+			end
+	end
+end
+
+function IWin:IntervenePartySize()
+	local partySize = IWin_Settings["charge"]
+	if (
+			UnitInRaid("player")
+			and IWin_PartySize[partySize] == 40
+		) or (
+			GetNumPartyMembers() ~= 0
+			and IWin_PartySize[partySize] >= 5
+		) or (
+			GetNumPartyMembers() == 0
+			and IWin_PartySize[partySize] >= 1
+		) or (
+			IWin_Settings["charge"] == "targetincombat"
+			and UnitAffectingCombat("target")
+		) or (
+			IWin_Settings["chargewl"] == "on"
+			and IWin:IsWhitelistCharge()
+		) then
+			IWin:Intervene()
+	end
+end
+
 function IWin:MasterStrike()
 	if IWin:IsSpellLearnt("Master Strike")
 		and IWin_CombatVar["queueGCD"]
@@ -790,6 +858,8 @@ function IWin:ShieldBlock()
 		and IWin:IsTanking()
 		and IWin:IsBuffStack("target", "Sunder Armor", 5)
 		and IWin:IsRageAvailable("Shield Block")
+		and not IWin:IsBuffActive("player", "Improved Shield Slam")
+		and not IWin:IsBuffActive("player", "Shield Block")
 		and IWin:GetCooldownRemaining("Revenge") <  IWin_Settings["GCD"]
 		and not IWin:IsRevengeAvailable()
 		and IWin:IsStanceActive("Defensive Stance") then

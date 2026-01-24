@@ -362,18 +362,19 @@ function IWin:SetReservedEnergy(spell, trigger, unit)
 end
 
 -- Range #######################################################################################################################################
-function IWin:IsInRange(spell, distance)
-	if not UnitExists("target") then return false end
+function IWin:IsInRange(spell, distance, unit)
+	if unit == nil then unit = "target" end
+	if not UnitExists(unit) then return false end
 	if not IsSpellInRange
 		or not spell
 		or not IWin:IsSpellLearnt(spell) then
 			if distance == "ranged" then
-				return not (CheckInteractDistance("target", 3) ~= nil)
+				return not (CheckInteractDistance(unit, 3) ~= nil)
 			else
-        		return CheckInteractDistance("target", 3) ~= nil
+        		return CheckInteractDistance(unit, 3) ~= nil
         	end
 	else
-		return IsSpellInRange(spell, "target") == 1
+		return IsSpellInRange(spell, unit) == 1
 	end
 end
 
