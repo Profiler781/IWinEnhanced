@@ -185,10 +185,20 @@ end
 function IWin:Cleave()
 	if IWin:IsSpellLearnt("Cleave") then
 		if IWin:IsRageAvailable("Cleave")
-			or UnitMana("player") > 80 then
-				IWin_CombatVar["swingAttackQueued"] = true
-				IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
-				CastSpellByName("Cleave")
+			or (
+					UnitMana("player") > 60
+					and (
+							not IWin:IsSpellLearnt("Whirlwind")
+							or IWin:GetCooldownRemaining("Whirlwind") > 0
+						)
+					and (
+							not IWin:IsSpellLearnt("Sweeping Strikes")
+							or IWin:GetCooldownRemaining("Sweeping Strikes") > 0
+						)
+				) then
+					IWin_CombatVar["swingAttackQueued"] = true
+					IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
+					CastSpellByName("Cleave")
 		else
 			--SpellStopCasting()
 		end
