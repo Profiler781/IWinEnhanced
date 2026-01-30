@@ -102,3 +102,35 @@ function IWin:IsHighAP()
 	local APbase, APpos, APneg = UnitAttackPower("player")
 	return (APbase + APpos - APneg) * 0.35 + 200 > 600 + 20 * 15
 end
+
+-- Returns estimated time-to-kill from TimeToKill addon, or nil if unavailable.
+function IWin:GetTimeToKill()
+	if type(TimeToKill) == "table"
+		and type(TimeToKill.GetTTK) == "function" then
+			return TimeToKill.GetTTK()
+	end
+	return nil
+end
+
+-- Gates auto Death Wish in /idps and /icleave. Requires burst setting on,
+-- combat, 50+ rage, and non-nil TTK (defers until TimeToKill has samples).
+-- Boss: fires during execute (HP<=20%), TTK<=35s (buff covers kill),
+--   or TTK>=60s (long fight). Holds at TTK 35-60s for execute phase.
+-- Elite/normal: fires when TTK>=30s.
+function IWin:IsDeathWishBurstAvailable()
+	if IWin_Settings["burst"] ~= "on" then return false end
+	if not UnitAffectingCombat("player") then return false end
+	if UnitMana("player") < 50 then return false end
+
+	local ttk = IWin:GetTimeToKill()
+	if ttk == nil then return false end
+
+	if IWin:IsBoss() then
+		if IWin:IsExecutePhase() then return true end
+		if ttk <= 35 then return true end
+		if ttk >= 60 then return true end
+		return false
+	end
+
+	return ttk >= 30
+end

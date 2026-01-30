@@ -26,6 +26,7 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["dtDefensive"] == nil then IWin_Settings["dtDefensive"] = "on" end
 		if IWin_Settings["dtBerserker"] == nil then IWin_Settings["dtBerserker"] = "off" end
 		if IWin_Settings["jousting"] == nil then IWin_Settings["jousting"] = "off" end
+		if IWin_Settings["burst"] == nil then IWin_Settings["burst"] = "on" end
 		IWin.hasSuperwow = SetAutoloot and true or false
 		IWin.hasUnitXP = pcall(UnitXP, "nop", "nop") and true or false
 	elseif event == "ADDON_LOADED" and (arg1 == "SuperCleveRoidMacros" or arg1 == "IWinEnhanced") then
