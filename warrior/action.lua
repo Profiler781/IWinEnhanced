@@ -968,6 +968,8 @@ function IWin:SaveDualWieldWeapons()
 		if ohName then
 			IWin_Settings["savedOH"] = ohName
 		end
+	else
+		IWin_Settings["savedOH"] = ""
 	end
 end
 
@@ -997,6 +999,9 @@ function IWin:EquipShield()
 end
 
 function IWin:ReequipDualWield()
+	if IWin_Settings["savedMH"] ~= "" then
+		IWin:RunSlashCmd("/equipmh", IWin_Settings["savedMH"])
+	end
 	if IWin_Settings["savedOH"] ~= "" then
 		IWin:RunSlashCmd("/equipoh", IWin_Settings["savedOH"])
 	end
