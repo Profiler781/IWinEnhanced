@@ -1,5 +1,23 @@
 if UnitClass("player") ~= "Warrior" then return end
 
+-- Local aliases for hot-path globals (Phase 2 optimization)
+local GetTime = GetTime
+local UnitMana = UnitMana
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
+local UnitExists = UnitExists
+local UnitAffectingCombat = UnitAffectingCombat
+local UnitIsFriend = UnitIsFriend
+local UnitIsUnit = UnitIsUnit
+local UnitInRaid = UnitInRaid
+local UnitIsPVP = UnitIsPVP
+local UnitAttackSpeed = UnitAttackSpeed
+local GetNumPartyMembers = GetNumPartyMembers
+local CastSpellByName = CastSpellByName
+local SpellStopCasting = SpellStopCasting
+local GetInventoryItemLink = GetInventoryItemLink
+local GetItemInfo = GetItemInfo
+
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
 	IWin_CombatVar["reservedRage"] = 0
@@ -185,7 +203,7 @@ end
 function IWin:Cleave()
 	if IWin:IsSpellLearnt("Cleave") then
 		if IWin:IsRageAvailable("Cleave")
-			or UnitMana("player") > 80 then
+			or UnitMana("player") > 70 then
 				IWin_CombatVar["swingAttackQueued"] = true
 				IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
 				CastSpellByName("Cleave")
@@ -271,6 +289,29 @@ function IWin:DPSStanceDefault()
 					CastSpellByName("Battle Stance")
 				end
 		end
+	end
+end
+
+-- Casts Death Wish if learned, off CD, not already active, rage available,
+-- in combat, and no slam queued. Used by both /iburst (manual) and DeathWishAuto().
+function IWin:DeathWish()
+	if IWin:IsSpellLearnt("Death Wish")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Death Wish")
+		and not IWin:IsBuffActive("player", "Death Wish")
+		and IWin:IsRageCostAvailable("Death Wish")
+		and UnitAffectingCombat("player")
+		and not IWin_CombatVar["slamQueued"] then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Death Wish")
+	end
+end
+
+-- Auto-burst wrapper for /idps and /icleave rotations.
+-- Gated by IsDeathWishBurstAvailable() (rage, TTK, boss timing).
+function IWin:DeathWishAuto()
+	if IWin:IsDeathWishBurstAvailable() then
+		IWin:DeathWish()
 	end
 end
 
@@ -536,7 +577,7 @@ function IWin:Intervene()
 				or not IWin:IsOnCooldown("Bloodrage")
 			)
 		and not IWin_CombatVar["slamQueued"] then
-			if IWin:IsStanceActive("Defensive Stance") then
+			if not IWin:IsStanceActive("Defensive Stance") then
 				CastSpellByName("Defensive Stance")
 			end
 			if not IWin:IsRageCostAvailable("Intervene") then
@@ -606,7 +647,7 @@ function IWin:MasterStrikeWindfury()
 		and IWin:IsRageAvailable("Master Strike")
 		and IWin:IsBuffActive("player", "Windfury Totem") then
 			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Hamstring")
+			CastSpellByName("Master Strike")
 	end
 end
 
@@ -777,9 +818,9 @@ function IWin:Rend()
 		and not UnitInRaid("player")
 		and not IWin:IsBuffActive("target","Rend")
 		and not (
-					UnitCreatureType("target") == "Undead"
-					or UnitCreatureType("target") == "Mechanical"
-					or UnitCreatureType("target") == "Elemental"
+					IWin:IsCreatureType("Undead")
+					or IWin:IsCreatureType("Mechanical")
+					or IWin:IsCreatureType("Elemental")
 				)
 		and not IWin:IsStanceActive("Berserker Stance")
 		and not IWin_CombatVar["slamQueued"] then
@@ -787,6 +828,28 @@ function IWin:Rend()
 			CastSpellByName("Rend")
 	end
 end
+
+-- Manual-only cast via /iburst. Swaps from Battle to Berserker Stance if needed,
+-- then casts Recklessness. Not used in auto-burst rotations.
+function IWin:Recklessness()
+	if IWin:IsSpellLearnt("Recklessness")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Recklessness")
+		and not IWin:IsBuffActive("player", "Recklessness")
+		and UnitAffectingCombat("player")
+		and not IWin_CombatVar["slamQueued"] then
+			if not IWin:IsStanceActive("Berserker Stance")
+				and IWin:IsStanceActive("Battle Stance") then
+					IWin_CombatVar["queueGCD"] = false
+					CastSpellByName("Berserker Stance")
+			end
+			if IWin:IsStanceActive("Berserker Stance") then
+				IWin_CombatVar["queueGCD"] = false
+				CastSpellByName("Recklessness")
+			end
+	end
+end
+
 
 function IWin:Revenge()
 	if IWin:IsSpellLearnt("Revenge")
@@ -888,6 +951,95 @@ function IWin:ShieldSlam(queueTime)
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Shield Slam")
+	end
+end
+
+function IWin:SaveDualWieldWeapons()
+	local mhLink = GetInventoryItemLink("player", 16)
+	local ohLink = GetInventoryItemLink("player", 17)
+	if mhLink then
+		local mhName = GetItemInfo(tonumber(IWin:GetItemID(mhLink)))
+		if mhName then
+			IWin_Settings["savedMH"] = mhName
+		end
+	end
+	if ohLink then
+		local ohName = GetItemInfo(tonumber(IWin:GetItemID(ohLink)))
+		if ohName then
+			IWin_Settings["savedOH"] = ohName
+		end
+	end
+end
+
+function IWin:RunSlashCmd(cmd, args)
+	for name, handler in pairs(SlashCmdList) do
+		local i = 1
+		while _G["SLASH_" .. name .. i] do
+			if _G["SLASH_" .. name .. i] == cmd then
+				handler(args or "")
+				return
+			end
+			i = i + 1
+		end
+	end
+end
+
+function IWin:EquipShield()
+	if IWin_Settings["shield"] == "" then
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /idefend: No shield configured. Use /iwin shield <name>|r")
+		return
+	end
+	if not IWin:IsShieldEquipped() then
+		IWin:SaveDualWieldWeapons()
+		IWin_CombatVar["queueGCD"] = false
+		IWin:RunSlashCmd("/equipoh", IWin_Settings["shield"])
+	end
+end
+
+function IWin:ReequipDualWield()
+	if IWin_Settings["savedOH"] ~= "" then
+		IWin:RunSlashCmd("/equipoh", IWin_Settings["savedOH"])
+	end
+	IWin_CombatVar["queueGCD"] = false
+end
+
+function IWin:DefensiveStanceDefend()
+	if IWin:IsSpellLearnt("Defensive Stance")
+		and not IWin:IsStanceActive("Defensive Stance") then
+			CastSpellByName("Defensive Stance")
+	end
+end
+
+function IWin:LastStandDefend()
+	if IWin:IsSpellLearnt("Last Stand")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Last Stand")
+		and not IWin:IsBuffActive("player", "Last Stand")
+		and (UnitHealth("player") / UnitHealthMax("player") * 100) < IWin_Settings["laststand"] then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Last Stand")
+	end
+end
+
+function IWin:ShieldWallDefend()
+	if IWin:IsSpellLearnt("Shield Wall")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Shield Wall")
+		and IWin:IsShieldEquipped()
+		and IWin:IsStanceActive("Defensive Stance")
+		and not IWin:IsBuffActive("player", "Shield Wall") then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Shield Wall")
+	end
+end
+
+function IWin:LastStandDefendNormal()
+	if IWin:IsSpellLearnt("Last Stand")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Last Stand")
+		and not IWin:IsBuffActive("player", "Last Stand") then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Last Stand")
 	end
 end
 
@@ -1208,5 +1360,31 @@ function IWin:WhirlwindAOE(queueTime)
 						CastSpellByName("Whirlwind")
 					end
 			end
+	end
+end
+
+-- Furyprot ####################################################################################################################################
+
+function IWin:HeroicStrikeFuryprot()
+	if IWin:IsSpellLearnt("Heroic Strike")
+		and UnitMana("player") >= 50 then
+			IWin_CombatVar["swingAttackQueued"] = true
+			IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
+			CastSpellByName("Heroic Strike")
+	end
+end
+
+function IWin:CleaveFuryprot()
+	if IWin:IsSpellLearnt("Cleave")
+		and UnitMana("player") >= 40 then
+			IWin_CombatVar["swingAttackQueued"] = true
+			IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
+			CastSpellByName("Cleave")
+	end
+end
+
+function IWin:BloodthirstFuryprotAOE()
+	if UnitMana("player") >= 60 then
+		IWin:Bloodthirst(IWin_Settings["GCD"])
 	end
 end

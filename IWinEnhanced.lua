@@ -1,4 +1,4 @@
--- IWinEnhanced by Agamemnoth/Profiler781
+-- IWinEnhanced by Wheatthins750
 
 IWin = CreateFrame("frame",nil,UIParent)
 IWin.t = CreateFrame("GameTooltip", "IWin_T", UIParent, "GameTooltipTemplate")

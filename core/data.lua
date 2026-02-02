@@ -59,61 +59,58 @@ IWin_PartySize = {
 }
 
 IWin_BlacklistAOEDebuff = {
-	"Vek'lor",
-	"Vek'nilash",
-	"Qiraji Scarab",
-	"Qiraji Scorpion",
+	["Vek'lor"] = true,
+	["Vek'nilash"] = true,
+	["Qiraji Scarab"] = true,
+	["Qiraji Scorpion"] = true,
 }
 
 IWin_BlacklistAOEDamage = {
-	"Vek'lor",
-	"Vek'nilash",
-	"Qiraji Scarab",
-	"Qiraji Scorpion",
+	["Vek'lor"] = true,
+	["Vek'nilash"] = true,
+	["Qiraji Scarab"] = true,
+	["Qiraji Scorpion"] = true,
 }
 
 IWin_BlacklistKick = {
 	-- Karazhan
-	"Echo of Medivh",
-	"Shadowclaw Darkbringer",
-	"Blue Owl",
-	"Red Owl",
+	["Echo of Medivh"] = true,
+	["Shadowclaw Darkbringer"] = true,
+	["Blue Owl"] = true,
+	["Red Owl"] = true,
 	-- Naxxramas
-	"Kel'Thuzad",
-	"Spectral Rider",
-	"Naxxramas Acolyte",
-	"Stitched Spewer",
+	["Kel'Thuzad"] = true,
+	["Spectral Rider"] = true,
+	["Naxxramas Acolyte"] = true,
+	["Stitched Spewer"] = true,
 	-- Ahn'Qiraj
-	"Eye of C'Thun",
-	"Eye Tentacle",
-	"Claw Tentacle",
-	"Giant Claw Tentacle",
-	"Giant Eye Tentacle",
+	["Eye of C'Thun"] = true,
+	["Eye Tentacle"] = true,
+	["Claw Tentacle"] = true,
+	["Giant Claw Tentacle"] = true,
+	["Giant Eye Tentacle"] = true,
 	-- Molten Core
-	"Flamewaker Priest",
+	["Flamewaker Priest"] = true,
 }
 
 IWin_BlacklistFear = {
-	"Magmadar",
-	"Onyxia",
-	"Nefarian",
+	["Magmadar"] = true,
+	["Onyxia"] = true,
+	["Nefarian"] = true,
 }
 
 IWin_WhitelistCharge = {
 	-- Karazhan
-
 	-- Naxxramas
-
 	-- Ahn'Qiraj
-
 	-- Molten Core
-	"Ragnaros",
+	["Ragnaros"] = true,
 }
 
 IWin_WhitelistBoss = {
 	-- Molten Core
-	"Flamewaker Protector",
-	"Flamewaker Elite",
+	["Flamewaker Protector"] = true,
+	["Flamewaker Elite"] = true,
 }
 
 IWin_DrinkVendor = {

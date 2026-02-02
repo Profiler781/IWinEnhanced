@@ -86,13 +86,17 @@ Example: /iwin judgement wisdom
 
     /idps           Single target DPS rotation
     /icleave        Multi target DPS rotation
-    /itank          Single target threat rotation
-    /ihodor         Multi target threat rotation
+    /itank          Single target deep prot threat rotation
+    /ihodor         Multi target deep prot threat rotation
+    /ifuryprot      Single target furyprot tank rotation
+    /ifuryprotaoe   Multi target furyprot tank rotation
+    /idefend        Defensive shield swap (press: equip shield + cooldowns, shift+press: swap back to DW)
     /ichase         Stick to your target with Charge, Intercept, Hamstring
     /ikick          Kick with Pummel or Shield Bash
     /ifeardance     Use Berserker Rage if available
     /itaunt         Taunt or Mocking Blow if the target is not under another taunt effect
     /ishoot         Shoot with bow, crossbow, gun or throw
+    /iburst         Manual burst cooldowns (Recklessness + Death Wish)
 
 ## Setup commands
 
@@ -107,6 +111,9 @@ Example: /iwin judgement wisdom
     /iwin ragebuffer <number>         Setup to save 100% required rage for spells X seconds before the spells are used.
     /iwin ragegain <number>           Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used.
     /iwin jousting <toggle>           Setup for jousting solo DPS.
+    /iwin burst <toggle>              Setup for auto-burst cooldown (Death Wish) in /idps and /icleave.
+    /iwin shield <name>               Shield name for /idefend (e.g. /iwin shield Draconian Deflector).
+    /iwin laststand <0-100>           HP% threshold for Last Stand priority in /idefend (default: 50).
 
 partySize possible values: raid, group, solo, targetincombat, off.
 

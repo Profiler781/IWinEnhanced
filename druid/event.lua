@@ -3,6 +3,7 @@ if UnitClass("player") ~= "Druid" then return end
 IWin:RegisterEvent("ADDON_LOADED")
 IWin:RegisterEvent("SPELLCAST_START")
 IWin:RegisterEvent("PLAYER_TARGET_CHANGED")
+IWin:RegisterEvent("SPELLS_CHANGED")
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced for Druid loaded.|r")
@@ -23,9 +24,12 @@ IWin:SetScript("OnEvent", function()
 	elseif event == "SPELLCAST_START" and (arg1 == "Wrath" or arg1 == "Starfire") then
 		IWin_CombatVar["lastMoonkinSpell"] = arg1
 		IWin_CombatVar["lastMoonkinSpellTime"] = GetTime() + (arg2 / 1000)
+	elseif event == "SPELLS_CHANGED" then
+		IWin:InvalidateSpellbookCache()
 	elseif event == "PLAYER_TARGET_CHANGED" or (event == "ADDON_LOADED" and arg1 == "IWinEnhanced") then
 		IWin:SetBlacklistFear()
 		IWin:SetBlacklistAOEDebuff()
 		IWin:SetBlacklistAOEDamage()
+		IWin:SetCreatureType()
 	end
 end)

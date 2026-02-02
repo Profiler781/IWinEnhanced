@@ -4,6 +4,7 @@ IWin:RegisterEvent("ACTIONBAR_UPDATE_STATE")
 IWin:RegisterEvent("ADDON_LOADED")
 IWin:RegisterEvent("UNIT_INVENTORY_CHANGED")
 IWin:RegisterEvent("PLAYER_TARGET_CHANGED")
+IWin:RegisterEvent("SPELLS_CHANGED")
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced for Paladin loaded.|r")
@@ -30,10 +31,13 @@ IWin:SetScript("OnEvent", function()
 	    	if not IWin.libdebuff then return 0 end
 		end
 		IWin_CombatVar["weaponAttackSpeed"] = UnitAttackSpeed("player") * (1 + IWin:GetBuffStack("player","Zeal") * 0.05)
+	elseif event == "SPELLS_CHANGED" then
+		IWin:InvalidateSpellbookCache()
 	elseif event == "PLAYER_TARGET_CHANGED" or (event == "ADDON_LOADED" and arg1 == "IWinEnhanced") then
 		IWin:SetTrainingDummy()
 		IWin:SetWhitelistBoss()
 		IWin:SetElite()
 		IWin:SetBoss()
+		IWin:SetCreatureType()
 	end
 end)

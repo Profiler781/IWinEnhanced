@@ -15,6 +15,7 @@ IWin_Target = {
 	["blacklistFear"] = false,
 	["blacklistAOEDebuff"] = false,
 	["blacklistAOEDamage"] = false,
+	["creatureType"] = nil,
 }
 
 IWin_CastTime = {}

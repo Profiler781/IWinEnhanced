@@ -1,5 +1,18 @@
 if UnitClass("player") ~= "Druid" then return end
 
+-- Local aliases for hot-path globals (Phase 2 optimization)
+local GetTime = GetTime
+local UnitMana = UnitMana
+local UnitExists = UnitExists
+local UnitLevel = UnitLevel
+local UnitAffectingCombat = UnitAffectingCombat
+local UnitIsPVP = UnitIsPVP
+local UnitPowerType = UnitPowerType
+local GetNumPartyMembers = GetNumPartyMembers
+local GetComboPoints = GetComboPoints
+local CheckInteractDistance = CheckInteractDistance
+local CastSpellByName = CastSpellByName
+
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
 	IWin_CombatVar["reservedRage"] = 0
@@ -404,9 +417,9 @@ function IWin:Rake()
 		and IWin:IsEnergyAvailable("Rake")
 		and not IWin:IsBuffActive("target", "Rake", "player")
 		and not (
-					UnitCreatureType("target") == "Undead"
-					or UnitCreatureType("target") == "Mechanical"
-					or UnitCreatureType("target") == "Elemental"
+					IWin:IsCreatureType("Undead")
+					or IWin:IsCreatureType("Mechanical")
+					or IWin:IsCreatureType("Elemental")
 				) then
 					IWin_CombatVar["queueGCD"] = false
 					CastSpellByName("Rake")
@@ -415,9 +428,9 @@ end
 
 function IWin:SetReservedEnergyRake()
 	if not (
-				UnitCreatureType("target") == "Undead"
-				or UnitCreatureType("target") == "Mechanical"
-				or UnitCreatureType("target") == "Elemental"
+				IWin:IsCreatureType("Undead")
+				or IWin:IsCreatureType("Mechanical")
+				or IWin:IsCreatureType("Elemental")
 			) then
 				IWin:SetReservedEnergy("Rake", "buff", "target")
 	end
@@ -455,9 +468,9 @@ function IWin:Rip()
 				)
 			)
 		and not (
-					UnitCreatureType("target") == "Undead"
-					or UnitCreatureType("target") == "Mechanical"
-					or UnitCreatureType("target") == "Elemental"
+					IWin:IsCreatureType("Undead")
+					or IWin:IsCreatureType("Mechanical")
+					or IWin:IsCreatureType("Elemental")
 				) then
 					IWin_CombatVar["queueGCD"] = false
 					CastSpellByName("Rip")
@@ -481,9 +494,9 @@ function IWin:SetReservedEnergyRip()
 				)
 			)
 		and not (
-					UnitCreatureType("target") == "Undead"
-					or UnitCreatureType("target") == "Mechanical"
-					or UnitCreatureType("target") == "Elemental"
+					IWin:IsCreatureType("Undead")
+					or IWin:IsCreatureType("Mechanical")
+					or IWin:IsCreatureType("Elemental")
 				) then
 			IWin:SetReservedEnergy("Rip", "nocooldown")
 	end

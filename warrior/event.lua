@@ -9,6 +9,7 @@ IWin:RegisterEvent("CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF")
 IWin:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE")
 IWin:RegisterEvent("ADDON_LOADED")
 IWin:RegisterEvent("PLAYER_TARGET_CHANGED")
+IWin:RegisterEvent("SPELLS_CHANGED")
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced for Warrior loaded.|r")
@@ -26,6 +27,11 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["dtDefensive"] == nil then IWin_Settings["dtDefensive"] = "on" end
 		if IWin_Settings["dtBerserker"] == nil then IWin_Settings["dtBerserker"] = "off" end
 		if IWin_Settings["jousting"] == nil then IWin_Settings["jousting"] = "off" end
+		if IWin_Settings["burst"] == nil then IWin_Settings["burst"] = "on" end
+		if IWin_Settings["shield"] == nil then IWin_Settings["shield"] = "" end
+		if IWin_Settings["laststand"] == nil then IWin_Settings["laststand"] = 50 end
+		if IWin_Settings["savedMH"] == nil then IWin_Settings["savedMH"] = "" end
+		if IWin_Settings["savedOH"] == nil then IWin_Settings["savedOH"] = "" end
 		IWin.hasSuperwow = SetAutoloot and true or false
 		IWin.hasUnitXP = pcall(UnitXP, "nop", "nop") and true or false
 	elseif event == "ADDON_LOADED" and (arg1 == "SuperCleveRoidMacros" or arg1 == "IWinEnhanced") then
@@ -53,13 +59,18 @@ IWin:SetScript("OnEvent", function()
 		if string.find(arg1,"dodge") or string.find(arg1,"parry") then
 			IWin_CombatVar["revengeAvailable"] = GetTime() + 5
 		end
+	elseif event == "SPELLS_CHANGED" then
+		IWin:InvalidateSpellbookCache()
 	elseif event == "PLAYER_TARGET_CHANGED" or (event == "ADDON_LOADED" and arg1 == "IWinEnhanced") then
 		IWin:SetTrainingDummy()
 		IWin:SetElite()
+		IWin:SetCreatureType()
 		IWin:SetBlacklistFear()
 		IWin:SetBlacklistAOEDebuff()
 		IWin:SetBlacklistAOEDamage()
 		IWin:SetBlacklistKick()
 		IWin:SetWhitelistCharge()
+		IWin:SetBoss()
+		IWin:SetWhitelistBoss()
 	end
 end)

@@ -1,3 +1,15 @@
+-- Local aliases for hot-path globals (Phase 2 optimization)
+local GetTime = GetTime
+local UnitExists = UnitExists
+local UnitIsDead = UnitIsDead
+local UnitIsFriend = UnitIsFriend
+local UnitLevel = UnitLevel
+local UnitAffectingCombat = UnitAffectingCombat
+local CastSpellByName = CastSpellByName
+local GetContainerNumSlots = GetContainerNumSlots
+local GetContainerItemLink = GetContainerItemLink
+local UseContainerItem = UseContainerItem
+
 function IWin:InitializeRotationCore()
 	if not IWin.hasSuperwow then
     	DEFAULT_CHAT_FRAME:AddMessage("|cFF00FFFFbalakethelock's SuperWoW|r required:")
@@ -19,6 +31,9 @@ function IWin:InitializeRotationCore()
 	end
 	IWin_CombatVar["queueGCD"] = true
 	IWin_CombatVar["GCD"] = nil
+	IWin_CombatVar["cachedStance"] = nil
+	IWin_CombatVar["cachedShieldEquipped"] = nil
+	IWin_CombatVar["cached2HanderEquipped"] = nil
 end
 
 function IWin:TargetEnemy()

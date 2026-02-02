@@ -21,9 +21,12 @@ IWin_CombatVar = {
 IWin_Target = {
 	["trainingDummy"] = false,
 	["elite"] = false,
+	["boss"] = false,
+	["whitelistBoss"] = false,
 	["blacklistFear"] = false,
 	["blacklistAOEDebuff"] = false,
 	["blacklistAOEDamage"] = false,
 	["blacklistKick"] = false,
 	["whitelistCharge"] = false,
+	["creatureType"] = nil,
 }
