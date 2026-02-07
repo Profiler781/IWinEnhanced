@@ -53,6 +53,12 @@ function IWin:GetBuffRemaining(unit, spell, owner)
 	        	end
 	        end
 	    end
+	    if DoitePlayerAuras then
+			local timeLeft = DoitePlayerAuras.GetHiddenBuffRemaining(spell)
+			if timeLeft then
+				return timeleft
+			end
+		end
     end
     -- Debuff scan overflow as buff
 	for index = 1, 64 do
@@ -81,6 +87,9 @@ function IWin:GetBuffStack(unit, spell, owner)
 	end
 	-- Player buff scan
 	if unit == "player" then
+		if DoitePlayerAuras then
+			return DoitePlayerAuras.GetBuffStacks(spell) or 0
+		end
 		local index = IWin:GetPlayerBuffIndex(spell)
 		if index then
 			local _, stack = UnitBuff(unit, index)
@@ -208,6 +217,28 @@ function IWin:GetCastTime(spell)
         end
     end
     return nil
+end
+
+function IWin:GetSpellSlot(spell)
+	for slot = 1, 172 do
+		local actionTexture = GetActionTexture(slot)
+		if actionTexture then
+			local actionName = IWin_Texture[actionTexture]
+			if actionName and actionName == spell then
+				return slot
+			end
+		end
+	end
+	return nil
+end
+
+-- requires IWin_Texture data
+function IWin:IsActionUsable(spell)
+	local slot = IWin:GetSpellSlot(spell)
+	if slot and IsUsableAction(slot) == 1 then
+		return true
+	end
+	return false
 end
 
 -- Stance #######################################################################################################################################

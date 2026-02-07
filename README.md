@@ -24,6 +24,7 @@ Optionnal Addons:
 * [LibramSwap](https://github.com/Profiler781/Libramswap), Automatically swap librams based on cast.
 * [TimeToKill](https://github.com/jrc13245/TimeToKill), Advanced time-to-kill estimation using RLS (Recursive Least Squares) algorithm. Used for raid targets.
 * [MonkeySpeed](https://github.com/Profiler781/MonkeySpeed), Track player's movement speed. Used to postpone casted spells.
+* [DoiteAura](https://github.com/Player-Doite/DoiteAuras), Ability, buff, debuff & item tracker for Vanilla WoW. Used to track player's buff above buff cap.
 
 # Druid Module
 
@@ -40,6 +41,7 @@ Optionnal Addons:
 
     /iwin                             Current setup
     /iwin frontshred <toggle>         Setup for Front Shredding
+    /iwin berserkcat <toggle>         Setup for Berserk in Cat Form
 
 toggle possible values: on, off.
 

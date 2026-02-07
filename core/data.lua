@@ -145,3 +145,7 @@ IWin_DrinkConjured = {
 	["Conjured Fresh Water"] = 5,
 	["Conjured Water"] = 1,
 }
+
+IWin_Texture = {
+	["Interface\\Icons\\Spell_Holy_RighteousFury"] = "Judgement",
+}

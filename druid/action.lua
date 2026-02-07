@@ -343,6 +343,7 @@ end
 function IWin:BerserkCat()
 	if IWin:IsSpellLearnt("Berserk")
 		and IWin_CombatVar["queueGCD"]
+		and IWin_Settings["berserkCat"] == "on"
 		and not IWin:IsBlacklistFear()
 		and not IWin:IsOnCooldown("Berserk")
 		and UnitMana("player") <= 50

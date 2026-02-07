@@ -4,7 +4,7 @@
 ## Version: 2.1
 ## SavedVariablesPerCharacter: IWin_Settings
 ## Dependencies: SuperCleveRoidMacros
-## OptionalDeps: SP_SwingTimer, PallyPowerTW, LibramSwap, TimeToKill, MonkeySpeed
+## OptionalDeps: SP_SwingTimer, PallyPowerTW, LibramSwap, TimeToKill, MonkeySpeed, DoiteAura
 
 IWinEnhanced.lua
 

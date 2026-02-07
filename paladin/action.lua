@@ -131,6 +131,13 @@ function IWin:Consecration(manaPercent)
 	end
 end
 
+function IWin:ConsecrationFocus(manaPercent)
+	if not IWin:IsMoving()
+		and IWin:GetTimeToDie() > 6 then
+			IWin:Consecration(manaPercent)
+	end
+end
+
 function IWin:CrusaderStrike(manaPercent,queueTime)
 	if IWin:IsSpellLearnt("Crusader Strike")
 		and IWin_CombatVar["queueGCD"]
@@ -360,7 +367,10 @@ function IWin:Judgement(manaPercent,queueTime)
 				IWin:GetCooldownRemaining("Judgement") < queueTime
 				or not IWin:IsOnCooldown("Judgement")
 			)
-		and IWin:IsSealActive()
+		and (
+				IWin:IsSealActive()
+				or IWin:IsSealHidden()
+			)
 		and (
 				(
 					IWin:GetTalentRank(1, 3) == 3
@@ -394,6 +404,7 @@ function IWin:Judgement(manaPercent,queueTime)
 								or IWin:GetManaPercent("player") > manaPercent
 							)
 					)
+				or IWin:IsSealHidden()
 			)
 		and not IWin:IsGCDActive() then
 			IWin_CombatVar["queueGCD"] = false
@@ -447,6 +458,7 @@ function IWin:RepentanceRaid()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Repentance")
 		and not IWin:IsBuffActive("player", "Repentance")
+		and IWin:GetTimeToDie() > 10
 		and UnitInRaid("player")
 		and IWin:IsElite() then
 			IWin_CombatVar["queueGCD"] = false
@@ -493,6 +505,7 @@ end
 function IWin:SealOfCommand(manaPercent)
 	if IWin:IsSpellLearnt("Seal of Command")
 		and IWin:GetManaPercent("player") > manaPercent
+		and not IWin:IsSealHidden()
 		and (
 				(
 					IWin_CombatVar["weaponAttackSpeed"] > 3.49
@@ -511,6 +524,7 @@ end
 
 function IWin:SealOfJustice()
 	if IWin:IsSpellLearnt("Seal of Justice")
+		and not IWin:IsSealHidden()
 		and not IWin:IsBuffActive("target", "Judgement of Justice")
 		and not IWin:IsBuffActive("player", "Seal of Justice") then
 			IWin_CombatVar["queueGCD"] = false
@@ -520,6 +534,7 @@ end
 
 function IWin:SealOfJusticeElite()
 	if IWin:IsSpellLearnt("Seal of Justice")
+		and not IWin:IsSealHidden()
 		and not IWin:IsBuffActive("player","Seal of Justice")
 		and not IWin:IsBuffActive("target","Judgement of Justice")
 		and IWin:IsJudgementTarget("justice")
@@ -538,6 +553,7 @@ end
 
 function IWin:SealOfLightElite()
 	if IWin:IsSpellLearnt("Seal of Light")
+		and not IWin:IsSealHidden()
 		and not IWin:IsBuffActive("player","Seal of Light")
 		and not IWin:IsBuffActive("target","Judgement of Light")
 		and IWin:IsJudgementTarget("light")
@@ -559,6 +575,7 @@ end
 function IWin:SealOfRighteousness(manaPercent)
 	if IWin:IsSpellLearnt("Seal of Righteousness")
 		and IWin:GetManaPercent("player") > manaPercent
+		and not IWin:IsSealHidden()
 		and (
 				not IWin:IsSealActive()
 				or (
@@ -575,6 +592,7 @@ end
 
 function IWin:SealOfTheCrusaderElite()
 	if IWin:IsSpellLearnt("Seal of the Crusader")
+		and not IWin:IsSealHidden()
 		and not IWin:IsBuffActive("player","Seal of the Crusader")
 		and not IWin:IsBuffActive("target","Judgement of the Crusader")
 		and IWin:IsJudgementTarget("crusader")
@@ -594,6 +612,7 @@ end
 function IWin:SealOfWisdom(manaPercent)
 	if IWin:IsSpellLearnt("Seal of Wisdom")
 		and not IWin:IsSealActive()
+		and not IWin:IsSealHidden()
 		and (
 				IWin:GetManaPercent("player") < manaPercent
 				or (
@@ -615,17 +634,20 @@ end
 
 function IWin:SealOfWisdomElite()
 	if IWin:IsSpellLearnt("Seal of Wisdom")
+		and not IWin:IsSealHidden()
 		and not IWin:IsBuffActive("player","Seal of Wisdom")
 		and not IWin:IsBuffActive("target","Judgement of Wisdom")
 		and IWin:IsJudgementTarget("wisdom")
 		and IWin:GetCooldownRemaining("Judgement") <= IWin_Settings["GCD"]
-		and ((
-				IWin.hasPallyPower
-				and PallyPower_SealAssignments[UnitName("player")] == 0
-			) or (
-				not IWin.hasPallyPower
-				and IWin_Settings["judgement"] == "wisdom"
-			)) then
+		and (
+				(
+					IWin.hasPallyPower
+					and PallyPower_SealAssignments[UnitName("player")] == 0
+				) or (
+					not IWin.hasPallyPower
+					and IWin_Settings["judgement"] == "wisdom"
+				)
+			) then
 				IWin_CombatVar["queueGCD"] = false
 				CastSpellByName("Seal of Wisdom")
 	end
@@ -633,6 +655,7 @@ end
 
 function IWin:SealOfWisdomEco()
 	if IWin:IsSpellLearnt("Seal of Wisdom")
+		and not IWin:IsSealHidden()
 		and not IWin:IsSealActive() then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Seal of Wisdom")

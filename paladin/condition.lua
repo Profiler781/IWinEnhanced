@@ -57,3 +57,8 @@ function IWin:IsBlessingActive()
 		or IWin:IsBuffActive("player","Blessing of Salvation")
 		or IWin:IsBuffActive("player","Greater Blessing of Salvation")
 end
+
+function IWin:IsSealHidden()
+	return false
+	--return (not IWin:IsSealActive()) and IWin:IsActionUsable("Judgement")
+end

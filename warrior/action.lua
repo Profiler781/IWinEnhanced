@@ -185,7 +185,7 @@ end
 function IWin:Cleave()
 	if IWin:IsSpellLearnt("Cleave") then
 		if IWin:IsRageAvailable("Cleave")
-			or UnitMana("player") > 80 then
+			or UnitMana("player") > 75 then
 				IWin_CombatVar["swingAttackQueued"] = true
 				IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
 				CastSpellByName("Cleave")
@@ -1057,7 +1057,6 @@ function IWin:SunderArmorDPSRefresh()
 		and IWin_CombatVar["queueGCD"]
 		and IWin:IsRageCostAvailable("Sunder Armor")
 		and not (IWin_Settings["sunder"] == "off")
-		and IWin:GetTimeToDie() > IWin:GetBuffRemaining("target", "Sunder Armor")
 		and IWin:IsBuffActive("target", "Sunder Armor")
 		and IWin:GetBuffRemaining("target", "Sunder Armor") < 6
 		and IWin:GetBuffRemaining("target", "Sunder Armor") < IWin:GetTimeToDie()
