@@ -36,17 +36,17 @@ function IWin:GetBuffRemaining(unit, spell, owner)
 	    local effect, _, texture, stacks, dtype, duration, timeleft, caster = IWin.libdebuff:UnitDebuff(unit, index)
 	    if not effect then break end
 	    if effect and effect == spell and ((not owner) or (caster == owner)) then
-	        return timeleft
+	        return timeleft or 9999
 	    end
 	end
 	-- Buff scan only for player
 	if unit == "player" then
-		for index = 0, 63 do
+		for index = 0, 31 do
 	        spellID = GetPlayerBuffID(index)
 	        if not spellID then break end
 	        if spell == SpellInfo(spellID) then
 	        	local timeLeft = GetPlayerBuffTimeLeft(index)
-	        	if timeLeft ~= 0 then
+	        	if timeLeft and timeLeft ~= 0 then
 	        		return timeLeft
 	        	else
 	        		return 9999
@@ -65,7 +65,7 @@ function IWin:GetBuffRemaining(unit, spell, owner)
 	    local effect, _, texture, stacks, dtype, duration, timeleft, caster = IWin.libdebuff:UnitBuff(unit, index)
 	    if not effect then break end
 	    if effect == spell and ((not owner) or (caster == owner)) then
-	        return timeleft
+	        return timeleft or 9999
 	    end
 	end
 	-- Not found
@@ -328,7 +328,7 @@ function IWin:GetRageToReserve(spell, trigger, unit)
 	if spell == "Heroic Strike" or spell == "Cleave" or spell == "Maul" then
 		rageCost = rageCost + 20 --fix before rework
 	end
-	if trigger == "nocooldown" then
+	if trigger == "nocooldown" and IWin:IsSpellLearnt(spell) then
 		return rageCost
 	elseif trigger == "cooldown" then
 		spellTriggerTime = IWin:GetCooldownRemaining(spell) or 0
@@ -366,7 +366,7 @@ end
 
 function IWin:GetEnergyToReserve(spell, trigger, unit)
 	local spellTriggerTime = 0
-	if trigger == "nocooldown" then
+	if trigger == "nocooldown" and IWin:IsSpellLearnt(spell) then
 		return IWin_EnergyCost[spell]
 	elseif trigger == "cooldown" then
 		spellTriggerTime = IWin:GetCooldownRemaining(spell) or 0
@@ -622,6 +622,15 @@ function IWin:IsWandEquipped()
 	if rangedLink then
 		local _, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(rangedLink)))
 		return itemSubType == "Wands"
+	end
+	return false
+end
+
+function IWin:IsDaggerEquipped()
+	local mainHandLink = GetInventoryItemLink("player", 16)
+	if mainHandLink then
+		local _, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(mainHandLink)))
+		return itemSubType == "Daggers"
 	end
 	return false
 end

@@ -1,14 +1,15 @@
 if UnitClass("player") ~= "Warrior" then return end
 
+IWin:RegisterEvent("ACTIONBAR_UPDATE_STATE")
+IWin:RegisterEvent("ADDON_LOADED")
 IWin:RegisterEvent("CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS")
 IWin:RegisterEvent("CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES")
-IWin:RegisterEvent("SPELLCAST_START")
-IWin:RegisterEvent("ACTIONBAR_UPDATE_STATE")
 IWin:RegisterEvent("CHAT_MSG_COMBAT_SELF_MISSES")
 IWin:RegisterEvent("CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF")
 IWin:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE")
-IWin:RegisterEvent("ADDON_LOADED")
 IWin:RegisterEvent("PLAYER_TARGET_CHANGED")
+IWin:RegisterEvent("SPELLCAST_START")
+
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced for Warrior loaded.|r")

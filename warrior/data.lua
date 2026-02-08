@@ -20,18 +20,18 @@ IWin_ThunderClapCostReduction = {
 }
 
 function IWin:GetExecuteCostReduction()
-	local executeRank = IWin:GetTalentRank(2, 13)
-	return IWin_ExecuteCostReduction[executeRank]
+	local rank = IWin:GetTalentRank(2, 13)
+	return IWin_ExecuteCostReduction[rank]
 end
 
 function IWin:GetBloodrageCostReduction()
-	local bloodrageRank = IWin:GetTalentRank(3, 1)
-	return IWin_BloodrageCostReduction[bloodrageRank]
+	local rank = IWin:GetTalentRank(3, 1)
+	return IWin_BloodrageCostReduction[rank]
 end
 
 function IWin:GetThunderClapCostReduction()
-	local thunderClapRank = IWin:GetTalentRank(1, 6)
-	return IWin_ThunderClapCostReduction[thunderClapRank]
+	local rank = IWin:GetTalentRank(1, 6)
+	return IWin_ThunderClapCostReduction[rank]
 end
 
 IWin_RageCost = {

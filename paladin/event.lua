@@ -2,8 +2,9 @@ if UnitClass("player") ~= "Paladin" then return end
 
 IWin:RegisterEvent("ACTIONBAR_UPDATE_STATE")
 IWin:RegisterEvent("ADDON_LOADED")
-IWin:RegisterEvent("UNIT_INVENTORY_CHANGED")
 IWin:RegisterEvent("PLAYER_TARGET_CHANGED")
+IWin:RegisterEvent("UNIT_INVENTORY_CHANGED")
+
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced for Paladin loaded.|r")

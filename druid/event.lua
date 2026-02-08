@@ -1,8 +1,9 @@
 if UnitClass("player") ~= "Druid" then return end
 
 IWin:RegisterEvent("ADDON_LOADED")
-IWin:RegisterEvent("SPELLCAST_START")
 IWin:RegisterEvent("PLAYER_TARGET_CHANGED")
+IWin:RegisterEvent("SPELLCAST_START")
+
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff IWinEnhanced for Druid loaded.|r")

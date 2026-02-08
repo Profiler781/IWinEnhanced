@@ -392,9 +392,9 @@ function IWin:FerociousBite()
 end
 
 function IWin:SetReservedEnergyFerocious()
-	if 	GetComboPoints() == 5
-			or IWin:GetTimeToDie() < 3 then
-				IWin:SetReservedEnergy("Ferocious Bite", "nocooldown")
+	if GetComboPoints() == 5
+		or IWin:GetTimeToDie() < 3 then
+			IWin:SetReservedEnergy("Ferocious Bite", "nocooldown")
 	end
 end
 
