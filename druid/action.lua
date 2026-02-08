@@ -500,6 +500,7 @@ function IWin:Shred()
 				or not IWin:IsBuffActive("target", "Rip", "player")
 				or IWin:IsBuffActive("player", "Clearcasting")
 				or IWin:IsBuffActive("player", "Berserk")
+				or IWin:GetTalentRank(2, 6) == 0
 			)
 		and (
 				(
@@ -518,6 +519,8 @@ function IWin:SetReservedEnergyShred()
 			not IWin:IsBuffActive("target", "Rake", "player")
 			or not IWin:IsBuffActive("target", "Rip", "player")
 			or IWin:IsBuffActive("player", "Clearcasting")
+			or IWin:IsBuffActive("player", "Berserk")
+			or IWin:GetTalentRank(2, 6) == 0
 		)
 		and (
 				(

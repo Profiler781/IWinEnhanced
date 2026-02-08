@@ -457,7 +457,7 @@ function IWin:RepentanceRaid()
 	if IWin:IsSpellLearnt("Repentance")
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Repentance")
-		and not IWin:IsBuffActive("player", "Repentance")
+		and not IWin:IsBuffActive("target", "Repent")
 		and IWin:GetTimeToDie() > 10
 		and UnitInRaid("player")
 		and IWin:IsElite() then
