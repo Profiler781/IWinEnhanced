@@ -12,7 +12,7 @@ function SlashCmdList.IDPSROGUE()
 	IWin:CheapShot()
 
 	--cooldowns
-	IWin:AdrenalineRush()
+	--IWin:AdrenalineRush()
 	--IWin:BladeFlurry()
 
 	--finishers
