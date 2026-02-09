@@ -273,7 +273,7 @@ function IWin:SetReservedEnergyRupture()
 			IWin:GetTalentRank(1, 10) == 3
 			or (
 					IWin:GetTimeToDie() > 13
-					and not IWin:IsBuffActive("Rupture", "target", "player")
+					and not IWin:IsBuffActive("target", "Rupture", "player")
 				)
 		)
 		and GetComboPoints() == 5
