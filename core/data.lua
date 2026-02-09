@@ -118,6 +118,7 @@ IWin_WhitelistBoss = {
 
 IWin_DrinkVendor = {
 	["Hyjal Nectar"] = 55,
+	["Alterac Manna Biscuit"] = 51,
 	["Morning Glory Dew"] = 45,
 	["Freshly-Squeezed Lemonade"] = 45,
 	["Bottled Winterspring Water"] = 35,

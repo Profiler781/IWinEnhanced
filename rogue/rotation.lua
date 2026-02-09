@@ -6,6 +6,7 @@ function SlashCmdList.IDPSROGUE()
 	IWin:TargetEnemy()
 
 	--openers
+	IWin:PickPocket()
 	IWin:Ambush()
 	IWin:Garrote()
 	IWin:CheapShot()

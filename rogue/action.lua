@@ -88,10 +88,10 @@ function IWin:Envenom()
 		and (
 				(
 					GetComboPoints() ~= 0
-					and not IWin:IsBuffActive("target", "Envenom")
+					and not IWin:IsBuffActive("target", "Envenom", "player")
 				) or (
 					GetComboPoints() == 5
-					and IWin:GetBuffRemaining("target", "Envenom") < 6
+					and IWin:GetBuffRemaining("target", "Envenom", "player") < 6
 				)
 			) then
 				IWin_CombatVar["queueGCD"] = false
@@ -104,10 +104,10 @@ function IWin:SetReservedEnergyEnvenom()
 		and (
 				(
 					GetComboPoints() ~= 0
-					and not IWin:IsBuffActive("target", "Envenom")
+					and not IWin:IsBuffActive("target", "Envenom", "player")
 				) or (
 					GetComboPoints() == 5
-					and IWin:GetBuffRemaining("target", "Envenom") < 6
+					and IWin:GetBuffRemaining("target", "Envenom", "player") < 6
 				)
 			) then
 				IWin:SetReservedEnergy("Envenom", "buff", "target")
@@ -230,6 +230,14 @@ function IWin:NoxiousAssault()
 	end
 end
 
+function IWin:PickPocket()
+	if IWin:IsSpellLearnt("Pick Pocket")
+		and IWin:IsBuffActive("player", "Stealth")
+		and UnitCreatureType("target") == "Humanoid" then
+			CastSpellByName("Pick Pocket")
+	end
+end
+
 function IWin:Riposte()
 	if IWin:IsSpellLearnt("Riposte")
 		and IWin_CombatVar["queueGCD"]
@@ -246,16 +254,28 @@ function IWin:Rupture()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Rupture")
 		and IWin:IsEnergyAvailable("Rupture")
-		and IWin:GetTalentRank(1, 10) == 3
+		and (
+				IWin:GetTalentRank(1, 10) == 3
+				or (
+						IWin:GetTimeToDie() > 13
+						and not IWin:IsBuffActive("Rupture", "target", "player")
+					)
+			)
 		and GetComboPoints() == 5
-		and IWin:GetBuffRemaining("", "Taste for Blood") < 6 then
+		and IWin:GetBuffRemaining("player", "Taste for Blood") < 6 then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Rupture")
 	end
 end
 
 function IWin:SetReservedEnergyRupture()
-	if IWin:GetTalentRank(1, 10) == 3
+	if (
+			IWin:GetTalentRank(1, 10) == 3
+			or (
+					IWin:GetTimeToDie() > 13
+					and not IWin:IsBuffActive("Rupture", "target", "player")
+				)
+		)
 		and GetComboPoints() == 5
 		and IWin:GetBuffRemaining("player", "Taste for Blood") < 6 then
 			IWin:SetReservedEnergy("Rupture", "nocooldown")
