@@ -73,6 +73,7 @@ function IWin:DeadlyThrow()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Deadly Throw")
 		and IWin:IsEnergyCostAvailable("Deadly Throw")
+		and IWin:IsCasting("target")
 		and IWin:IsInRange("Deadly Throw") then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Deadly Throw")
@@ -162,6 +163,7 @@ function IWin:Garrote()
 		and not IWin:IsOnCooldown("Garrote")
 		and IWin:IsEnergyCostAvailable("Garrote")
 		and IWin:IsBehind()
+		and not IWin:IsImmune("target", "bleed")
 		and IWin:IsBuffActive("player", "Stealth") then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Garrote")
@@ -214,6 +216,7 @@ function IWin:Kick()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Kick")
 		and IWin:IsEnergyCostAvailable("Kick")
+		and IWin:IsCasting("target")
 		and IWin:IsInRange("Kick") then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Kick")
@@ -254,6 +257,7 @@ function IWin:Rupture()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Rupture")
 		and IWin:IsEnergyAvailable("Rupture")
+		and not IWin:IsImmune("target", "bleed")
 		and (
 				IWin:GetTalentRank(1, 10) == 3
 				or (
@@ -269,13 +273,14 @@ function IWin:Rupture()
 end
 
 function IWin:SetReservedEnergyRupture()
-	if (
-			IWin:GetTalentRank(1, 10) == 3
-			or (
-					IWin:GetTimeToDie() > 13
-					and not IWin:IsBuffActive("target", "Rupture", "player")
-				)
-		)
+	if not IWin:IsImmune("target", "bleed")
+		and (
+				IWin:GetTalentRank(1, 10) == 3
+				or (
+						IWin:GetTimeToDie() > 13
+						and not IWin:IsBuffActive("target", "Rupture", "player")
+					)
+			)
 		and GetComboPoints() == 5
 		and IWin:GetBuffRemaining("player", "Taste for Blood") < 6 then
 			IWin:SetReservedEnergy("Rupture", "nocooldown")

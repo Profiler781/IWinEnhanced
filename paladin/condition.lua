@@ -58,7 +58,30 @@ function IWin:IsBlessingActive()
 		or IWin:IsBuffActive("player","Greater Blessing of Salvation")
 end
 
-function IWin:IsSealHidden()
-	return false
-	--return (not IWin:IsSealActive()) and IWin:IsActionUsable("Judgement")
+function IWin:IsHiddenSealUsed() --fix for Doiteaura not removing used seal from hidden buff
+	return IWin:IsSealActive() and (not IWin:IsActionUsable("Judgement"))
+end
+
+function IWin:IsHiddenSealofRighteousnessUsed() --fix for Doiteaura not removing used seal from hidden buff
+	return IWin:IsBuffActive("player","Seal of Righteousness") and (not IWin:IsActionUsable("Judgement"))
+end
+
+function IWin:IsHiddenSealofWisdomUsed() --fix for Doiteaura not removing used seal from hidden buff
+	return IWin:IsBuffActive("player","Seal of Wisdom") and (not IWin:IsActionUsable("Judgement"))
+end
+
+function IWin:IsHiddenSealofLightUsed() --fix for Doiteaura not removing used seal from hidden buff
+	return IWin:IsBuffActive("player","Seal of Light") and (not IWin:IsActionUsable("Judgement"))
+end
+
+function IWin:IsHiddenSealofJusticeUsed() --fix for Doiteaura not removing used seal from hidden buff
+	return IWin:IsBuffActive("player","Seal of Justice") and (not IWin:IsActionUsable("Judgement"))
+end
+
+function IWin:IsHiddenSealoftheCrusaderUsed() --fix for Doiteaura not removing used seal from hidden buff
+	return IWin:IsBuffActive("player","Seal of the Crusader") and (not IWin:IsActionUsable("Judgement"))
+end
+
+function IWin:IsHiddenSealofCommandUsed() --fix for Doiteaura not removing used seal from hidden buff
+	return IWin:IsBuffActive("player","Seal of Command") and (not IWin:IsActionUsable("Judgement"))
 end

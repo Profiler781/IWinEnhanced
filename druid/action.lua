@@ -159,16 +159,15 @@ function IWin:FaerieFireFeral()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Faerie Fire (Feral)")
 		and not IWin:IsBuffActive("target", "Faerie Fire (Feral)")
+		--and not IWin:IsImmune("target", "Faerie Fire (Feral)")
 		and (
 				IWin:IsStanceActive("Cat Form")
 				or IWin:IsStanceActive("Bear Form")
 				or IWin:IsStanceActive("Dire Bear Form")
 			) then
 				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Faerie Fire (Feral)(Rank 4)")
-				CastSpellByName("Faerie Fire (Feral)(Rank 3)")
-				CastSpellByName("Faerie Fire (Feral)(Rank 2)")
-				CastSpellByName("Faerie Fire (Feral)(Rank 1)")
+				local spellNameMaxRank = IWin:GetSpellNameMaxRank("Faerie Fire (Feral)")
+				CastSpellByName(spellNameMaxRank)
 	end
 end
 
@@ -177,16 +176,15 @@ function IWin:FaerieFireFeralRefresh()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Faerie Fire (Feral)")
 		and IWin:GetBuffRemaining("target", "Faerie Fire (Feral)") < 10
+		--and not IWin:IsImmune("target", "Faerie Fire (Feral)")
 		and (
 				IWin:IsStanceActive("Cat Form")
 				or IWin:IsStanceActive("Bear Form")
 				or IWin:IsStanceActive("Dire Bear Form")
 			) then
 				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Faerie Fire (Feral)(Rank 4)")
-				CastSpellByName("Faerie Fire (Feral)(Rank 3)")
-				CastSpellByName("Faerie Fire (Feral)(Rank 2)")
-				CastSpellByName("Faerie Fire (Feral)(Rank 1)")
+				local spellNameMaxRank = IWin:GetSpellNameMaxRank("Faerie Fire (Feral)")
+				CastSpellByName(spellNameMaxRank)
 	end
 end
 
@@ -195,16 +193,15 @@ function IWin:FaerieFireFeralRanged()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Faerie Fire (Feral)")
 		and not IWin:IsInRange()
+		--and not IWin:IsImmune("target", "Faerie Fire (Feral)")
 		and (
 				IWin:IsStanceActive("Cat Form")
 				or IWin:IsStanceActive("Bear Form")
 				or IWin:IsStanceActive("Dire Bear Form")
 			) then
 				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Faerie Fire (Feral)(Rank 4)")
-				CastSpellByName("Faerie Fire (Feral)(Rank 3)")
-				CastSpellByName("Faerie Fire (Feral)(Rank 2)")
-				CastSpellByName("Faerie Fire (Feral)(Rank 1)")
+				local spellNameMaxRank = IWin:GetSpellNameMaxRank("Faerie Fire (Feral)")
+				CastSpellByName(spellNameMaxRank)
 	end
 end
 
@@ -301,6 +298,7 @@ end
 
 function IWin:Growl()
 	if IWin:IsSpellLearnt("Growl")
+		and not IWin:IsImmune("target", "Growl")
 		and not IWin:IsTanking()
 		and not IWin:IsOnCooldown("Growl")
 		and not IWin:IsTaunted() then
@@ -393,8 +391,30 @@ end
 
 function IWin:SetReservedEnergyFerocious()
 	if GetComboPoints() == 5
-		or IWin:GetTimeToDie() < 3 then
-			IWin:SetReservedEnergy("Ferocious Bite", "nocooldown")
+		or (
+				IWin:GetTimeToDie() < 3
+				and GetComboPoints() >= 3
+			) then
+				IWin:SetReservedEnergy("Ferocious Bite", "nocooldown")
+	end
+end
+
+function IWin:Pounce()
+	if IWin:IsSpellLearnt("Pounce")
+		and IWin_CombatVar["queueGCD"]
+		and not IWin:IsOnCooldown("Pounce")
+		and IWin:IsBuffActive("player", "Prowl")
+		and not IWin:IsImmune("target", "bleed")
+		and (
+				(
+					IWin:GetTimeToDie() > 18
+					and IWin:GetTalentRank(2, 6) == 3
+				)
+				or GetNumPartyMembers() < 3
+			)
+		and IWin:IsBehind() then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Pounce")
 	end
 end
 
@@ -404,23 +424,47 @@ function IWin:Rake()
 		and not IWin:IsOnCooldown("Rake")
 		and IWin:IsEnergyAvailable("Rake")
 		and not IWin:IsBuffActive("target", "Rake", "player")
-		and not (
-					UnitCreatureType("target") == "Undead"
-					or UnitCreatureType("target") == "Mechanical"
-					or UnitCreatureType("target") == "Elemental"
-				) then
-					IWin_CombatVar["queueGCD"] = false
-					CastSpellByName("Rake")
+		and IWin:GetTimeToDie() > 9
+		and (
+				not IWin:IsBehind() --shred wont be used. rake>claw
+				or (
+						IWin:GetTalentRank(2, 6) == 3 --open wounds needs rake bleed
+						and (
+								IWin:GetBleedCount() >= 1 --1 more bleed to claw
+								or (
+										GetComboPoints() == 4 --rip will be used after rake cp. 2 bleeds will allow claw
+										and IWin:GetTimeToDie() > 15
+									)
+							)
+					)
+			)
+		and not IWin:IsImmune("target", "bleed") then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Rake")
 	end
 end
 
 function IWin:SetReservedEnergyRake()
-	if not (
-				UnitCreatureType("target") == "Undead"
-				or UnitCreatureType("target") == "Mechanical"
-				or UnitCreatureType("target") == "Elemental"
-			) then
-				IWin:SetReservedEnergy("Rake", "buff", "target")
+	if IWin:GetTimeToDie() > 9
+		and (
+				not IWin:IsBehind() --shred wont be used. rake>claw
+				or (
+						IWin:GetTalentRank(2, 6) == 3 --open wounds needs rake bleed
+						and (
+								IWin:GetBleedCount() >= 1 --1 more bleed to claw
+								or (
+										GetComboPoints() == 4 --rip will be used after rake cp. 2 bleeds will allow claw
+										and IWin:GetTimeToDie() > 15
+									)
+							)
+					)
+			)
+		and not IWin:IsImmune("target", "bleed")
+		and not (
+					IWin:GetTalentRank(2, 17) == 2 --dont plan rake refresh if we will refresh it with carnage talent
+					and GetComboPoints() == 4
+				) then
+			IWin:SetReservedEnergy("Rake", "buff", "target")
 	end
 end
 
@@ -429,6 +473,10 @@ function IWin:Ravage()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Ravage")
 		and IWin:IsBuffActive("player", "Prowl")
+		and not (
+					IWin:IsSpellLearnt("Shred", "Rank 6") --this rank scales better than ravage if talented
+					and GetTalentRank(2, 13) == 2
+				)
 		and IWin:IsBehind() then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Ravage")
@@ -455,13 +503,9 @@ function IWin:Rip()
 					and IWin:GetTimeToDie() > 14
 				)
 			)
-		and not (
-					UnitCreatureType("target") == "Undead"
-					or UnitCreatureType("target") == "Mechanical"
-					or UnitCreatureType("target") == "Elemental"
-				) then
-					IWin_CombatVar["queueGCD"] = false
-					CastSpellByName("Rip")
+		and not IWin:IsImmune("target", "bleed") then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Rip")
 	end
 end
 
@@ -481,11 +525,7 @@ function IWin:SetReservedEnergyRip()
 					and IWin:GetTimeToDie() > 14
 				)
 			)
-		and not (
-					UnitCreatureType("target") == "Undead"
-					or UnitCreatureType("target") == "Mechanical"
-					or UnitCreatureType("target") == "Elemental"
-				) then
+		and not IWin:IsImmune("target", "bleed") then
 			IWin:SetReservedEnergy("Rip", "nocooldown")
 	end
 end
@@ -496,8 +536,7 @@ function IWin:Shred()
 		and not IWin:IsOnCooldown("Shred")
 		and IWin:IsEnergyAvailable("Shred")
 		and (
-				not IWin:IsBuffActive("target", "Rake", "player")
-				or not IWin:IsBuffActive("target", "Rip", "player")
+				IWin:GetBleedCount() < 2
 				or IWin:IsBuffActive("player", "Clearcasting")
 				or IWin:IsBuffActive("player", "Berserk")
 				or IWin:GetTalentRank(2, 6) == 0
@@ -516,10 +555,8 @@ end
 
 function IWin:SetReservedEnergyShred()
 	if (
-			not IWin:IsBuffActive("target", "Rake", "player")
-			or not IWin:IsBuffActive("target", "Rip", "player")
+			IWin:GetBleedCount() < 2
 			or IWin:IsBuffActive("player", "Clearcasting")
-			or IWin:IsBuffActive("player", "Berserk")
 			or IWin:GetTalentRank(2, 6) == 0
 		)
 		and (
@@ -536,9 +573,9 @@ end
 function IWin:TigersFury()
 	if IWin:IsSpellLearnt("Tiger's Fury")
 		and not IWin:IsOnCooldown("Tiger's Fury")
-		and IWin:GetTalentRank(2,12) ~= 0
 		and IWin:IsEnergyAvailable("Tiger's Fury")
 		and not IWin:IsBuffActive("player", "Tiger's Fury")
+		and IWin:GetTalentRank(2,12) ~= 0
 		and (
 				IWin:GetTimeToDie() > 6
 				or not UnitExists("target")
@@ -548,9 +585,12 @@ function IWin:TigersFury()
 end
 
 function IWin:SetReservedEnergyTigersFury()
-	if IWin:GetTimeToDie() > 6
-		and IWin:GetTalentRank(2,12) ~= 0 then
-			IWin:SetReservedEnergy("Tiger's Fury", "buff", "player")
+	if IWin:GetTalentRank(2,12) ~= 0
+		and (
+				IWin:GetTimeToDie() > 6
+				or not UnitExists("target")
+			) then
+				IWin:SetReservedEnergy("Tiger's Fury", "buff", "player")
 	end
 end
 

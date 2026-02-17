@@ -2,6 +2,7 @@
 ## Title: IWinEnhanced
 ## Notes: 1-button rotation macros for turtle druids, paladins and warriors.
 ## Version: 2.1
+## Author: Profiler781(Agamemnoth), Vlad
 ## SavedVariablesPerCharacter: IWin_Settings
 ## Dependencies: SuperCleveRoidMacros
 ## OptionalDeps: SP_SwingTimer, PallyPowerTW, LibramSwap, TimeToKill, MonkeySpeed, DoiteAura

@@ -622,6 +622,7 @@ function IWin:MockingBlow()
 		and not IWin:IsTanking()
 		and IWin:IsOnCooldown("Taunt")
 		and not IWin:IsOnCooldown("Mocking Blow")
+		and not IWin:IsImmune("target", "Mocking Blow")
 		and not IWin:IsTaunted() then
 			IWin_CombatVar["queueGCD"] = false
 			if not IWin:IsStanceActive("Battle Stance") then
@@ -719,6 +720,7 @@ function IWin:Pummel()
 	if IWin:IsSpellLearnt("Pummel")
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Pummel")
+		and IWin:IsCasting("target")
 		and (
 				(
 					IWin:IsRageCostAvailable("Pummel")
@@ -775,12 +777,8 @@ function IWin:Rend()
 		and IWin:IsRageAvailable("Rend")
 		and IWin:GetTimeToDie() > 9
 		and not UnitInRaid("player")
-		and not IWin:IsBuffActive("target","Rend")
-		and not (
-					UnitCreatureType("target") == "Undead"
-					or UnitCreatureType("target") == "Mechanical"
-					or UnitCreatureType("target") == "Elemental"
-				)
+		and not IWin:IsBuffActive("target","Rend","player")
+		and not IWin:IsImmune("target", "bleed")
 		and not IWin:IsStanceActive("Berserker Stance")
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
@@ -827,6 +825,7 @@ function IWin:ShieldBash()
 	if IWin:IsSpellLearnt("Shield Bash")
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Shield Bash")
+		and IWin:IsCasting("target")
 		and IWin:IsShieldEquipped() 
 		and (
 				(
@@ -1139,6 +1138,7 @@ function IWin:Taunt()
 	if IWin:IsSpellLearnt("Taunt")
 		and not IWin:IsTanking()
 		and not IWin:IsOnCooldown("Taunt")
+		and not IWin:IsImmune("target", "Taunt")
 		and not IWin:IsTaunted() then
 			if not IWin:IsStanceActive("Defensive Stance") then
 				CastSpellByName("Defensive Stance")

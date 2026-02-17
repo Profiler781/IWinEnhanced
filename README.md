@@ -2,10 +2,6 @@
 
 1-button rotation macros for Turtle Druids, Paladins and Warriors.
 
-Author: Agamemnoth (discord)
-
-Special thanks to contributor: Vlad (discord tfw.vlad)
-
 ## Mods Dependencies
 
 Mandatory Mods:

@@ -13,3 +13,13 @@ function IWin:GetCastTimeStarfire()
 	end
 	return IWin_CastTime["Starfire"]
 end
+
+function IWin:GetBleedCount()
+	local bleedCount = 0
+	for bleed in IWin_Bleed do
+		if IWin:IsBuffActive("target", IWin_Bleed[bleed], "player") then
+			bleedCount = bleedCount + 1
+		end
+	end
+	return bleedCount
+end

@@ -33,10 +33,10 @@ end
 function IWin:GetBuffRemaining(unit, spell, owner)
 	-- Debuff scan
 	for index = 1, 16 do
-	    local effect, _, texture, stacks, dtype, duration, timeleft, caster = IWin.libdebuff:UnitDebuff(unit, index)
+	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = IWin.libdebuff:UnitDebuff(unit, index)
 	    if not effect then break end
 	    if effect and effect == spell and ((not owner) or (caster == owner)) then
-	        return timeleft or 9999
+	        return timeLeft or 9999
 	    end
 	end
 	-- Buff scan only for player
@@ -56,16 +56,19 @@ function IWin:GetBuffRemaining(unit, spell, owner)
 	    if DoitePlayerAuras then
 			local timeLeft = DoitePlayerAuras.GetHiddenBuffRemaining(spell)
 			if timeLeft then
-				return timeleft
+				return timeLeft
 			end
+			if DoitePlayerAuras.HasBuff(spell) then
+		        return 9999
+		    end
 		end
     end
     -- Debuff scan overflow as buff
 	for index = 1, 64 do
-	    local effect, _, texture, stacks, dtype, duration, timeleft, caster = IWin.libdebuff:UnitBuff(unit, index)
+	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = IWin.libdebuff:UnitBuff(unit, index)
 	    if not effect then break end
 	    if effect == spell and ((not owner) or (caster == owner)) then
-	        return timeleft or 9999
+	        return timeLeft or 9999
 	    end
 	end
 	-- Not found
@@ -79,7 +82,7 @@ end
 function IWin:GetBuffStack(unit, spell, owner)
 	-- Debuff scan
 	for index = 1, 16 do
-	    local effect, _, texture, stacks, dtype, duration, timeleft, caster = IWin.libdebuff:UnitDebuff(unit, index)
+	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = IWin.libdebuff:UnitDebuff(unit, index)
 	    if not effect then break end
 	    if effect == spell and ((not owner) or (caster == owner)) then
 	        return stacks
@@ -88,7 +91,8 @@ function IWin:GetBuffStack(unit, spell, owner)
 	-- Player buff scan
 	if unit == "player" then
 		if DoitePlayerAuras then
-			return DoitePlayerAuras.GetBuffStacks(spell) or 0
+			local stacks = DoitePlayerAuras.GetBuffStacks(spell)
+   			if stacks then return stacks end
 		end
 		local index = IWin:GetPlayerBuffIndex(spell)
 		if index then
@@ -98,7 +102,7 @@ function IWin:GetBuffStack(unit, spell, owner)
 	end
 	-- Debuff scan overflow as buff
 	for index = 1, 64 do
-	    local effect, _, texture, stacks, dtype, duration, timeleft, caster = IWin.libdebuff:UnitBuff(unit, index)
+	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = IWin.libdebuff:UnitBuff(unit, index)
 	    if not effect then break end
 	    if effect == spell and ((not owner) or (caster == owner)) then
 	        return stacks
@@ -239,6 +243,24 @@ function IWin:IsActionUsable(spell)
 		return true
 	end
 	return false
+end
+
+function IWin:GetSpellNameMaxRank(spell)
+	if not IWin:IsSpellLearnt(spell) then return nil end
+	local rank = 1
+	while true do
+		local rankName = "Rank " .. tostring(rank)
+		if IWin:IsSpellLearnt(spell, rankName) then
+			spellNameMaxRank = spell .. "(" .. rankName .. ")"
+		else
+			return spellNameMaxRank
+		end
+		rank = rank + 1
+	end
+end
+
+function IWin:IsCasting(unit, spell)
+	return CleveRoids.CheckSpellCast(unit, spell)
 end
 
 -- Stance #######################################################################################################################################
@@ -407,6 +429,10 @@ function IWin:IsInRange(spell, distance, unit)
 	else
 		return IsSpellInRange(spell, unit) == 1
 	end
+end
+
+function IWin:GetEnemyInRange(range)
+	-- body
 end
 
 -- Target #######################################################################################################################################
@@ -599,6 +625,10 @@ end
 
 function IWin:IsWhitelistBoss()
 	return IWin_Target["whitelistBoss"]
+end
+
+function IWin:IsImmune(unit, school)
+	return CleveRoids.CheckImmunity(unit, school)
 end
 
 -- Item #######################################################################################################################################

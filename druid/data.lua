@@ -15,7 +15,6 @@ IWin_EnergyCost = {
 	["Claw"] = 45 - IWin:GetTalentRank(2, 1),
 	["Cower"] = 20,
 	["Ferocious Bite"] = 35,
-	["Mangle"] = 45,
 	["Pounce"] = 50,
 	["Rake"] = 40 - IWin:GetTalentRank(2, 1),
 	["Ravage"] = 60,
@@ -26,4 +25,10 @@ IWin_EnergyCost = {
 
 IWin_ManaCost = {
 	["Reshift"] = 348,
+}
+
+IWin_Bleed = {
+	"Pounce",
+	"Rake",
+	"Rip",
 }
