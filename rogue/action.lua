@@ -331,7 +331,7 @@ function IWin:SliceAndDice()
 					and not IWin:IsBuffActive("player", "Slice and Dice")
 				) or (
 					GetComboPoints() == 5
-					and IWin:GetBuffRemaining("player", "Slice and Dice") < 6
+					and IWin:GetBuffRemaining("player", "Slice and Dice") < 3
 				)
 			) then
 				IWin_CombatVar["queueGCD"] = false
@@ -341,18 +341,18 @@ end
 
 function IWin:SetReservedEnergySliceAndDice()
 	if (
-				IWin:GetTimeToDie() > 6
-				or not IWin:IsBoss()
-				or IWin:GetHealthPercent("player") > 50
-				or GetNumPartyMembers() ~= 0
-			)
+			IWin:GetTimeToDie() > 6
+			or not IWin:IsBoss()
+			or IWin:GetHealthPercent("player") > 50
+			or GetNumPartyMembers() ~= 0
+		)
 		and (
 				(
 					GetComboPoints() ~= 0
 					and not IWin:IsBuffActive("player", "Slice and Dice")
 				) or (
 					GetComboPoints() == 5
-					and IWin:GetBuffRemaining("player", "Slice and Dice") < 6
+					and IWin:GetBuffRemaining("player", "Slice and Dice") < 3
 				)
 			) then
 				IWin:SetReservedEnergy("Slice and Dice", "buff", "player")
