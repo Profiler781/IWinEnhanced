@@ -87,13 +87,8 @@ function IWin:Envenom()
 		and IWin:IsEnergyAvailable("Envenom")
 		and IWin:GetTimeToDie() > 6
 		and (
-				(
-					GetComboPoints() ~= 0
-					and not IWin:IsBuffActive("target", "Envenom", "player")
-				) or (
-					GetComboPoints() == 5
-					and IWin:GetBuffRemaining("target", "Envenom", "player") < 6
-				)
+				GetComboPoints() < 3
+				and IWin:GetBuffRemaining("target", "Envenom", "player") < 3
 			) then
 				IWin_CombatVar["queueGCD"] = false
 				CastSpellByName("Envenom")
@@ -103,13 +98,8 @@ end
 function IWin:SetReservedEnergyEnvenom()
 	if IWin:GetTimeToDie() > 6
 		and (
-				(
-					GetComboPoints() ~= 0
-					and not IWin:IsBuffActive("target", "Envenom", "player")
-				) or (
-					GetComboPoints() == 5
-					and IWin:GetBuffRemaining("target", "Envenom", "player") < 6
-				)
+				GetComboPoints() < 3
+				and IWin:GetBuffRemaining("target", "Envenom", "player") < 3
 			) then
 				IWin:SetReservedEnergy("Envenom", "buff", "target")
 	end
@@ -120,14 +110,20 @@ function IWin:Evicerate()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Evicerate")
 		and IWin:IsEnergyAvailable("Evicerate")
-		and GetComboPoints() == 5 then
+		and (
+				IWin:IsMaxComboPoints()
+				or (
+						GetComboPoints() > 2
+						and IWin:GetTimeToDie() < 2
+					)
+			) then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Evicerate")
 	end
 end
 
 function IWin:SetReservedEnergyEvicerate()
-	if GetComboPoints() == 5 then
+	if IWin:IsMaxComboPoints() then
 		IWin:SetReservedEnergy("Evicerate", "nocooldown")
 	end
 end
@@ -139,9 +135,9 @@ function IWin:ExposeArmor()
 		and IWin:IsEnergyAvailable("Expose Armor")
 		and IWin:IsBoss()
 		and IWin:GetTalentRank(3, 2) == 2
-		and GetComboPoints() == 5
+		and IWin:IsMaxComboPoints()
 		and IWin:GetTimeToDie() > IWin:GetBuffRemaining("target", "Expose Armor")
-		and IWin:GetBuffRemaining("target", "Expose Armor") < 6 then
+		and IWin:GetBuffRemaining("target", "Expose Armor") < 3 then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Expose Armor")
 	end
@@ -150,9 +146,9 @@ end
 function IWin:SetReservedEnergyExposeArmor()
 	if IWin:IsBoss()
 		and IWin:GetTalentRank(3, 2) == 2
-		and GetComboPoints() == 5
+		and IWin:IsMaxComboPoints()
 		and IWin:GetTimeToDie() > IWin:GetBuffRemaining("target", "Expose Armor")
-		and IWin:GetBuffRemaining("target", "Expose Armor") < 6 then
+		and IWin:GetBuffRemaining("target", "Expose Armor") < 3 then
 			IWin:SetReservedEnergy("Expose Armor", "buff", "target")
 	end
 end
@@ -257,32 +253,36 @@ function IWin:Rupture()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Rupture")
 		and IWin:IsEnergyAvailable("Rupture")
-		and not IWin:IsImmune("target", "bleed")
 		and (
-				IWin:GetTalentRank(1, 10) == 3
+					(
+						not IWin:IsImmune("target", "bleed")
+						and IWin:GetTimeToDie() > IWin:GetRuptureDuration()
+						and IWin:GetBuffRemaining("player", "Taste for Blood") < 3
+					)
 				or (
-						IWin:GetTimeToDie() > 13
-						and not IWin:IsBuffActive("target", "Rupture", "player")
+						IWin:GetBuffRemaining("player", "Taste for Blood") < 3
+						and IWin:GetTalentRank(1, 10) ~= 0
 					)
 			)
-		and GetComboPoints() == 5
-		and IWin:GetBuffRemaining("player", "Taste for Blood") < 6 then
+		and IWin:IsMaxComboPoints() then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Rupture")
 	end
 end
 
 function IWin:SetReservedEnergyRupture()
-	if not IWin:IsImmune("target", "bleed")
-		and (
-				IWin:GetTalentRank(1, 10) == 3
-				or (
-						IWin:GetTimeToDie() > 13
-						and not IWin:IsBuffActive("target", "Rupture", "player")
-					)
-			)
-		and GetComboPoints() == 5
-		and IWin:GetBuffRemaining("player", "Taste for Blood") < 6 then
+	if (
+				(
+					not IWin:IsImmune("target", "bleed")
+					and IWin:GetTimeToDie() > IWin:GetRuptureDuration()
+					and IWin:GetBuffRemaining("player", "Taste for Blood") < 3
+				)
+			or (
+					IWin:GetBuffRemaining("player", "Taste for Blood") < 3
+					and IWin:GetTalentRank(1, 10) ~= 0
+				)
+		)
+		and IWin:IsMaxComboPoints() then
 			IWin:SetReservedEnergy("Rupture", "nocooldown")
 	end
 end
@@ -292,14 +292,14 @@ function IWin:ShadowOfDeath()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Shadow of Death")
 		and IWin:IsEnergyAvailable("Shadow of Death")
-		and GetComboPoints() == 5 then
+		and IWin:IsMaxComboPoints() then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Shadow of Death")
 	end
 end
 
 function IWin:SetReservedEnergyShadowOfDeath()
-	if GetComboPoints() == 5 then
+	if IWin:IsMaxComboPoints() then
 		IWin:SetReservedEnergy("Shadow of Death", "nocooldown")
 	end
 end
@@ -320,20 +320,18 @@ function IWin:SliceAndDice()
 		and not IWin:IsOnCooldown("Slice and Dice")
 		and IWin:IsEnergyAvailable("Slice and Dice")
 		and (
-				IWin:GetTimeToDie() > 6
-				or not IWin:IsBoss()
-				or IWin:GetHealthPercent("player") > 50
-				or GetNumPartyMembers() ~= 0
+				IWin:GetTimeToDie() > 6 --longer fight
+				or ( --solo will engage next fight
+						IWin:GetHealthPercent("player") > 50
+						and GetNumPartyMembers() == 0
+					)
+				or ( --group will engage next pack
+						not IWin:IsBoss()
+						and GetNumPartyMembers() ~= 0
+					)
 			)
-		and (
-				(
-					GetComboPoints() ~= 0
-					and not IWin:IsBuffActive("player", "Slice and Dice")
-				) or (
-					GetComboPoints() == 5
-					and IWin:GetBuffRemaining("player", "Slice and Dice") < 3
-				)
-			) then
+		and GetComboPoints() < 3
+		and IWin:GetBuffRemaining("player", "Slice and Dice") < 3 then
 				IWin_CombatVar["queueGCD"] = false
 				CastSpellByName("Slice and Dice")
 	end
@@ -341,21 +339,19 @@ end
 
 function IWin:SetReservedEnergySliceAndDice()
 	if (
-			IWin:GetTimeToDie() > 6
-			or not IWin:IsBoss()
-			or IWin:GetHealthPercent("player") > 50
-			or GetNumPartyMembers() ~= 0
-		)
-		and (
-				(
-					GetComboPoints() ~= 0
-					and not IWin:IsBuffActive("player", "Slice and Dice")
-				) or (
-					GetComboPoints() == 5
-					and IWin:GetBuffRemaining("player", "Slice and Dice") < 3
+			IWin:GetTimeToDie() > 6 --longer fight
+			or ( --solo will engage next fight
+					IWin:GetHealthPercent("player") > 50
+					and GetNumPartyMembers() == 0
 				)
-			) then
-				IWin:SetReservedEnergy("Slice and Dice", "buff", "player")
+			or ( --group will engage next pack
+					not IWin:IsBoss()
+					and GetNumPartyMembers() ~= 0
+				)
+		)
+		and GetComboPoints() < 3
+		and IWin:GetBuffRemaining("player", "Slice and Dice") < 3 then
+			IWin:SetReservedEnergy("Slice and Dice", "buff", "player")
 	end
 end
 
@@ -364,7 +360,8 @@ function IWin:SurpriseAttack()
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsOnCooldown("Surprise Attack")
 		and IWin:IsSurpriseAttackAvailable()
-		and IWin:IsEnergyAvailable("Surprise Attack") then
+		and IWin:IsEnergyAvailable("Surprise Attack")
+		and UnitMana("player") < IWin:GetMaxEnergy() - IWin_CombatVar["energyPerSecondPrediction"] * 2 then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Surprise Attack")
 	end

@@ -16,6 +16,8 @@ function SlashCmdList.IDPSROGUE()
 	--IWin:BladeFlurry()
 
 	--finishers
+	IWin:Envenom()
+	IWin:SetReservedEnergyEnvenom()
 	IWin:SliceAndDice()
 	IWin:SetReservedEnergySliceAndDice()
 	IWin:ExposeArmor()
@@ -24,8 +26,6 @@ function SlashCmdList.IDPSROGUE()
 	IWin:SetReservedEnergyShadowOfDeath()
 	IWin:Rupture()
 	IWin:SetReservedEnergyRupture()
-	IWin:Envenom()
-	IWin:SetReservedEnergyEnvenom()
 	IWin:Evicerate()
 	IWin:SetReservedEnergyEvicerate()
 
