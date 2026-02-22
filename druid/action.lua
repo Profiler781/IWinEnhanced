@@ -475,7 +475,7 @@ function IWin:Ravage()
 		and IWin:IsBuffActive("player", "Prowl")
 		and not (
 					IWin:IsSpellLearnt("Shred", "Rank 6") --this rank scales better than ravage if talented
-					and GetTalentRank(2, 13) == 2
+					and IWin:GetTalentRank(2, 13) == 2
 				)
 		and IWin:IsBehind() then
 			IWin_CombatVar["queueGCD"] = false
