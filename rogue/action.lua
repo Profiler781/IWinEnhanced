@@ -86,22 +86,20 @@ function IWin:Envenom()
 		and not IWin:IsOnCooldown("Envenom")
 		and IWin:IsEnergyAvailable("Envenom")
 		and IWin:GetTimeToDie() > 6
-		and (
-				GetComboPoints() < 3
-				and IWin:GetBuffRemaining("target", "Envenom", "player") < 3
-			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Envenom")
+		and IWin:GetBuffRemaining("target", "Envenom", "player") < 3
+		and GetComboPoints() < 3
+		and GetComboPoints() > 0 then
+			IWin_CombatVar["queueGCD"] = false
+			CastSpellByName("Envenom")
 	end
 end
 
 function IWin:SetReservedEnergyEnvenom()
 	if IWin:GetTimeToDie() > 6
-		and (
-				GetComboPoints() < 3
-				and IWin:GetBuffRemaining("target", "Envenom", "player") < 3
-			) then
-				IWin:SetReservedEnergy("Envenom", "buff", "target")
+		and IWin:GetBuffRemaining("target", "Envenom", "player") < 3
+		and GetComboPoints() < 3
+		and GetComboPoints() > 0 then
+			IWin:SetReservedEnergy("Envenom", "buff", "target")
 	end
 end
 
@@ -331,6 +329,7 @@ function IWin:SliceAndDice()
 					)
 			)
 		and GetComboPoints() < 3
+		and GetComboPoints() > 0
 		and IWin:GetBuffRemaining("player", "Slice and Dice") < 3 then
 				IWin_CombatVar["queueGCD"] = false
 				CastSpellByName("Slice and Dice")
@@ -350,6 +349,7 @@ function IWin:SetReservedEnergySliceAndDice()
 				)
 		)
 		and GetComboPoints() < 3
+		and GetComboPoints() > 0
 		and IWin:GetBuffRemaining("player", "Slice and Dice") < 3 then
 			IWin:SetReservedEnergy("Slice and Dice", "buff", "player")
 	end
