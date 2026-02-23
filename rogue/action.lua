@@ -86,7 +86,7 @@ function IWin:Envenom()
 		and not IWin:IsOnCooldown("Envenom")
 		and IWin:IsEnergyAvailable("Envenom")
 		and IWin:GetTimeToDie() > 6
-		and IWin:GetBuffRemaining("target", "Envenom", "player") < 3
+		and IWin:GetBuffRemaining("player", "Envenom") < 3
 		and GetComboPoints() < 3
 		and GetComboPoints() > 0 then
 			IWin_CombatVar["queueGCD"] = false
@@ -96,10 +96,10 @@ end
 
 function IWin:SetReservedEnergyEnvenom()
 	if IWin:GetTimeToDie() > 6
-		and IWin:GetBuffRemaining("target", "Envenom", "player") < 3
+		and IWin:GetBuffRemaining("player", "Envenom") < 3
 		and GetComboPoints() < 3
 		and GetComboPoints() > 0 then
-			IWin:SetReservedEnergy("Envenom", "buff", "target")
+			IWin:SetReservedEnergy("Envenom", "buff", "player")
 	end
 end
 
