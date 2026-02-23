@@ -14,7 +14,7 @@ function IWin:IsMaxComboPoints()
 	if GetComboPoints() == 5
 		or (
 				GetComboPoints() == 4
-				and IWin:GetTalentRank(1, 10) == 17 --seal of fate
+				and IWin:GetTalentRank(1, 17) == 5 --seal of fate
 			) then
 				return true
 	end
