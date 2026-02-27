@@ -1,5 +1,16 @@
 if UnitClass("player") ~= "Paladin" then return end
 
+local GetTime = GetTime
+local UnitMana = UnitMana
+local UnitManaMax = UnitManaMax
+local UnitExists = UnitExists
+local UnitName = UnitName
+local UnitAffectingCombat = UnitAffectingCombat
+local UnitInRaid = UnitInRaid
+local UnitIsPVP = UnitIsPVP
+local GetNumPartyMembers = GetNumPartyMembers
+local CastSpellByName = CastSpellByName
+
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
 end
@@ -182,8 +193,8 @@ function IWin:Exorcism(manaPercent)
 		and not IWin:IsOnCooldown("Exorcism")
 		and IWin:GetManaPercent("player") > manaPercent
 		and (
-				UnitCreatureType("target") == "Undead"
-				or UnitCreatureType("target") == "Demon"
+				IWin:IsCreatureType("Undead")
+				or IWin:IsCreatureType("Demon")
 			) then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Exorcism")
@@ -196,8 +207,8 @@ function IWin:ExorcismRanged(manaPercent)
 		and not IWin:IsOnCooldown("Exorcism")
 		and IWin:GetManaPercent("player") > manaPercent
 		and (
-				UnitCreatureType("target") == "Undead"
-				or UnitCreatureType("target") == "Demon"
+				IWin:IsCreatureType("Undead")
+				or IWin:IsCreatureType("Demon")
 			)
 		and not IWin:IsInRange("Holy Strike") then
 			IWin_CombatVar["queueGCD"] = false
@@ -352,8 +363,8 @@ function IWin:HolyWrath(manaPercent)
 		and not IWin:IsOnCooldown("Holy Wrath")
 		and not IWin:IsTanking()
 		and (
-				UnitCreatureType("target") == "Undead"
-				or UnitCreatureType("target") == "Demon"
+				IWin:IsCreatureType("Undead")
+				or IWin:IsCreatureType("Demon")
 			)
 		and IWin:GetManaPercent("player") > manaPercent then
 			IWin_CombatVar["queueGCD"] = false

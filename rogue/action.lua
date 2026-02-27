@@ -1,5 +1,11 @@
 if UnitClass("player") ~= "Rogue" then return end
 
+local GetTime = GetTime
+local UnitMana = UnitMana
+local GetNumPartyMembers = GetNumPartyMembers
+local CastSpellByName = CastSpellByName
+local GetComboPoints = GetComboPoints
+
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
 	IWin_CombatVar["reservedEnergy"] = 0

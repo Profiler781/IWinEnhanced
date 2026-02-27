@@ -13,4 +13,5 @@ IWin_CombatVar = {
 
 IWin_Target = {
 	["boss"] = false,
+	["creatureType"] = nil,
 }

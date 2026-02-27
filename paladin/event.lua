@@ -3,6 +3,7 @@ if UnitClass("player") ~= "Paladin" then return end
 IWin:RegisterEvent("ACTIONBAR_UPDATE_STATE")
 IWin:RegisterEvent("ADDON_LOADED")
 IWin:RegisterEvent("PLAYER_TARGET_CHANGED")
+IWin:RegisterEvent("SPELLS_CHANGED")
 IWin:RegisterEvent("UNIT_INVENTORY_CHANGED")
 
 IWin:SetScript("OnEvent", function()
@@ -31,10 +32,13 @@ IWin:SetScript("OnEvent", function()
 	    	if not IWin.libdebuff then return 0 end
 		end
 		IWin_CombatVar["weaponAttackSpeed"] = UnitAttackSpeed("player") * (1 + IWin:GetBuffStack("player","Zeal") * 0.05)
+	elseif event == "SPELLS_CHANGED" then
+		IWin_Spellbook = {}
 	elseif event == "PLAYER_TARGET_CHANGED" or (event == "ADDON_LOADED" and arg1 == "IWinEnhanced") then
 		IWin:SetTrainingDummy()
 		IWin:SetWhitelistBoss()
 		IWin:SetElite()
 		IWin:SetBoss()
+		IWin:SetCreatureType()
 	end
 end)

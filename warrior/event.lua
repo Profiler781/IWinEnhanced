@@ -9,6 +9,7 @@ IWin:RegisterEvent("CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF")
 IWin:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE")
 IWin:RegisterEvent("PLAYER_TARGET_CHANGED")
 IWin:RegisterEvent("SPELLCAST_START")
+IWin:RegisterEvent("SPELLS_CHANGED")
 
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
@@ -54,6 +55,8 @@ IWin:SetScript("OnEvent", function()
 		if string.find(arg1,"dodge") or string.find(arg1,"parry") then
 			IWin_CombatVar["revengeAvailable"] = GetTime() + 5
 		end
+	elseif event == "SPELLS_CHANGED" then
+		IWin_Spellbook = {}
 	elseif event == "PLAYER_TARGET_CHANGED" or (event == "ADDON_LOADED" and arg1 == "IWinEnhanced") then
 		IWin:SetTrainingDummy()
 		IWin:SetElite()
@@ -62,5 +65,6 @@ IWin:SetScript("OnEvent", function()
 		IWin:SetBlacklistAOEDamage()
 		IWin:SetBlacklistKick()
 		IWin:SetWhitelistCharge()
+		IWin:SetCreatureType()
 	end
 end)

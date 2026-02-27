@@ -12,4 +12,5 @@ IWin_Target = {
 	["whitelistBoss"] = false,
 	["elite"] = false,
 	["boss"] = false,
+	["creatureType"] = nil,
 }

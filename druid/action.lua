@@ -1,5 +1,17 @@
 if UnitClass("player") ~= "Druid" then return end
 
+local GetTime = GetTime
+local UnitMana = UnitMana
+local UnitExists = UnitExists
+local UnitLevel = UnitLevel
+local UnitAffectingCombat = UnitAffectingCombat
+local UnitIsPVP = UnitIsPVP
+local UnitPowerType = UnitPowerType
+local GetNumPartyMembers = GetNumPartyMembers
+local GetComboPoints = GetComboPoints
+local CheckInteractDistance = CheckInteractDistance
+local CastSpellByName = CastSpellByName
+
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
 	IWin_CombatVar["reservedRage"] = 0

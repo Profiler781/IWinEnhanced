@@ -1,14 +1,53 @@
+local GetTime = GetTime
+local GetSpellName = GetSpellName
+local GetSpellCooldown = GetSpellCooldown
+local GetPlayerBuff = GetPlayerBuff
+local GetPlayerBuffID = GetPlayerBuffID
+local GetPlayerBuffTimeLeft = GetPlayerBuffTimeLeft
+local SpellInfo = SpellInfo
+local UnitMana = UnitMana
+local UnitManaMax = UnitManaMax
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
+local UnitExists = UnitExists
+local UnitName = UnitName
+local UnitAffectingCombat = UnitAffectingCombat
+local GetNumShapeshiftForms = GetNumShapeshiftForms
+local GetShapeshiftFormInfo = GetShapeshiftFormInfo
+local GetInventoryItemLink = GetInventoryItemLink
+local GetItemInfo = GetItemInfo
+local UnitClassification = UnitClassification
+local CheckInteractDistance = CheckInteractDistance
+local GetNumPartyMembers = GetNumPartyMembers
+local GetNumRaidMembers = GetNumRaidMembers
+local UnitInRaid = UnitInRaid
+local GetContainerNumSlots = GetContainerNumSlots
+local GetContainerItemLink = GetContainerItemLink
+local UnitBuff = UnitBuff
+local UnitDebuff = UnitDebuff
+local UnitIsUnit = UnitIsUnit
+local UnitCreatureType = UnitCreatureType
+local string_find = string.find
+local string_lower = string.lower
+local string_gsub = string.gsub
+local string_gfind = string.gfind
+local string_match = string.match
+local math_max = math.max
+
+IWin_Spellbook = {}
+IWin_CastTime = {}
+
 -- Buff #######################################################################################################################################
 function IWin:GetPlayerBuffIndex(spell)
 	local index = 0
-    spell = string.lower(string.gsub(spell, "_"," "))
+    spell = string_lower(string_gsub(spell, "_"," "))
 	while true do
 		local auraIndex = GetPlayerBuff(index,"HELPFUL")
 		index = index + 1
 		if auraIndex == -1 then break end
 		local buffIndex = GetPlayerBuffID(auraIndex)
 		buffIndex = (buffIndex < -1) and (buffIndex + 65536) or buffIndex
-		if string.lower(SpellInfo(buffIndex)) == spell then
+		if string_lower(SpellInfo(buffIndex)) == spell then
 			return auraIndex
 		end
 	end
@@ -22,7 +61,7 @@ function IWin:GetDebuffIndex(unit, spell)
 		IWin_T:ClearLines()
 		IWin_T:SetUnitDebuff(unit, index)
 		local tooltipText = IWin_TTextLeft1:GetText()
-		if spell and tooltipText and string.find(tooltipText, spell) then 
+		if spell and tooltipText and string_find(tooltipText, spell) then 
 			return index
 		end
 		index = index + 1
@@ -130,15 +169,22 @@ end
 
 -- Spell #######################################################################################################################################
 function IWin:GetSpellSpellbookID(spell, rank)
+	local cacheKey = rank and (spell .. "|" .. rank) or spell
+    local cached = IWin_Spellbook[cacheKey]
+    if cached ~= nil then
+        return cached ~= false and cached or nil
+    end
     local spellID = 1
     while true do
         local spellName, spellRank = GetSpellName(spellID, "BOOKTYPE_SPELL")
         if not spellName then break end
         if spellName == spell and ((not rank) or spellRank == rank) and (rank ~= nil or spellName ~= GetSpellName(spellID + 1, "BOOKTYPE_SPELL")) then
+        	IWin_Spellbook[cacheKey] = spellID
             return spellID
         end
         spellID = spellID + 1
     end
+    IWin_Spellbook[cacheKey] = false
     return nil
 end
 
@@ -186,7 +232,7 @@ end
 function IWin:ParseCastTimeFromText(text)
     if not text then return nil end
     -- Match patterns like "1.5 sec cast", "1.59 sec cast", "2 sec cast"
-    local castTime = string.match(text, "(%d+%.?%d*) sec cast")
+    local castTime = string_match(text, "(%d+%.?%d*) sec cast")
     if castTime then
         return tonumber(castTime)
     end
@@ -194,8 +240,15 @@ function IWin:ParseCastTimeFromText(text)
 end
 
 function IWin:GetCastTime(spell)
+	local cached = IWin_CastTime[spell]
+    if cached ~= nil then
+        return cached ~= false and cached or nil
+    end
 	local spellID = IWin:GetSpellSpellbookID(spell)
-    if not spellID then return nil end
+    if not spellID then
+        IWin_CastTime[spell] = false
+        return nil
+    end
 
     IWin_T:SetOwner(WorldFrame, "ANCHOR_NONE")
     IWin_T:ClearLines()
@@ -208,6 +261,7 @@ function IWin:GetCastTime(spell)
             local text = leftText:GetText()
             local castTime = IWin:ParseCastTimeFromText(text)
             if castTime then
+            	IWin_CastTime[spell] = castTime
                 return castTime
             end
         end
@@ -216,10 +270,12 @@ function IWin:GetCastTime(spell)
             local text = rightText:GetText()
             local castTime = IWin:ParseCastTimeFromText(text)
             if castTime then
+            	IWin_CastTime[spell] = castTime
                 return castTime
             end
         end
     end
+    IWin_CastTime[spell] = false
     return nil
 end
 
@@ -264,32 +320,31 @@ function IWin:IsCasting(unit, spell)
 end
 
 -- Stance #######################################################################################################################################
-function IWin:IsStanceActive(stance)
-	local forms = GetNumShapeshiftForms()
-	for index = 1, forms do
-		local _, name, active = GetShapeshiftFormInfo(index)
-		if name == stance then
-			return active == 1
-		end
-	end
-	return false
-end
-
 function IWin:GetStance()
+	local cached = IWin_CombatVar["stance"]
+	if cached ~= nil then
+		return cached ~= false and cached or nil
+	end
 	local forms = GetNumShapeshiftForms()
 	for index = 1, forms do
 		local _, name, active = GetShapeshiftFormInfo(index)
 		if active == 1 then
+			IWin_CombatVar["stance"] = name
 			return name
 		end
 	end
+	IWin_CombatVar["stance"] = false
 	return nil
+end
+
+function IWin:IsStanceActive(stance)
+	return IWin:GetStance() == stance
 end
 
 -- Health #######################################################################################################################################
 function IWin:GetTimeToDie()
 	local ttd = 0
-	local numPartyMembers = math.max(2, GetNumPartyMembers(), GetNumRaidMembers())
+	local numPartyMembers = math_max(2, GetNumPartyMembers(), GetNumRaidMembers())
 	if (not UnitInRaid("player")) or type(TimeToKill) ~= "table" or type(TimeToKill.GetTTK) ~= "function" or TimeToKill.GetTTK() == nil then
 		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / numPartyMembers * 2
 	else
@@ -361,9 +416,9 @@ function IWin:GetRageToReserve(spell, trigger, unit)
 	if IWin_Settings["ragePerSecondPrediction"] > 0 then
 		reservedRageTime = IWin_CombatVar["reservedRage"] / IWin_Settings["ragePerSecondPrediction"]
 	end
-	local timeToReserveRage = math.max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
+	local timeToReserveRage = math_max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
 	if trigger == "partybuff" or IWin:IsSpellLearnt(spell) then
-		return math.max(0, rageCost - IWin_Settings["ragePerSecondPrediction"] * timeToReserveRage)
+		return math_max(0, rageCost - IWin_Settings["ragePerSecondPrediction"] * timeToReserveRage)
 	end
 	return 0
 end
@@ -399,9 +454,9 @@ function IWin:GetEnergyToReserve(spell, trigger, unit)
 	if IWin_CombatVar["energyPerSecondPrediction"] > 0 then
 		reservedEnergyTime = IWin_CombatVar["reservedEnergy"] / IWin_CombatVar["energyPerSecondPrediction"]
 	end
-	local timeToReserveEnergy = math.max(0, spellTriggerTime - IWin_Settings["energyTimeToReserveBuffer"] - reservedEnergyTime)
+	local timeToReserveEnergy = math_max(0, spellTriggerTime - IWin_Settings["energyTimeToReserveBuffer"] - reservedEnergyTime)
 	if trigger == "partybuff" or IWin:IsSpellLearnt(spell) then
-		return math.max(0, IWin_EnergyCost[spell] - IWin_CombatVar["energyPerSecondPrediction"] * timeToReserveEnergy)
+		return math_max(0, IWin_EnergyCost[spell] - IWin_CombatVar["energyPerSecondPrediction"] * timeToReserveEnergy)
 	end
 	return 0
 end
@@ -447,7 +502,7 @@ end
 
 function IWin:GetTrainingDummy()
 	local name = UnitName("target")
-	if name and string.find(name,"Training Dummy") then
+	if name and string_find(name,"Training Dummy") then
 		return true
 	else
 		return false
@@ -502,13 +557,7 @@ function IWin:GetBlacklistAOEDebuff()
 	if not UnitExists("target") then
 		return true
 	end
-	local name = UnitName("target")
-	for unit in IWin_BlacklistAOEDebuff do
-		if IWin_BlacklistAOEDebuff[unit] == name then
-			return true
-		end
-	end
-	return false
+	return IWin_BlacklistAOEDebuff[UnitName("target")] or false
 end
 
 function IWin:SetBlacklistAOEDebuff()
@@ -523,13 +572,7 @@ function IWin:GetBlacklistAOEDamage()
 	if not UnitExists("target") then
 		return true
 	end
-	local name = UnitName("target")
-	for unit in IWin_BlacklistAOEDamage do
-		if IWin_BlacklistAOEDamage[unit] == name then
-			return true
-		end
-	end
-	return false
+	return IWin_BlacklistAOEDamage[UnitName("target")] or false
 end
 
 function IWin:SetBlacklistAOEDamage()
@@ -544,13 +587,7 @@ function IWin:GetBlacklistKick()
 	if not UnitExists("target") then
 		return true
 	end
-	local name = UnitName("target")
-	for unit in IWin_BlacklistKick do
-		if IWin_BlacklistKick[unit] == name then
-			return true
-		end
-	end
-	return false
+	return IWin_BlacklistKick[UnitName("target")] or false
 end
 
 function IWin:SetBlacklistKick()
@@ -565,13 +602,7 @@ function IWin:GetBlacklistFear()
 	if not UnitExists("target") then
 		return true
 	end
-	local name = UnitName("target")
-	for unit in IWin_BlacklistFear do
-		if IWin_BlacklistFear[unit] == name then
-			return true
-		end
-	end
-	return false
+	return IWin_BlacklistFear[UnitName("target")] or false
 end
 
 function IWin:SetBlacklistFear()
@@ -586,13 +617,7 @@ function IWin:GetWhitelistCharge()
 	if not UnitExists("target") then
 		return true
 	end
-	local name = UnitName("target")
-	for unit in IWin_WhitelistCharge do
-		if IWin_WhitelistCharge[unit] == name then
-			return true
-		end
-	end
-	return false
+	return IWin_WhitelistCharge[UnitName("target")] or false
 end
 
 function IWin:SetWhitelistCharge()
@@ -610,13 +635,7 @@ function IWin:GetWhitelistBoss()
 	if IWin:IsTrainingDummy() then
 		return true
 	end
-	local name = UnitName("target")
-	for unit in IWin_WhitelistBoss do
-		if IWin_WhitelistBoss[unit] == name then
-			return true
-		end
-	end
-	return false
+	return IWin_WhitelistBoss[UnitName("target")] or false
 end
 
 function IWin:SetWhitelistBoss()
@@ -631,19 +650,32 @@ function IWin:IsImmune(unit, school)
 	return CleveRoids.CheckImmunity(unit, school)
 end
 
+function IWin:SetCreatureType()
+	IWin_Target["creatureType"] = UnitCreatureType("target")
+end
+
+function IWin:IsCreatureType(creatureType)
+	return IWin_Target["creatureType"] == creatureType
+end
+
 -- Item #######################################################################################################################################
 function IWin:GetItemID(itemLink)
-	for itemID in string.gfind(itemLink, "|c%x+|Hitem:(%d+):%d+:%d+:%d+|h%[(.-)%]|h|r$") do
+	for itemID in string_gfind(itemLink, "|c%x+|Hitem:(%d+):%d+:%d+:%d+|h%[(.-)%]|h|r$") do
 		return itemID
 	end
 end
 
 function IWin:IsShieldEquipped()
+	local cached = IWin_CombatVar["shieldEquipped"]
+	if cached ~= nil then return cached end
 	local offHandLink = GetInventoryItemLink("player", 17)
 	if offHandLink then
 		local _, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(offHandLink)))
-		return itemSubType == "Shields"
+		local result = itemSubType == "Shields"
+		IWin_CombatVar["shieldEquipped"] = result
+		return result
 	end
+	IWin_CombatVar["shieldEquipped"] = false
 	return false
 end
 
@@ -666,8 +698,12 @@ function IWin:IsDaggerEquipped()
 end
 
 function IWin:Is2HanderEquipped()
+	local cached = IWin_CombatVar["2HanderEquipped"]
+	if cached ~= nil then return cached end
 	local offHandLink = GetInventoryItemLink("player", 17)
-	return not offHandLink
+	local result = not offHandLink
+	IWin_CombatVar["2HanderEquipped"] = result
+	return result
 end
 
 function IWin:IsItemEquipped(slot, name)

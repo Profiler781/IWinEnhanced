@@ -1,5 +1,22 @@
 if UnitClass("player") ~= "Warrior" then return end
 
+local GetTime = GetTime
+local UnitMana = UnitMana
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
+local UnitExists = UnitExists
+local UnitAffectingCombat = UnitAffectingCombat
+local UnitIsFriend = UnitIsFriend
+local UnitIsUnit = UnitIsUnit
+local UnitInRaid = UnitInRaid
+local UnitIsPVP = UnitIsPVP
+local UnitAttackSpeed = UnitAttackSpeed
+local GetNumPartyMembers = GetNumPartyMembers
+local CastSpellByName = CastSpellByName
+local SpellStopCasting = SpellStopCasting
+local GetInventoryItemLink = GetInventoryItemLink
+local GetItemInfo = GetItemInfo
+
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
 	IWin_CombatVar["reservedRage"] = 0
@@ -536,7 +553,7 @@ function IWin:Intervene()
 				or not IWin:IsOnCooldown("Bloodrage")
 			)
 		and not IWin_CombatVar["slamQueued"] then
-			if IWin:IsStanceActive("Defensive Stance") then
+			if not IWin:IsStanceActive("Defensive Stance") then
 				CastSpellByName("Defensive Stance")
 			end
 			if not IWin:IsRageCostAvailable("Intervene") then
@@ -606,7 +623,7 @@ function IWin:MasterStrikeWindfury()
 		and IWin:IsRageAvailable("Master Strike")
 		and IWin:IsBuffActive("player", "Windfury Totem") then
 			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Hamstring")
+			CastSpellByName("Master Strike")
 	end
 end
 

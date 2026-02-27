@@ -26,4 +26,7 @@ IWin_Target = {
 	["blacklistAOEDamage"] = false,
 	["blacklistKick"] = false,
 	["whitelistCharge"] = false,
+	["boss"] = false,
+	["whitelistBoss"] = false,
+	["creatureType"] = nil,
 }

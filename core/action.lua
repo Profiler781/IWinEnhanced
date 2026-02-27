@@ -1,3 +1,14 @@
+local GetTime = GetTime
+local UnitExists = UnitExists
+local UnitIsDead = UnitIsDead
+local UnitIsFriend = UnitIsFriend
+local UnitLevel = UnitLevel
+local UnitAffectingCombat = UnitAffectingCombat
+local CastSpellByName = CastSpellByName
+local GetContainerNumSlots = GetContainerNumSlots
+local GetContainerItemLink = GetContainerItemLink
+local UseContainerItem = UseContainerItem
+
 function IWin:InitializeRotationCore()
 	if not IWin.hasSuperwow then
     	DEFAULT_CHAT_FRAME:AddMessage("|cFF00FFFFbalakethelock's SuperWoW|r required:")
@@ -19,6 +30,10 @@ function IWin:InitializeRotationCore()
 	end
 	IWin_CombatVar["queueGCD"] = true
 	IWin_CombatVar["GCD"] = nil
+	IWin_CombatVar["stance"] = nil
+	IWin_CombatVar["shieldEquipped"] = nil
+	IWin_CombatVar["2HanderEquipped"] = nil
+	IWin_CastTime = {}
 end
 
 function IWin:TargetEnemy()
