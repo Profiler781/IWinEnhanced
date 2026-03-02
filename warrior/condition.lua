@@ -1,17 +1,17 @@
 if UnitClass("player") ~= "Warrior" then return end
 
 function IWin:IsOverpowerAvailable()
-	local overpowerRemaining = IWin_CombatVar["overpowerAvailable"] - GetTime() - 0.2
+	local overpowerRemaining = IWin_RotationVar["overpowerAvailable"] - GetTime() - 0.2
  	return overpowerRemaining > IWin:GetGCDRemaining()
 end
 
 function IWin:IsRevengeAvailable()
-	local revengeRemaining = IWin_CombatVar["revengeAvailable"] - GetTime()
+	local revengeRemaining = IWin_RotationVar["revengeAvailable"] - GetTime()
  	return revengeRemaining > IWin:GetGCDRemaining()
 end
 
 function IWin:IsCharging()
-	local chargeTimeActive = GetTime() - IWin_CombatVar["charge"]
+	local chargeTimeActive = GetTime() - IWin_RotationVar["charge"]
 	return chargeTimeActive < 1
 end
 
@@ -29,20 +29,20 @@ function IWin:IsStanceSwapMaxRageLoss(maxRageLoss, spell)
 end
 
 function IWin:IsReservedRageStance(stance)
-	if IWin_CombatVar["reservedRageStance"] then
-		return IWin_CombatVar["reservedRageStance"] == stance
+	if IWin_RotationVar["reservedRageStance"] then
+		return IWin_RotationVar["reservedRageStance"] == stance
 	end
 	return true
 end
 
 function IWin:SetReservedRageStance(stance)
-	if IWin_CombatVar["reservedRageStanceLast"] +  IWin_Settings["GCD"] < GetTime() then
-		IWin_CombatVar["reservedRageStance"] = stance
+	if IWin_RotationVar["reservedRageStanceLast"] +  IWin_Settings["GCD"] < GetTime() then
+		IWin_RotationVar["reservedRageStance"] = stance
 	end
 end
 
 function IWin:SetReservedRageStanceCast()
-	IWin_CombatVar["reservedRageStanceLast"] = GetTime()
+	IWin_RotationVar["reservedRageStanceLast"] = GetTime()
 end
 
 function IWin:IsDefensiveTacticsAvailable()

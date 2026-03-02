@@ -28,11 +28,11 @@ function IWin:InitializeRotationCore()
 	    end
 		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
 	end
+	IWin_CombatVar = {}
 	IWin_CombatVar["queueGCD"] = true
-	IWin_CombatVar["GCD"] = nil
-	IWin_CombatVar["stance"] = nil
-	IWin_CombatVar["shieldEquipped"] = nil
-	IWin_CombatVar["2HanderEquipped"] = nil
+	IWin_CombatVar["reservedRage"] = 0
+	IWin_CombatVar["reservedEnergy"] = 0
+	IWin_CombatVar["swingAttackQueued"] = false
 	IWin_CastTime = {}
 end
 

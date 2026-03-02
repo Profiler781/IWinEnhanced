@@ -34,10 +34,8 @@ local string_gfind = string.gfind
 local string_match = string.match
 local math_max = math.max
 
-IWin_Spellbook = {}
-IWin_CastTime = {}
-
 -- Buff #######################################################################################################################################
+--helper
 function IWin:GetPlayerBuffIndex(spell)
 	local index = 0
     spell = string_lower(string_gsub(spell, "_"," "))
@@ -54,6 +52,7 @@ function IWin:GetPlayerBuffIndex(spell)
 	return nil
 end
 
+--helper
 function IWin:GetDebuffIndex(unit, spell)
 	local index = 1
 	while UnitDebuff(unit, index) do
@@ -69,6 +68,7 @@ function IWin:GetDebuffIndex(unit, spell)
 	return nil
 end
 
+--todo
 function IWin:GetBuffRemaining(unit, spell, owner)
 	-- Debuff scan
 	for index = 1, 16 do
@@ -114,10 +114,12 @@ function IWin:GetBuffRemaining(unit, spell, owner)
 	return 0
 end
 
+--todo
 function IWin:IsBuffActive(unit, spell, owner)
 	return IWin:GetBuffRemaining(unit, spell, owner) ~= 0
 end
 
+--todo
 function IWin:GetBuffStack(unit, spell, owner)
 	-- Debuff scan
 	for index = 1, 16 do
@@ -151,19 +153,24 @@ function IWin:GetBuffStack(unit, spell, owner)
 	return 0
 end
 
+--todo
 function IWin:IsBuffStack(unit, spell, stack, owner)
 	return IWin:GetBuffStack(unit, spell, owner) == stack
 end
 
 function IWin:IsTaunted()
+	local cached = IWin_CombatVar["taunted"]
+	if cached ~= nil then return cached end
 	local index = 1
 	while IWin_Taunt[index] do
 		local taunt = IWin:IsBuffActive("target", IWin_Taunt[index])
 		if taunt then
+			IWin_CombatVar["taunted"] = true
 			return true
 		end
 		index = index + 1
 	end
+	IWin_CombatVar["taunted"] = false
 	return false
 end
 
@@ -188,21 +195,24 @@ function IWin:GetSpellSpellbookID(spell, rank)
     return nil
 end
 
+--todo
 function IWin:GetCooldownRemaining(spell)
 	local spellID = IWin:GetSpellSpellbookID(spell)
 	if not spellID then return false end
 	local start, duration = GetSpellCooldown(spellID, "BOOKTYPE_SPELL")
-	if start ~= 0 and duration ~=  IWin_Settings["GCD"] then
+	if start ~= 0 and duration ~= IWin_Settings["GCD"] then
 		return duration - (GetTime() - start)
 	else
 		return 0
 	end
 end
 
+--todo
 function IWin:IsOnCooldown(spell)
 	return IWin:GetCooldownRemaining(spell) ~= 0
 end
 
+--todo
 function IWin:IsSpellLearnt(spell, rank)
 	local spellID = IWin:GetSpellSpellbookID(spell, rank)
 	if not spellID then return false end
@@ -210,9 +220,8 @@ function IWin:IsSpellLearnt(spell, rank)
 end
 
 function IWin:GetGCDRemaining()
-	if IWin_CombatVar["GCD"] ~= nil then
-		return IWin_CombatVar["GCD"]
-	end
+	local cached = IWin_CombatVar["GCD"]
+	if cached ~= nil then return cached end
 	local info = GetCastInfo()
 	if info and info.gcdRemainingMs then
 		IWin_CombatVar["GCD"] = info.gcdRemainingMs
@@ -223,12 +232,17 @@ function IWin:GetGCDRemaining()
 end
 
 function IWin:IsGCDActive()
+	local cached = IWin_CombatVar["GCDActive"]
+	if cached ~= nil then return cached end
 	if IWin:GetGCDRemaining() ~= 0 then
+		IWin_CombatVar["GCDActive"] = true
 		return true
 	end
+	IWin_CombatVar["GCDActive"] = false
 	return false
 end
 
+--helper
 function IWin:ParseCastTimeFromText(text)
     if not text then return nil end
     -- Match patterns like "1.5 sec cast", "1.59 sec cast", "2 sec cast"
@@ -279,6 +293,7 @@ function IWin:GetCastTime(spell)
     return nil
 end
 
+--todo
 function IWin:GetSpellSlot(spell)
 	for slot = 1, 172 do
 		local actionTexture = GetActionTexture(slot)
@@ -292,6 +307,7 @@ function IWin:GetSpellSlot(spell)
 	return nil
 end
 
+--todo
 -- requires IWin_Texture data
 function IWin:IsActionUsable(spell)
 	local slot = IWin:GetSpellSlot(spell)
@@ -301,6 +317,7 @@ function IWin:IsActionUsable(spell)
 	return false
 end
 
+--todo
 function IWin:GetSpellNameMaxRank(spell)
 	if not IWin:IsSpellLearnt(spell) then return nil end
 	local rank = 1
@@ -315,34 +332,36 @@ function IWin:GetSpellNameMaxRank(spell)
 	end
 end
 
+--todo
 function IWin:IsCasting(unit, spell)
 	return CleveRoids.CheckSpellCast(unit, spell)
 end
 
 -- Stance #######################################################################################################################################
+--helper
 function IWin:GetStance()
-	local cached = IWin_CombatVar["stance"]
-	if cached ~= nil then
-		return cached ~= false and cached or nil
-	end
 	local forms = GetNumShapeshiftForms()
 	for index = 1, forms do
 		local _, name, active = GetShapeshiftFormInfo(index)
 		if active == 1 then
-			IWin_CombatVar["stance"] = name
 			return name
 		end
 	end
-	IWin_CombatVar["stance"] = false
-	return nil
+	return "no stance"
 end
 
 function IWin:IsStanceActive(stance)
-	return IWin:GetStance() == stance
+	local cached = IWin_CombatVar["stance"]
+	if cached ~= nil then return cached == stance end
+	local stanceActive = IWin:GetStance()
+	IWin_CombatVar["stance"] = stanceActive
+	return stanceActive == stance
 end
 
 -- Health #######################################################################################################################################
 function IWin:GetTimeToDie()
+	local cached = IWin_CombatVar["timeToDie"]
+	if cached ~= nil then return cached end
 	local ttd = 0
 	local numPartyMembers = math_max(2, GetNumPartyMembers(), GetNumRaidMembers())
 	if (not UnitInRaid("player")) or type(TimeToKill) ~= "table" or type(TimeToKill.GetTTK) ~= "function" or TimeToKill.GetTTK() == nil then
@@ -350,36 +369,52 @@ function IWin:GetTimeToDie()
 	else
 		ttd = TimeToKill.GetTTK() - 1
 	end
+	IWin_CombatVar["timeToDie"] = ttd
 	return ttd
 end
 
+--todo
 function IWin:GetHealthPercent(unit)
 	return UnitHealth(unit) / UnitHealthMax(unit) * 100
 end
 
 function IWin:IsExecutePhase()
-	return IWin:GetHealthPercent("target") <= 20
+	local cached = IWin_CombatVar["executePhase"]
+	if cached ~= nil then return cached end
+	local result = IWin:GetHealthPercent("target") <= 20
+	IWin_CombatVar["executePhase"] = result
+	return result
 end
 
 -- Mana #######################################################################################################################################
+--todo
 function IWin:GetManaPercent(unit)
 	return UnitMana(unit) / UnitManaMax(unit) * 100
 end
 
+--todo
 function IWin:IsManaAvailable(spell)
 	return UnitMana("player") >= IWin_ManaCost[spell]
 end
 
 function IWin:GetPlayerDruidMana()
+	local cached = IWin_Mana["playerDruidMana"]
+	if cached ~= nil then return cached end
 	local _, casterMana = UnitMana("player")
+	IWin_Mana["playerDruidMana"] = casterMana
 	return casterMana
 end
 
 function IWin:GetPlayerDruidManaPercent()
+	local cached = IWin_Mana["playerDruidManaPercent"]
+	if cached ~= nil then return cached end
 	local _, casterManaMax = UnitManaMax("player")
-	return IWin:GetPlayerDruidMana() / casterManaMax * 100
+	local result = IWin:GetPlayerDruidMana() / casterManaMax * 100
+	IWin_Mana["playerDruidManaPercent"] = result
+	return result
 end
 
+--todo
 function IWin:IsDruidManaAvailable(spell)
 	return IWin:GetPlayerDruidMana() >= IWin_ManaCost[spell]
 end
@@ -470,6 +505,7 @@ function IWin:SetReservedEnergy(spell, trigger, unit)
 end
 
 -- Range #######################################################################################################################################
+--todo
 function IWin:IsInRange(spell, distance, unit)
 	if unit == nil then unit = "target" end
 	if not UnitExists(unit) then return false end
@@ -486,179 +522,158 @@ function IWin:IsInRange(spell, distance, unit)
 	end
 end
 
+--todo
 function IWin:GetEnemyInRange(range)
 	-- body
 end
 
 -- Target #######################################################################################################################################
 function IWin:IsTanking()
-	return UnitIsUnit("targettarget", "player")
+	local cached = IWin_CombatVar["tanking"]
+	if cached ~= nil then return cached end
+	local result = UnitIsUnit("targettarget", "player")
+	IWin_CombatVar["tanking"] = result
+	return result
 end
 
 function IWin:IsBehind()
-	if not UnitExists("target") then return false end
-    return UnitXP("behind", "player", "target")
-end
-
-function IWin:GetTrainingDummy()
-	local name = UnitName("target")
-	if name and string_find(name,"Training Dummy") then
-		return true
-	else
+	local cached = IWin_CombatVar["behind"]
+	if cached ~= nil then return cached end
+	if not UnitExists("target") then
+		IWin_CombatVar["behind"] = false
 		return false
 	end
-end
-
-function IWin:SetTrainingDummy()
-	IWin_Target["trainingDummy"] = IWin:GetTrainingDummy()
+    local result = UnitXP("behind", "player", "target")
+    IWin_CombatVar["behind"] = result
+    return result
 end
 
 function IWin:IsTrainingDummy()
-	if IWin_Target["trainingDummy"] == nil then IWin:SetTrainingDummy() end
-	return IWin_Target["trainingDummy"]
-end
-
-function IWin:GetElite()
-	local classification = UnitClassification("target")
-	if IWin_UnitClassification[classification]
-		or IWin:IsTrainingDummy() then
-			return true
-	else
-		return false
+	local cached = IWin_Target["trainingDummy"]
+	if cached ~= nil then return cached end
+	local name = UnitName("target")
+	if name and string_find(name,"Training Dummy") then
+		IWin_Target["trainingDummy"] = true
+		return true
 	end
-end
-
-function IWin:SetElite()
-	IWin_Target["elite"] = IWin:GetElite()
-end
-
-function IWin:IsElite()
-	return IWin_Target["elite"]
-end
-
-function IWin:GetBoss()
-	if UnitClassification("target") == "worldboss"
-		or IWin:IsTrainingDummy()
-		or IWin:IsWhitelistBoss() then
-			return true
-	end
+	IWin_Target["trainingDummy"] = false
 	return false
 end
 
-function IWin:SetBoss()
-	IWin_Target["boss"] = IWin:GetBoss()
+function IWin:IsElite()
+	local cached = IWin_Target["elite"]
+	if cached ~= nil then return cached end
+	local classification = UnitClassification("target")
+	if IWin:IsTrainingDummy()
+		or (
+				classification
+				and IWin_UnitClassification[classification]
+			) then
+				IWin_Target["elite"] = true
+				return true
+	end
+	IWin_Target["elite"] = false	
+	return false
 end
 
 function IWin:IsBoss()
-	return IWin_Target["boss"]
-end
-
-function IWin:GetBlacklistAOEDebuff()
-	if not UnitExists("target") then
-		return true
+	local cached = IWin_Target["boss"]
+	if cached ~= nil then return cached end
+	if UnitClassification("target") == "worldboss"
+		or IWin:IsTrainingDummy()
+		or IWin:IsWhitelistBoss() then
+			IWin_Target["boss"] = true
+			return true
 	end
-	return IWin_BlacklistAOEDebuff[UnitName("target")] or false
-end
-
-function IWin:SetBlacklistAOEDebuff()
-	IWin_Target["blacklistAOEDebuff"] = IWin:GetBlacklistAOEDebuff()
+	IWin_Target["boss"] = false	
+	return false
 end
 
 function IWin:IsBlacklistAOEDebuff()
-	return IWin_Target["blacklistAOEDebuff"]
-end
-
-function IWin:GetBlacklistAOEDamage()
-	if not UnitExists("target") then
-		return true
+	local cached = IWin_Target["blacklistAOEDebuff"]
+	if cached ~= nil then return cached end
+	if not UnitExists("target")
+		or IWin_BlacklistAOEDebuff[UnitName("target")] then
+			IWin_Target["blacklistAOEDebuff"] = true
+			return true
 	end
-	return IWin_BlacklistAOEDamage[UnitName("target")] or false
-end
-
-function IWin:SetBlacklistAOEDamage()
-	IWin_Target["blacklistAOEDamage"] = IWin:GetBlacklistAOEDamage()
+	IWin_Target["blacklistAOEDebuff"] = false
+	return false
 end
 
 function IWin:IsBlacklistAOEDamage()
-	return IWin_Target["blacklistAOEDamage"]
-end
-
-function IWin:GetBlacklistKick()
-	if not UnitExists("target") then
-		return true
+	local cached = IWin_Target["blacklistAOEDamage"]
+	if cached ~= nil then return cached end
+	if not UnitExists("target")
+		or IWin_BlacklistAOEDamage[UnitName("target")] then
+			IWin_Target["blacklistAOEDamage"] = true
+			return true
 	end
-	return IWin_BlacklistKick[UnitName("target")] or false
-end
-
-function IWin:SetBlacklistKick()
-	IWin_Target["blacklistKick"] = IWin:GetBlacklistKick()
+	IWin_Target["blacklistAOEDamage"] = false
+	return false
 end
 
 function IWin:IsBlacklistKick()
-	return IWin_Target["blacklistKick"]
-end
-
-function IWin:GetBlacklistFear()
-	if not UnitExists("target") then
-		return true
+	local cached = IWin_Target["blacklistKick"]
+	if cached ~= nil then return cached end
+	if not UnitExists("target")
+		or IWin_BlacklistKick[UnitName("target")] then
+			IWin_Target["blacklistKick"] = true
+			return true
 	end
-	return IWin_BlacklistFear[UnitName("target")] or false
-end
-
-function IWin:SetBlacklistFear()
-	IWin_Target["blacklistFear"] = IWin:GetBlacklistFear()
+	IWin_Target["blacklistKick"] = false
+	return false
 end
 
 function IWin:IsBlacklistFear()
-	return IWin_Target["blacklistFear"]
-end
-
-function IWin:GetWhitelistCharge()
-	if not UnitExists("target") then
-		return true
+	local cached = IWin_Target["blacklistFear"]
+	if cached ~= nil then return cached end
+	if not UnitExists("target")
+		or IWin_BlacklistFear[UnitName("target")] then
+			IWin_Target["blacklistFear"] = true
+			return true
 	end
-	return IWin_WhitelistCharge[UnitName("target")] or false
-end
-
-function IWin:SetWhitelistCharge()
-	IWin_Target["whitelistCharge"] = IWin:GetWhitelistCharge()
+	IWin_Target["blacklistFear"] = false
+	return false
 end
 
 function IWin:IsWhitelistCharge()
-	return IWin_Target["whitelistCharge"]
-end
-
-function IWin:GetWhitelistBoss()
-	if not UnitExists("target") then
-		return false
+	local cached = IWin_Target["whitelistCharge"]
+	if cached ~= nil then return cached end
+	if not UnitExists("target")
+		or IWin_WhitelistCharge[UnitName("target")] then
+			IWin_Target["whitelistCharge"] = true
+			return true
 	end
-	if IWin:IsTrainingDummy() then
-		return true
-	end
-	return IWin_WhitelistBoss[UnitName("target")] or false
-end
-
-function IWin:SetWhitelistBoss()
-	IWin_Target["whitelistBoss"] = IWin:GetWhitelistBoss()
+	IWin_Target["whitelistCharge"] = false
+	return false
 end
 
 function IWin:IsWhitelistBoss()
-	return IWin_Target["whitelistBoss"]
+	local cached = IWin_Target["whitelistBoss"]
+	if cached ~= nil then return cached end
+	if not UnitExists("target")
+		or IWin_WhitelistBoss[UnitName("target")] then
+			IWin_Target["whitelistBoss"] = true
+			return true
+	end
+	IWin_Target["whitelistBoss"] = false
+	return false
 end
 
 function IWin:IsImmune(unit, school)
 	return CleveRoids.CheckImmunity(unit, school)
 end
 
-function IWin:SetCreatureType()
-	IWin_Target["creatureType"] = UnitCreatureType("target")
-end
-
 function IWin:IsCreatureType(creatureType)
+	if IWin_Target["creatureType"] == nil then
+		IWin_Target["creatureType"] = UnitCreatureType("target")
+	end
 	return IWin_Target["creatureType"] == creatureType
 end
 
 -- Item #######################################################################################################################################
+--helper
 function IWin:GetItemID(itemLink)
 	for itemID in string_gfind(itemLink, "|c%x+|Hitem:(%d+):%d+:%d+:%d+|h%[(.-)%]|h|r$") do
 		return itemID
@@ -666,46 +681,57 @@ function IWin:GetItemID(itemLink)
 end
 
 function IWin:IsShieldEquipped()
-	local cached = IWin_CombatVar["shieldEquipped"]
+	local cached = IWin_Inventory["shieldEquipped"]
 	if cached ~= nil then return cached end
 	local offHandLink = GetInventoryItemLink("player", 17)
 	if offHandLink then
 		local _, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(offHandLink)))
 		local result = itemSubType == "Shields"
-		IWin_CombatVar["shieldEquipped"] = result
+		IWin_Inventory["shieldEquipped"] = result
 		return result
 	end
-	IWin_CombatVar["shieldEquipped"] = false
+	IWin_Inventory["shieldEquipped"] = false
 	return false
 end
 
 function IWin:IsWandEquipped()
+	local cached = IWin_Inventory["wandEquipped"]
+	if cached ~= nil then return cached end
 	local rangedLink = GetInventoryItemLink("player", 18)
 	if rangedLink then
 		local _, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(rangedLink)))
-		return itemSubType == "Wands"
+		local result = itemSubType == "Wands"
+		IWin_Inventory["wandEquipped"] = result
+		return result
 	end
+	IWin_Inventory["wandEquipped"] = false
 	return false
 end
 
 function IWin:IsDaggerEquipped()
+	local cached = IWin_Inventory["daggerEquipped"]
+	if cached ~= nil then return cached end
 	local mainHandLink = GetInventoryItemLink("player", 16)
 	if mainHandLink then
 		local _, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(mainHandLink)))
-		return itemSubType == "Daggers"
+		local result = itemSubType == "Daggers"
+		IWin_Inventory["daggerEquipped"] = result
+		return result
 	end
+	IWin_Inventory["daggerEquipped"] = false
 	return false
 end
 
 function IWin:Is2HanderEquipped()
-	local cached = IWin_CombatVar["2HanderEquipped"]
+	local cached = IWin_Inventory["2HanderEquipped"]
 	if cached ~= nil then return cached end
 	local offHandLink = GetInventoryItemLink("player", 17)
 	local result = not offHandLink
-	IWin_CombatVar["2HanderEquipped"] = result
+	IWin_Inventory["2HanderEquipped"] = result
 	return result
 end
 
+--todo
 function IWin:IsItemEquipped(slot, name)
 	local itemLink = GetInventoryItemLink("player", slot)
 	if itemLink then
@@ -715,6 +741,7 @@ function IWin:IsItemEquipped(slot, name)
 	return false
 end
 
+--todo
 function IWin:IsItemInBag(item)
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
@@ -727,6 +754,7 @@ function IWin:IsItemInBag(item)
 	return false
 end
 
+--todo
 function IWin:GetItemCountInBag(item)
 	local itemCount = 0
 	for bag = 0, 4 do
@@ -742,8 +770,12 @@ end
 
 -- Movement #######################################################################################################################################
 function IWin:IsMoving()
+	local cached = IWin_CombatVar["moving"]
+	if cached ~= nil then return cached end
 	if MonkeySpeed and MonkeySpeed.m_fSpeed and MonkeySpeed.m_fSpeed ~= 0 then
+		IWin_CombatVar["moving"] = true
 		return true
 	end
+	IWin_CombatVar["moving"] = false
 	return false
 end

@@ -14,14 +14,11 @@ local CastSpellByName = CastSpellByName
 
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedEnergy"] = 0
-	IWin_CombatVar["swingAttackQueued"] = false
-	if IWin_CombatVar["lastMoonkinSpellTime"] + 0.5 < GetTime() then
+	if IWin_RotationVar["lastMoonkinSpellTime"] + 0.5 < GetTime() then
 		if not UnitExists("target") or UnitAffectingCombat("target") then
-			IWin_CombatVar["lastMoonkinSpell"] = "Starfire"
+			IWin_RotationVar["lastMoonkinSpell"] = "Starfire"
 		else
-			IWin_CombatVar["lastMoonkinSpell"] = "Wrath"
+			IWin_RotationVar["lastMoonkinSpell"] = "Wrath"
 		end
 	end
 	IWin_CombatVar["energyPerSecondPrediction"] = IWin_Settings["energyPerSecondPrediction"]
@@ -31,10 +28,6 @@ function IWin:InitializeRotation()
 	if IWin:IsBuffActive("player", "Berserk") then
 		IWin_CombatVar["energyPerSecondPrediction"] = IWin_CombatVar["energyPerSecondPrediction"] + IWin_Settings["energyPerSecondPrediction"]
 	end
-	IWin_CastTime = {
-		["Wrath"] = nil,
-		["Starfire"] = nil,
-	}
 end
 
 ---- Class Actions ----
@@ -690,7 +683,7 @@ function IWin:Starfire()
 										and IWin:IsBuffActive("player", "Natural Solstice")
 									)
 								or (
-										IWin_CombatVar["lastMoonkinSpell"] == "Wrath"
+										IWin_RotationVar["lastMoonkinSpell"] == "Wrath"
 										and not IWin:IsBuffActive("player", "Arcane Eclipse")
 										and not IWin:IsBuffActive("player", "Nature Eclipse")
 										and (
@@ -733,7 +726,7 @@ function IWin:Wrath()
 										and IWin:IsBuffActive("player", "Arcane Solstice")
 									)
 								or (
-										IWin_CombatVar["lastMoonkinSpell"] == "Starfire"
+										IWin_RotationVar["lastMoonkinSpell"] == "Starfire"
 										and not IWin:IsBuffActive("player", "Arcane Eclipse")
 										and not IWin:IsBuffActive("player", "Nature Eclipse")
 										and (

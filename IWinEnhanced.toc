@@ -20,6 +20,7 @@ shaman\data.lua
 warlock\data.lua
 warrior\data.lua
 
+core\init.lua
 druid\init.lua
 hunter\init.lua
 mage\init.lua
@@ -52,6 +53,7 @@ shaman\action.lua
 warlock\action.lua
 warrior\action.lua
 
+core\event.lua
 druid\event.lua
 hunter\event.lua
 mage\event.lua

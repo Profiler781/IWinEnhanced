@@ -8,8 +8,6 @@ local GetComboPoints = GetComboPoints
 
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
-	IWin_CombatVar["reservedEnergy"] = 0
-	IWin_CombatVar["swingAttackQueued"] = false
 	IWin_CombatVar["energyPerSecondPrediction"] = IWin_Settings["energyPerSecondPrediction"]
 	if IWin:IsBuffActive("player", "Adrenaline") then
 		IWin_CombatVar["energyPerSecondPrediction"] = IWin_CombatVar["energyPerSecondPrediction"] * 2

@@ -1,32 +1,17 @@
 if UnitClass("player") ~= "Warrior" then return end
 
 IWin_CombatVar = {
-	["GCD"] = 0,
-	["startAttackThrottle"] = 0,
+	["slamQueued"] = false
+}
+
+IWin_RotationVar = {
 	["overpowerAvailable"] = 0,
 	["revengeAvailable"] = 0,
-	["reservedRage"] = 0,
 	["reservedRageStance"] = nil,
 	["reservedRageStanceLast"] = 0,
 	["charge"] = 0,
-	["queueGCD"] = true,
-	["slamQueued"] = false,
-	["swingAttackQueued"] = false,
 	["slamCasting"] = 0,
 	["slamGCDAllowed"] = 0,
 	["slamClipAllowedMax"] = 0,
 	["slamClipAllowedMin"] = 0,
-}
-
-IWin_Target = {
-	["trainingDummy"] = false,
-	["elite"] = false,
-	["blacklistFear"] = false,
-	["blacklistAOEDebuff"] = false,
-	["blacklistAOEDamage"] = false,
-	["blacklistKick"] = false,
-	["whitelistCharge"] = false,
-	["boss"] = false,
-	["whitelistBoss"] = false,
-	["creatureType"] = nil,
 }

@@ -19,11 +19,9 @@ local GetItemInfo = GetItemInfo
 
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
-	IWin_CombatVar["reservedRage"] = 0
 	IWin_CombatVar["slamQueued"] = false
-	IWin_CombatVar["swingAttackQueued"] = false
-	if IWin_CombatVar["reservedRageStanceLast"] +  IWin_Settings["GCD"] < GetTime() then
-		IWin_CombatVar["reservedRageStance"] = nil
+	if IWin_RotationVar["reservedRageStanceLast"] + IWin_Settings["GCD"] < GetTime() then
+		IWin_RotationVar["reservedRageStance"] = nil
 	end
 end
 
@@ -171,7 +169,7 @@ function IWin:Charge()
 			end
 			if IWin:IsStanceActive("Battle Stance") then
 				CastSpellByName("Charge")
-				IWin_CombatVar["charge"] = GetTime()
+				IWin_RotationVar["charge"] = GetTime()
 				IWin:MarkSkull()
 			end
 	end
@@ -204,7 +202,7 @@ function IWin:Cleave()
 		if IWin:IsRageAvailable("Cleave")
 			or UnitMana("player") > 75 then
 				IWin_CombatVar["swingAttackQueued"] = true
-				IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
+				IWin_RotationVar["startAttackThrottle"] = GetTime() + 0.2
 				CastSpellByName("Cleave")
 		else
 			--SpellStopCasting()
@@ -450,7 +448,7 @@ function IWin:HeroicStrike()
 						)
 				) then
 					IWin_CombatVar["swingAttackQueued"] = true
-					IWin_CombatVar["startAttackThrottle"] = GetTime() + 0.2
+					IWin_RotationVar["startAttackThrottle"] = GetTime() + 0.2
 					CastSpellByName("Heroic Strike")
 		else
 			--SpellStopCasting()
@@ -759,7 +757,7 @@ function IWin:Pummel()
 					if not IWin:IsRageCostAvailable("Pummel") then
 						CastSpellByName("Bloodrage")
 					end
-					if IWin_CombatVar["slamCasting"] > GetTime() then
+					if IWin_RotationVar["slamCasting"] > GetTime() then
 						SpellStopCasting()
 					end
 					CastSpellByName("Pummel")
@@ -876,7 +874,7 @@ function IWin:ShieldBlock()
 		and IWin:IsRageAvailable("Shield Block")
 		and not IWin:IsBuffActive("player", "Improved Shield Slam")
 		and not IWin:IsBuffActive("player", "Shield Block")
-		and IWin:GetCooldownRemaining("Revenge") <  IWin_Settings["GCD"]
+		and IWin:GetCooldownRemaining("Revenge") < IWin_Settings["GCD"]
 		and not IWin:IsRevengeAvailable()
 		and IWin:IsStanceActive("Defensive Stance") then
 			CastSpellByName("Shield Block")
@@ -928,7 +926,7 @@ end
 function IWin:Slam()
 	if IWin:IsSpellLearnt("Slam")
 		and IWin_CombatVar["queueGCD"]
-		and IWin_CombatVar["reservedRageStanceLast"] + 0.2 < GetTime()
+		and IWin_RotationVar["reservedRageStanceLast"] + 0.2 < GetTime()
 		and IWin:IsRageAvailable("Slam")
 		and IWin:Is2HanderEquipped()
 		and (
@@ -936,8 +934,8 @@ function IWin:Slam()
 				or st_timer > UnitAttackSpeed("player") * 0.5
 				--or st_timer > IWin:GetCastTime("Slam")
 				--or (
-				--		IWin_CombatVar["slamClipAllowedMax"] > GetTime()
-				--		and IWin_CombatVar["slamClipAllowedMin"] < GetTime()
+				--		IWin_RotationVar["slamClipAllowedMax"] > GetTime()
+				--		and IWin_RotationVar["slamClipAllowedMin"] < GetTime()
 				--	)
 			)
 		and (
@@ -960,9 +958,9 @@ function IWin:SetSlamQueued()
 	if IWin:IsSpellLearnt("Slam")
 		and IWin:Is2HanderEquipped() then
 			local nextSwing = st_timer + UnitAttackSpeed("player")
-			local nextSlam =  IWin_Settings["GCD"] + IWin:GetCastTime("Slam")
+			local nextSlam = IWin_Settings["GCD"] + IWin:GetCastTime("Slam")
 			if nextSlam > nextSwing
-				and IWin_CombatVar["slamGCDAllowed"] < GetTime() then
+				and IWin_RotationVar["slamGCDAllowed"] < GetTime() then
 					IWin_CombatVar["slamQueued"] = true
 			end
 	end
@@ -977,7 +975,7 @@ function IWin:SetReservedRageSlam()
 	if IWin:Is2HanderEquipped() then
 		IWin:SetReservedRage("Slam", "nocooldown")
 	end
-	if IWin_CombatVar["slamCasting"] > GetTime() then
+	if IWin_RotationVar["slamCasting"] > GetTime() then
 		IWin:SetReservedRage("Slam", "nocooldown")
 	end
 end
