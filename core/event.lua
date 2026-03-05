@@ -9,6 +9,7 @@ IWin_core:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
 		--DEFAULT_CHAT_FRAME:AddMessage("")
 		if IWin_Settings == nil then IWin_Settings = {} end
+		if IWin_Settings["debug"] == nil then IWin_Settings["debug"] = "off" end
 		if IWin_Settings["GCD"] == nil then IWin_Settings["GCD"] = 1.5 end
 		if IWin_Settings["GCDEnergy"] == nil then IWin_Settings["GCDEnergy"] = 1 end
 		IWin.hasSuperwow = SetAutoloot and true or false

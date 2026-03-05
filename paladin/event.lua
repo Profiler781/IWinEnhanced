@@ -27,6 +27,6 @@ IWin:SetScript("OnEvent", function()
 			IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
 	    	if not IWin.libdebuff then return 0 end
 		end
-		IWin_CombatVar["weaponAttackSpeed"] = UnitAttackSpeed("player") * (1 + IWin:GetBuffStack("player","Zeal") * 0.05)
+		IWin_CombatVar["weaponAttackSpeed"] = UnitAttackSpeed("player") * (1 + IWin:GetBuffStack("player","Zeal", nil, false) * 0.05)
 	end
 end)

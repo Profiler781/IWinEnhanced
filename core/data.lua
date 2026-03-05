@@ -1,5 +1,6 @@
-function IWin:GetTalentRank(tabIndex, talentIndex)
+function IWin:GetTalentRank(tabIndex, talentIndex, debugmsg)
 	local _, _, _, _, currentRank = GetTalentInfo(tabIndex, talentIndex)
+	IWin:Debug(tabIndex.."/"..talentIndex.." talent points: "..tostring(currentRank), debugmsg)
 	return currentRank
 end
 

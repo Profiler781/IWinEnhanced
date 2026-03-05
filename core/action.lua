@@ -10,6 +10,7 @@ local GetContainerItemLink = GetContainerItemLink
 local UseContainerItem = UseContainerItem
 
 function IWin:InitializeRotationCore()
+	IWin:Debug("=== Rotation processing ===")
 	if not IWin.hasSuperwow then
     	DEFAULT_CHAT_FRAME:AddMessage("|cFF00FFFFbalakethelock's SuperWoW|r required:")
         DEFAULT_CHAT_FRAME:AddMessage("https://github.com/balakethelock/SuperWoW")
@@ -36,6 +37,18 @@ function IWin:InitializeRotationCore()
 	IWin_CastTime = {}
 end
 
+function IWin:Cast(spell, gcd, unit)
+	if gcd ~= false then
+		IWin_CombatVar["queueGCD"] = false
+	end
+	IWin:Debug("=> Casting "..spell)
+	if unit == nil then
+		CastSpellByName(spell)
+	else
+		CastSpellByName(spell, unit)
+	end
+end
+
 function IWin:TargetEnemy()
 	if not UnitExists("target")
 		or UnitIsDead("target")
@@ -45,8 +58,9 @@ function IWin:TargetEnemy()
 end
 
 function IWin:StartAttack()
-	if IWin:IsBuffActive("player", "Prowl") or IWin:IsBuffActive("player", "Stealth") then return end
-	if IWin_CombatVar["swingAttackQueued"] or IWin_CombatVar["startAttackThrottle"] and IWin_CombatVar["startAttackThrottle"] > GetTime() then return end
+	--IWin:Debug("+++ checking conditions: startattack")
+	if IWin:IsBuffActive("player", "Prowl", nil, false) or IWin:IsBuffActive("player", "Stealth", nil, false) then return end
+	if IWin_CombatVar["swingAttackQueued"] or IWin_RotationVar["startAttackThrottle"] and IWin_RotationVar["startAttackThrottle"] > GetTime() then return end
 	local attackActionFound = false
 	for action = 1, 172 do
 		if IsAttackAction(action) then
@@ -74,18 +88,18 @@ function IWin:MarkSkull()
 		and not UnitIsFriend("player", "target")
 		and not UnitInRaid("player")
 		and GetNumPartyMembers() ~= 0 then
+			IWin:Debug("=> MarkSkull")
 			SetRaidTarget("target", 8)
 	end
 end
 
 function IWin:Perception()
-	if IWin:IsSpellLearnt("Perception")
-		and not IWin:IsOnCooldown("Perception")
-		and UnitAffectingCombat("player")
+	local spell = "Perception"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if UnitAffectingCombat("player")
 		and IWin_CombatVar["queueGCD"]
 		and not IWin:IsGCDActive() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Perception")
+			IWin:Cast(spell)
 	end
 end
 
@@ -129,9 +143,9 @@ function IWin:UseDrinkItem()
 end
 
 function IWin:Shoot()
-	if IWin:IsSpellLearnt("Shoot")
-		and IWin:IsWandEquipped() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Shoot")
+	local spell = "Shoot"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsWandEquipped() then
+		IWin:Cast(spell)
 	end
 end

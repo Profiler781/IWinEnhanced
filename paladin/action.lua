@@ -16,35 +16,33 @@ function IWin:InitializeRotation()
 end
 
 function IWin:BlessingOfKings()
-	if IWin:IsSpellLearnt("Blessing of Kings")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsBuffActive("player","Blessing of Kings")
-		and not IWin:IsBuffActive("player","Greater Blessing of Kings")
+	local spell = "Blessing of Kings"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsBuffActive("player", spell)
+		and not IWin:IsBuffActive("player", "Greater Blessing of Kings")
 		and GetNumPartyMembers() == 0
 		and IWin.hasPallyPower
 		and PallyPower_Assignments[UnitName("player")][4] == 4 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Blessing of Kings")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:BlessingOfLight()
-	if IWin:IsSpellLearnt("Blessing of Light")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsBuffActive("player","Blessing of Light")
-		and not IWin:IsBuffActive("player","Greater Blessing of Light")
+	local spell = "Blessing of Light"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsBuffActive("player", spell)
+		and not IWin:IsBuffActive("player", "Greater Blessing of Light")
 		and GetNumPartyMembers() == 0
 		and IWin.hasPallyPower
 		and PallyPower_Assignments[UnitName("player")][4] == 3 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Blessing of Light")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:BlessingOfMight()
-	if IWin:IsSpellLearnt("Blessing of Might")
-		and IWin_CombatVar["queueGCD"]
-		and GetNumPartyMembers() == 0
+	local spell = "Blessing of Might"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if GetNumPartyMembers() == 0
 		and (
 				(
 					not IWin.hasPallyPower
@@ -53,47 +51,44 @@ function IWin:BlessingOfMight()
 			or (
 					IWin.hasPallyPower
 					and PallyPower_Assignments[UnitName("player")][4] == 1
-					and not IWin:IsBuffActive("player","Blessing of Might")
+					and not IWin:IsBuffActive("player",spell)
 					and not IWin:IsBuffActive("player","Greater Blessing of Might")
 				)
 			) then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Blessing of Might")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:BlessingOfSalvation()
-	if IWin:IsSpellLearnt("Blessing of Salvation")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsBuffActive("player","Blessing of Salvation")
-		and not IWin:IsBuffActive("player","Greater Blessing of Salvation")
+	local spell = "Blessing of Salvation"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsBuffActive("player", spell)
+		and not IWin:IsBuffActive("player", "Greater Blessing of Salvation")
 		and GetNumPartyMembers() == 0
 		and IWin.hasPallyPower
 		and PallyPower_Assignments[UnitName("player")][4] == 2 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Blessing of Salvation")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:BlessingOfSanctuary()
-	if IWin:IsSpellLearnt("Blessing of Sanctuary")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsBuffActive("player","Blessing of Sanctuary")
-		and not IWin:IsBuffActive("player","Greater Blessing of Sanctuary")
+	local spell = "Blessing of Sanctuary"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsBuffActive("player", spell)
+		and not IWin:IsBuffActive("player", "Greater Blessing of Sanctuary")
 		and GetNumPartyMembers() == 0
 		and (
 				not IWin.hasPallyPower
 				or PallyPower_Assignments[UnitName("player")][4] == 5
 			) then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Blessing of Sanctuary")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:BlessingOfWisdom()
-	if IWin:IsSpellLearnt("Blessing of Wisdom")
-		and IWin_CombatVar["queueGCD"]
-		and GetNumPartyMembers() == 0
+	local spell = "Blessing of Wisdom"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if GetNumPartyMembers() == 0
 		and (
 				(
 					not IWin.hasPallyPower
@@ -102,156 +97,134 @@ function IWin:BlessingOfWisdom()
 			or (
 					IWin.hasPallyPower
 					and PallyPower_Assignments[UnitName("player")][4] == 0
-					and not IWin:IsBuffActive("player","Blessing of Wisdom")
-					and not IWin:IsBuffActive("player","Greater Blessing of Wisdom")
+					and not IWin:IsBuffActive("player", spell)
+					and not IWin:IsBuffActive("player", "Greater Blessing of Wisdom")
 				)
 			) then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Blessing of Wisdom")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:Cleanse()
-	if IWin:IsSpellLearnt("Cleanse")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Cleanse")
-		and not HasFullControl() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Cleanse")
+	local spell = "Cleanse"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not HasFullControl() then
+		IWin:Cast(spell)
 	end
 end
 
 function IWin:ConcentrationAura()
-	if IWin:IsSpellLearnt("Concentration Aura")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsAuraActive()
+	local spell = "Concentration Aura"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsAuraActive()
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 2 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Concentration Aura")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Consecration(manaPercent)
-	if IWin:IsSpellLearnt("Consecration")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:GetManaPercent("player") > manaPercent
-		and not IWin:IsOnCooldown("Consecration") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Consecration")
+	local spell = "Consecration"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetManaPercent("player") > manaPercent then
+		IWin:Cast(spell)
 	end
 end
 
 function IWin:ConsecrationFocus(manaPercent)
+	local spell = "Consecration"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsMoving()
 		and IWin:GetTimeToDie() > 6 then
 			IWin:Consecration(manaPercent)
 	end
 end
 
-function IWin:CrusaderStrike(manaPercent,queueTime)
-	if IWin:IsSpellLearnt("Crusader Strike")
-		and IWin_CombatVar["queueGCD"]
-		and (
-				IWin:GetCooldownRemaining("Crusader Strike") < queueTime
-				or not IWin:IsOnCooldown("Crusader Strike")
-			)
-		and IWin:GetManaPercent("player") > manaPercent
+function IWin:CrusaderStrike(manaPercent, queueTime)
+	local spell = "Crusader Strike"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetManaPercent("player") > manaPercent
 		and (
 				IWin:GetBuffRemaining("player","Zeal") < 13
 				or IWin:GetManaPercent("player") > 80
 			) then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Crusader Strike")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:DevotionAura()
-	if IWin:IsSpellLearnt("Devotion Aura")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsAuraActive()
+	local spell = "Devotion Aura"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsAuraActive()
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 0 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Devotion Aura")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:DivineShield()
-	if IWin:IsSpellLearnt("Divine Shield")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Divine Shield")
-		and UnitAffectingCombat("player") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Divine Shield")
+	local spell = "Divine Shield"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if UnitAffectingCombat("player") then
+		IWin:Cast(spell)
 	end
 end
 
 function IWin:Exorcism(manaPercent)
-	if IWin:IsSpellLearnt("Exorcism")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Exorcism")
-		and IWin:GetManaPercent("player") > manaPercent
+	local spell = "Exorcism"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetManaPercent("player") > manaPercent
 		and (
 				IWin:IsCreatureType("Undead")
 				or IWin:IsCreatureType("Demon")
 			) then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Exorcism")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:ExorcismRanged(manaPercent)
-	if IWin:IsSpellLearnt("Exorcism")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Exorcism")
-		and IWin:GetManaPercent("player") > manaPercent
+	local spell = "Exorcism"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetManaPercent("player") > manaPercent
 		and (
 				IWin:IsCreatureType("Undead")
 				or IWin:IsCreatureType("Demon")
 			)
 		and not IWin:IsInRange("Holy Strike") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Exorcism")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:FireResistanceAura()
-	if IWin:IsSpellLearnt("Fire Resistance Aura")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsAuraActive()
+	local spell = "Fire Resistance Aura"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsAuraActive()
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 5 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Fire Resistance Aura")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:FrostResistanceAura()
-	if IWin:IsSpellLearnt("Frost Resistance Aura")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsAuraActive()
+	local spell = "Frost Resistance Aura"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsAuraActive()
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 4 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Frost Resistance Aura")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:HammerOfJustice()
-	if IWin:IsSpellLearnt("Hammer of Justice")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Hammer of Justice") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Hammer of Justice")
-	end
+	local spell = "Hammer of Justice"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	IWin:Cast(spell)
 end
 
 function IWin:HammerOfWrath(manaPercent)
-	if IWin:IsSpellLearnt("Hammer of Wrath")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsMoving()
-		and not IWin:IsOnCooldown("Hammer of Wrath")
+	local spell = "Hammer of Wrath"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsMoving()
 		and (
 				(
 					IWin:IsElite()
@@ -261,125 +234,97 @@ function IWin:HammerOfWrath(manaPercent)
 				or UnitIsPVP("target")
 			)
 		and IWin:IsExecutePhase() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Hammer of Wrath")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:HandOfFreedom()
-	if IWin:IsSpellLearnt("Hand of Freedom")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Hand of Freedom")
-		and not HasFullControl() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Hand of Freedom")
+	local spell = "Hand of Freedom"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not HasFullControl() then
+		IWin:Cast(spell)
 	end
 end
 
 function IWin:HandOfReckoning()
-	if IWin:IsSpellLearnt("Hand of Reckoning")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsTanking()
-		and not IWin:IsOnCooldown("Hand of Reckoning")
-		and not IWin:IsImmune("target", "Hand of Reckoning")
+	local spell = "Hand of Reckoning"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsTanking()
+		--and not IWin:IsImmune("target", spell)
 		and not IWin:IsTaunted() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Hand of Reckoning")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:HolyShield(manaPercent, minParty)
-	if IWin:IsSpellLearnt("Holy Shield")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Holy Shield")
-		and IWin:GetManaPercent("player") > manaPercent
+	local spell = "Holy Shield"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetManaPercent("player") > manaPercent
 		and IWin:IsShieldEquipped()
 		and GetNumPartyMembers() >= minParty
 		and (
 				not UnitAffectingCombat("target")
 				or IWin:IsTanking()
 			) then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Holy Shield")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:HolyShock(manaPercent)
-	if IWin:IsSpellLearnt("Holy Shock")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Holy Shock")
-		and IWin:IsTanking()
-		and not IWin:IsBuffActive("player","Mortal Strike")
+	local spell = "Holy Shock"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsTanking()
+		and not IWin:IsBuffActive("player", "Mortal Strike")
 		and IWin:GetHealthPercent("player") < 80
 		and IWin:GetManaPercent("player") > manaPercent then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Holy Shock","player")
+			IWin:Cast(spell, nil, "player")
 	end
 end
 
 function IWin:HolyShockPull(manaPercent)
-	if IWin:IsSpellLearnt("Holy Shock")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsInRange("Holy Shock")
-		and not IWin:IsOnCooldown("Holy Shock")
+	local spell = "Holy Shock"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsInRange(spell)
 		and UnitExists("target")
 		and IWin:GetManaPercent("player") > manaPercent
 		and not UnitAffectingCombat("target") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Holy Shock")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:HolyStrike(queueTime)
-	if IWin:IsSpellLearnt("Holy Strike")
-		and IWin_CombatVar["queueGCD"]
-		and (
-				IWin:GetCooldownRemaining("Holy Strike") < queueTime
-				or not IWin:IsOnCooldown("Holy Strike")
-			) then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Holy Strike")
-	end
+	local spell = "Holy Strike"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	IWin:Cast(spell)
 end
 
 function IWin:HolyStrikeHolyMight(queueTime)
-	if IWin:IsSpellLearnt("Holy Strike")
-		and IWin_CombatVar["queueGCD"]
-		and (
-				IWin:GetCooldownRemaining("Holy Strike") < queueTime
-				or not IWin:IsOnCooldown("Holy Strike")
-			)
-		and IWin:GetBuffRemaining("player","Holy Might") < 4
+	local spell = "Holy Strike"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetBuffRemaining("player", "Holy Might") < 4
 		and IWin:GetTalentRank(3 ,15) ~= 0 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Holy Strike")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:HolyWrath(manaPercent)
-	if IWin:IsSpellLearnt("Holy Wrath")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsMoving()
-		and not IWin:IsOnCooldown("Holy Wrath")
+	local spell = "Holy Wrath"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsMoving()
 		and not IWin:IsTanking()
 		and (
 				IWin:IsCreatureType("Undead")
 				or IWin:IsCreatureType("Demon")
 			)
 		and IWin:GetManaPercent("player") > manaPercent then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Holy Wrath")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Judgement(manaPercent,queueTime)
-	if IWin:IsSpellLearnt("Judgement")
-		and IWin_CombatVar["queueGCD"]
-		and (
-				IWin:GetCooldownRemaining("Judgement") < queueTime
-				or not IWin:IsOnCooldown("Judgement")
-			)
-		and IWin:IsSealActive()
+	local spell = "Judgement"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsSealActive()
 		and (
 				(
 					IWin:GetTalentRank(1, 3) == 3
@@ -415,15 +360,14 @@ function IWin:Judgement(manaPercent,queueTime)
 					)
 			)
 		and not IWin:IsGCDActive() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Judgement")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:JudgementReact()
-	if IWin:IsSpellLearnt("Judgement")
-		and not IWin:IsOnCooldown("Judgement")
-		and (
+	local spell = "Judgement"
+	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
+	if 		(
 				IWin:IsBuffActive("player","Seal of Wisdom")
 				or IWin:IsBuffActive("player","Seal of Light")
 				or IWin:IsBuffActive("player","Seal of the Crusader")
@@ -433,51 +377,47 @@ function IWin:JudgementReact()
 				not IWin:IsJudgementOverwrite("Judgement of Wisdom","Seal of Wisdom")
 				or IWin:GetManaPercent("player") > 60
 			) then
-			CastSpellByName("Judgement")
+				IWin:Cast(spell, false)
 	end
 end
 
 function IWin:JudgementRanged(manaPercent,queueTime)
+	local spell = "Judgement"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsInRange("Holy Strike") then
 		IWin:Judgement(manaPercent,queueTime)
 	end
 end
 
 function IWin:Purify()
-	if IWin:IsSpellLearnt("Purify")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Purify")
-		and not HasFullControl() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Purify")
+	local spell = "Purify"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not HasFullControl() then
+		IWin:Cast(spell)
 	end
 end
 
 function IWin:Repentance()
-	if IWin:IsSpellLearnt("Repentance")
-		and not IWin:IsOnCooldown("Repentance") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Repentance")
-	end
+	local spell = "Repentance"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	IWin:Cast(spell)
 end
 
 function IWin:RepentanceRaid()
-	if IWin:IsSpellLearnt("Repentance")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Repentance")
-		and not IWin:IsBuffActive("target", "Repent")
+	local spell = "Repentance"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsBuffActive("target", "Repent")
 		and IWin:GetTimeToDie() > 10
 		and UnitInRaid("player")
 		and IWin:IsElite() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Repentance")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:RetributionAura()
-	if IWin:IsSpellLearnt("Retribution Aura")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsAuraActive()
+	local spell = "Retribution Aura"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsAuraActive()
 		and (
 				(
 					IWin.hasPallyPower
@@ -485,34 +425,32 @@ function IWin:RetributionAura()
 				)
 				or not IWin.hasPallyPower
 			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Retribution Aura")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:RighteousFury()
-	if IWin:IsSpellLearnt("Righteous Fury")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsBuffActive("player","Righteous Fury") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Righteous Fury")
+	local spell = "Righteous Fury"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsBuffActive("player" ,spell) then
+		IWin:Cast(spell)
 	end
 end
 
 function IWin:SanctityAura()
-	if IWin:IsSpellLearnt("Sanctity Aura")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsAuraActive()
+	local spell = "Sanctity Aura"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsAuraActive()
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 6 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Sanctity Aura")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SealOfCommand(manaPercent)
-	if IWin:IsSpellLearnt("Seal of Command")
-		and IWin:GetManaPercent("player") > manaPercent
+	local spell = "Seal of Command"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetManaPercent("player") > manaPercent
 		and (
 				(
 					IWin_CombatVar["weaponAttackSpeed"] > 3.49
@@ -525,28 +463,28 @@ function IWin:SealOfCommand(manaPercent)
 				or IWin:IsHiddenSealUsed()
 				or IWin:GetManaPercent("player") > 95
 			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Seal of Command")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:SealOfJustice()
-	if IWin:IsSpellLearnt("Seal of Justice")
-		and not IWin:IsBuffActive("target", "Judgement of Justice")
+	local spell = "Seal of Justice"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsBuffActive("target", "Judgement of Justice")
 		and (
-				not IWin:IsBuffActive("player", "Seal of Justice")
-				or IWin:IsHiddenSealofJusticeUsed()
+				not IWin:IsBuffActive("player", spell)
+				or IWin:IsHiddenSealUsed("Seal of Justice")
 			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Seal of Justice")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:SealOfJusticeElite()
-	if IWin:IsSpellLearnt("Seal of Justice")
-		and (
-				not IWin:IsBuffActive("player","Seal of Justice")
-				or IWin:IsHiddenSealofJusticeUsed()
+	local spell = "Seal of Justice"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if 		(
+				not IWin:IsBuffActive("player", spell)
+				or IWin:IsHiddenSealUsed("Seal of Justice")
 			)
 		and not IWin:IsBuffActive("target","Judgement of Justice")
 		and IWin:IsJudgementTarget("justice")
@@ -558,16 +496,16 @@ function IWin:SealOfJusticeElite()
 				not IWin.hasPallyPower
 				and IWin_Settings["judgement"] == "justice"
 			)) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Seal of Justice")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:SealOfLightElite()
-	if IWin:IsSpellLearnt("Seal of Light")
-		and (
-				not IWin:IsBuffActive("player","Seal of Light")
-				or IWin:IsHiddenSealofLightUsed()
+	local spell = "Seal of Light"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if 		(
+				not IWin:IsBuffActive("player", spell)
+				or IWin:IsHiddenSealUsed("Seal of Light")
 			)
 		and not IWin:IsBuffActive("target","Judgement of Light")
 		and IWin:IsJudgementTarget("light")
@@ -581,40 +519,40 @@ function IWin:SealOfLightElite()
 					and IWin_Settings["judgement"] == "light"
 				)
 			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Seal of Light")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:SealOfRighteousness(manaPercent)
-	if IWin:IsSpellLearnt("Seal of Righteousness")
-		and IWin:GetManaPercent("player") > manaPercent
+	local spell = "Seal of Righteousness"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetManaPercent("player") > manaPercent
 		and (
 				not IWin:IsSealActive()
 				or IWin:IsHiddenSealUsed()
 				or (
 						IWin:GetManaPercent("player") > 95
 						and (
-								not IWin:IsBuffActive("player","Seal of Righteousness")
-								or IWin:IsHiddenSealofRighteousnessUsed()
+								not IWin:IsBuffActive("player", spell)
+								or IWin:IsHiddenSealUsed("Seal of Righteousness")
 							)
 						and IWin:IsBuffActive("target","Judgement of Wisdom")
 						and (
 								IWin:IsBuffActive("player","Seal of Wisdom")
-								or IWin:IsHiddenSealofWisdomUsed()
+								or IWin:IsHiddenSealUsed("Seal of Wisdom")
 							)
 					)
 			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Seal of Righteousness")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:SealOfTheCrusaderElite()
-	if IWin:IsSpellLearnt("Seal of the Crusader")
-		and (
-				not IWin:IsBuffActive("player","Seal of the Crusader")
-				or IWin:IsHiddenSealoftheCrusaderUsed()
+	local spell = "Seal of the Crusader"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if 		(
+				not IWin:IsBuffActive("player", spell)
+				or IWin:IsHiddenSealUsed("Seal of the Crusader")
 			)
 		and not IWin:IsBuffActive("target","Judgement of the Crusader")
 		and IWin:IsJudgementTarget("crusader")
@@ -626,14 +564,14 @@ function IWin:SealOfTheCrusaderElite()
 				not IWin.hasPallyPower
 				and IWin_Settings["judgement"] == "crusader"
 			)) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Seal of the Crusader")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:SealOfWisdom(manaPercent)
-	if IWin:IsSpellLearnt("Seal of Wisdom")
-		and (
+	local spell = "Seal of Wisdom"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if 		(
 				not IWin:IsSealActive()
 				or IWin:IsHiddenSealUsed()
 			)
@@ -651,16 +589,16 @@ function IWin:SealOfWisdom(manaPercent)
 						and not UnitAffectingCombat("player")
 					)
 			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Seal of Wisdom")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:SealOfWisdomElite()
-	if IWin:IsSpellLearnt("Seal of Wisdom")
-		and (
-				not IWin:IsBuffActive("player","Seal of Wisdom")
-				or IWin:IsHiddenSealofWisdomUsed()
+	local spell = "Seal of Wisdom"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if 		(
+				not IWin:IsBuffActive("player", spell)
+				or IWin:IsHiddenSealUsed("Seal of Wisdom")
 			)
 		and not IWin:IsBuffActive("target","Judgement of Wisdom")
 		and IWin:IsJudgementTarget("wisdom")
@@ -674,29 +612,25 @@ function IWin:SealOfWisdomElite()
 					and IWin_Settings["judgement"] == "wisdom"
 				)
 			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Seal of Wisdom")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:SealOfWisdomEco()
-	if IWin:IsSpellLearnt("Seal of Wisdom")
-		and (
-				not IWin:IsSealActive()
-				or IWin:IsHiddenSealUsed()
-			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Seal of Wisdom")
+	local spell = "Seal of Wisdom"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsSealActive()
+		or IWin:IsHiddenSealUsed() then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:ShadowResistanceAura()
-	if IWin:IsSpellLearnt("Shadow Resistance Aura")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsAuraActive()
+	local spell = "Shadow Resistance Aura"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if not IWin:IsAuraActive()
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 3 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Shadow Resistance Aura")
+			IWin:Cast(spell)
 	end
 end

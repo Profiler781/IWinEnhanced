@@ -9,51 +9,47 @@ local GetComboPoints = GetComboPoints
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
 	IWin_CombatVar["energyPerSecondPrediction"] = IWin_Settings["energyPerSecondPrediction"]
-	if IWin:IsBuffActive("player", "Adrenaline") then
+	if IWin:IsBuffActive("player", "Adrenaline", nil, false) then
 		IWin_CombatVar["energyPerSecondPrediction"] = IWin_CombatVar["energyPerSecondPrediction"] * 2
 	end
 end
 
 function IWin:AdrenalineRush()
-	if IWin:IsSpellLearnt("Adrenaline Rush")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Adrenaline Rush")
-		and IWin:IsEnergyAvailable("Adrenaline Rush")
+	local spell = "Adrenaline Rush"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell)
 		and UnitMana("player") <= 60 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Adrenaline Rush")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Ambush()
-	if IWin:IsSpellLearnt("Ambush")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Ambush")
-		and IWin:IsEnergyCostAvailable("Ambush")
+	local spell = "Ambush"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyCostAvailable(spell)
 		and IWin:IsBehind()
 		and IWin:IsDaggerEquipped()
 		and IWin:IsBuffActive("player", "Stealth") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Ambush")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Backstab()
-	if IWin:IsSpellLearnt("Backstab")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Backstab")
-		and IWin:IsEnergyAvailable("Backstab")
+	local spell = "Backstab"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell)
 		and IWin:IsBehind()
 		and IWin:IsDaggerEquipped() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Backstab")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedEnergyBackstab()
-	if IWin:IsBehind()
-		and IWin:IsDaggerEquipped() then
-			IWin:SetReservedEnergy("Backstab", "nocooldown")
+	local spell = "Backstab"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsBehind(false)
+		and IWin:IsDaggerEquipped(false) then
+			IWin:SetReservedEnergy(spell, "nocooldown")
 	end
 end
 
@@ -62,56 +58,51 @@ function IWin:BladeFlurry()
 end
 
 function IWin:CheapShot()
-	if IWin:IsSpellLearnt("Cheap Shot")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Cheap Shot")
-		and IWin:IsEnergyCostAvailable("Cheap Shot")
+	local spell = "Cheap Shot"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyCostAvailable(spell)
 		and IWin:IsBuffActive("player", "Stealth") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Cheap Shot")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:DeadlyThrow()
-	if IWin:IsSpellLearnt("Deadly Throw")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Deadly Throw")
-		and IWin:IsEnergyCostAvailable("Deadly Throw")
+	local spell = "Deadly Throw"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyCostAvailable(spell)
 		and IWin:IsCasting("target")
-		and IWin:IsInRange("Deadly Throw") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Deadly Throw")
+		and IWin:IsInRange(spell) then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Envenom()
-	if IWin:IsSpellLearnt("Envenom")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Envenom")
-		and IWin:IsEnergyAvailable("Envenom")
+	local spell = "Envenom"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell)
 		and IWin:GetTimeToDie() > 6
-		and IWin:GetBuffRemaining("player", "Envenom") < 3
+		and IWin:GetBuffRemaining("player", spell) < 3
 		and GetComboPoints() < 3
 		and GetComboPoints() > 0 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Envenom")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedEnergyEnvenom()
-	if IWin:GetTimeToDie() > 6
-		and IWin:GetBuffRemaining("player", "Envenom") < 3
+	local spell = "Envenom"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:GetTimeToDie(false) > 6
+		and IWin:GetBuffRemaining("player", spell, nil, false) < 3
 		and GetComboPoints() < 3
 		and GetComboPoints() > 0 then
-			IWin:SetReservedEnergy("Envenom", "buff", "player")
+			IWin:SetReservedEnergy(spell, "buff", "player")
 	end
 end
 
 function IWin:Evicerate()
-	if IWin:IsSpellLearnt("Evicerate")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Evicerate")
-		and IWin:IsEnergyAvailable("Evicerate")
+	local spell = "Evicerate"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell)
 		and (
 				IWin:IsMaxComboPoints()
 				or (
@@ -119,142 +110,133 @@ function IWin:Evicerate()
 						and IWin:GetTimeToDie() < 2
 					)
 			) then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Evicerate")
+				IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedEnergyEvicerate()
-	if IWin:IsMaxComboPoints() then
-		IWin:SetReservedEnergy("Evicerate", "nocooldown")
+	local spell = "Evicerate"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsMaxComboPoints(false) then
+		IWin:SetReservedEnergy(spell, "nocooldown")
 	end
 end
 
 function IWin:ExposeArmor()
-	if IWin:IsSpellLearnt("Expose Armor")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Expose Armor")
-		and IWin:IsEnergyAvailable("Expose Armor")
+	local spell = "Expose Armor"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell)
 		and IWin:IsBoss()
 		and IWin:GetTalentRank(3, 2) == 2
 		and IWin:IsMaxComboPoints()
-		and IWin:GetTimeToDie() > IWin:GetBuffRemaining("target", "Expose Armor")
-		and IWin:GetBuffRemaining("target", "Expose Armor") < 3 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Expose Armor")
+		and IWin:GetTimeToDie() > IWin:GetBuffRemaining("target", spell)
+		and IWin:GetBuffRemaining("target", spell) < 3 then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedEnergyExposeArmor()
-	if IWin:IsBoss()
-		and IWin:GetTalentRank(3, 2) == 2
-		and IWin:IsMaxComboPoints()
-		and IWin:GetTimeToDie() > IWin:GetBuffRemaining("target", "Expose Armor")
-		and IWin:GetBuffRemaining("target", "Expose Armor") < 3 then
-			IWin:SetReservedEnergy("Expose Armor", "buff", "target")
+	local spell = "Expose Armor"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsBoss(false)
+		and IWin:GetTalentRank(3, 2, false) == 2
+		and IWin:IsMaxComboPoints(false)
+		and IWin:GetTimeToDie(false) > IWin:GetBuffRemaining("target", spell, nil, false)
+		and IWin:GetBuffRemaining("target", spell, nil, false) < 3 then
+			IWin:SetReservedEnergy(spell, "buff", "target")
 	end
 end
 
 function IWin:Garrote()
-	if IWin:IsSpellLearnt("Garrote")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Garrote")
-		and IWin:IsEnergyCostAvailable("Garrote")
+	local spell = "Garrote"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyCostAvailable(spell)
 		and IWin:IsBehind()
 		and not IWin:IsImmune("target", "bleed")
 		and IWin:IsBuffActive("player", "Stealth") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Garrote")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Gouge()
-	if IWin:IsSpellLearnt("Gouge")
-		and IWin:IsSpellLearnt("Backstab")
+	local spell = "Gouge"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsSpellLearnt("Backstab")
 		and not IWin:IsSpellLearnt("Noxious Assault")
 		and not IWin:IsSpellLearnt("Hemorrhage")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Gouge")
-		and IWin:IsEnergyAvailable("Gouge")
+		and IWin:IsEnergyAvailable(spell)
 		and IWin:IsTanking()
 		and not IWin:IsBoss()
-		and not IWin:IsBuffActive("target", "Gouge")
+		and not IWin:IsBuffActive("target", spell)
 		and not IWin:IsBehind()
 		and IWin:IsDaggerEquipped() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Gouge")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedEnergyGouge()
-	if IWin:IsSpellLearnt("Backstab")
-		and not IWin:IsSpellLearnt("Noxious Assault")
-		and not IWin:IsSpellLearnt("Hemorrhage")
-		and IWin:IsTanking()
-		and not IWin:IsBoss()
-		and not IWin:IsBuffActive("target", "Gouge")
-		and not IWin:IsBehind()
-		and IWin:IsDaggerEquipped() then
-			IWin:SetReservedEnergy("Gouge", "buff", "target")
+	local spell = "Gouge"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsSpellLearnt("Backstab", nil, false)
+		and not IWin:IsSpellLearnt("Noxious Assault", nil, false)
+		and not IWin:IsSpellLearnt("Hemorrhage", nil, false)
+		and IWin:IsTanking(false)
+		and not IWin:IsBoss(false)
+		and not IWin:IsBuffActive("target", spell, nil, false)
+		and not IWin:IsBehind(false)
+		and IWin:IsDaggerEquipped(false) then
+			IWin:SetReservedEnergy(spell, "buff", "target")
 	end
 end
 
 function IWin:Hemorrhage()
-	if IWin:IsSpellLearnt("Hemorrhage")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Hemorrhage")
-		and IWin:IsEnergyAvailable("Hemorrhage") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Hemorrhage")
+	local spell = "Hemorrhage"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell) then
+		IWin:Cast(spell)
 	end
 end
 
 function IWin:Kick()
-	if IWin:IsSpellLearnt("Kick")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Kick")
-		and IWin:IsEnergyCostAvailable("Kick")
+	local spell = "Kick"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyCostAvailable(spell)
 		and IWin:IsCasting("target")
-		and IWin:IsInRange("Kick") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Kick")
+		and IWin:IsInRange(spell) then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:NoxiousAssault()
-	if IWin:IsSpellLearnt("Noxious Assault")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Noxious Assault")
-		and IWin:IsEnergyAvailable("Noxious Assault") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Noxious Assault")
+	local spell = "Noxious Assault"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell) then
+		IWin:Cast(spell)
 	end
 end
 
 function IWin:PickPocket()
-	if IWin:IsSpellLearnt("Pick Pocket")
-		and IWin:IsBuffActive("player", "Stealth")
-		and UnitCreatureType("target") == "Humanoid" then
-			CastSpellByName("Pick Pocket")
+	local spell = "Pick Pocket"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsBuffActive("player", "Stealth")
+		and IWin:IsCreatureType("Humanoid") then
+			IWin:Cast(spell, false)
 	end
 end
 
 function IWin:Riposte()
-	if IWin:IsSpellLearnt("Riposte")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Riposte")
-		and IWin:IsEnergyAvailable("Riposte")
+	local spell = "Riposte"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell)
 		and IWin:IsRiposteAvailable() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Riposte")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Rupture()
-	if IWin:IsSpellLearnt("Rupture")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Rupture")
-		and IWin:IsEnergyAvailable("Rupture")
+	local spell = "Rupture"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell)
 		and (
 					(
 						not IWin:IsImmune("target", "bleed")
@@ -267,60 +249,58 @@ function IWin:Rupture()
 					)
 			)
 		and IWin:IsMaxComboPoints() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Rupture")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedEnergyRupture()
+	local spell = "Rupture"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
 	if (
 				(
-					not IWin:IsImmune("target", "bleed")
-					and IWin:GetTimeToDie() > IWin:GetRuptureDuration()
-					and IWin:GetBuffRemaining("player", "Taste for Blood") < 3
+					not IWin:IsImmune("target", "bleed", false)
+					and IWin:GetTimeToDie(false) > IWin:GetRuptureDuration(false)
+					and IWin:GetBuffRemaining("player", "Taste for Blood", nil, false) < 3
 				)
 			or (
-					IWin:GetBuffRemaining("player", "Taste for Blood") < 3
-					and IWin:GetTalentRank(1, 10) ~= 0
+					IWin:GetBuffRemaining("player", "Taste for Blood", nil, false) < 3
+					and IWin:GetTalentRank(1, 10, false) ~= 0
 				)
 		)
-		and IWin:IsMaxComboPoints() then
-			IWin:SetReservedEnergy("Rupture", "nocooldown")
+		and IWin:IsMaxComboPoints(false) then
+			IWin:SetReservedEnergy(spell, "nocooldown")
 	end
 end
 
 function IWin:ShadowOfDeath()
-	if IWin:IsSpellLearnt("Shadow of Death")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Shadow of Death")
-		and IWin:IsEnergyAvailable("Shadow of Death")
+	local spell = "Shadow of Death"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell)
 		and IWin:IsMaxComboPoints() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Shadow of Death")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedEnergyShadowOfDeath()
-	if IWin:IsMaxComboPoints() then
-		IWin:SetReservedEnergy("Shadow of Death", "nocooldown")
+	local spell = "Shadow of Death"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsMaxComboPoints(false) then
+		IWin:SetReservedEnergy(spell, "nocooldown")
 	end
 end
 
 function IWin:SinisterStrike()
-	if IWin:IsSpellLearnt("Sinister Strike")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Sinister Strike")
-		and IWin:IsEnergyAvailable("Sinister Strike") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Sinister Strike")
+	local spell = "Sinister Strike"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell) then
+		IWin:Cast(spell)
 	end
 end
 
 function IWin:SliceAndDice()
-	if IWin:IsSpellLearnt("Slice and Dice")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Slice and Dice")
-		and IWin:IsEnergyAvailable("Slice and Dice")
+	local spell = "Slice and Dice"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsEnergyAvailable(spell)
 		and (
 				IWin:GetTimeToDie() > 6 --longer fight
 				or ( --solo will engage next fight
@@ -334,39 +314,38 @@ function IWin:SliceAndDice()
 			)
 		and GetComboPoints() < 3
 		and GetComboPoints() > 0
-		and IWin:GetBuffRemaining("player", "Slice and Dice") < 3 then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Slice and Dice")
+		and IWin:GetBuffRemaining("player", spell) < 3 then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedEnergySliceAndDice()
+	local spell = "Slice and Dice"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
 	if (
-			IWin:GetTimeToDie() > 6 --longer fight
+			IWin:GetTimeToDie(false) > 6 --longer fight
 			or ( --solo will engage next fight
-					IWin:GetHealthPercent("player") > 50
+					IWin:GetHealthPercent("player", false) > 50
 					and GetNumPartyMembers() == 0
 				)
 			or ( --group will engage next pack
-					not IWin:IsBoss()
+					not IWin:IsBoss(false)
 					and GetNumPartyMembers() ~= 0
 				)
 		)
 		and GetComboPoints() < 3
 		and GetComboPoints() > 0
-		and IWin:GetBuffRemaining("player", "Slice and Dice") < 3 then
-			IWin:SetReservedEnergy("Slice and Dice", "buff", "player")
+		and IWin:GetBuffRemaining("player", spell, nil, false) < 3 then
+			IWin:SetReservedEnergy(spell, "buff", "player")
 	end
 end
 
 function IWin:SurpriseAttack()
-	if IWin:IsSpellLearnt("Surprise Attack")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Surprise Attack")
-		and IWin:IsSurpriseAttackAvailable()
-		and IWin:IsEnergyAvailable("Surprise Attack")
+	local spell = "Surprise Attack"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsSurpriseAttackAvailable()
+		and IWin:IsEnergyAvailable(spell)
 		and UnitMana("player") < IWin:GetMaxEnergy() - IWin_CombatVar["energyPerSecondPrediction"] * 2 then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Surprise Attack")
+			IWin:Cast(spell)
 	end
 end

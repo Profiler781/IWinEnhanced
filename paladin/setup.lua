@@ -7,7 +7,15 @@ function SlashCmdList.IWINPALADIN(command)
 	for token in string.gfind(command, "%S+") do
 		table.insert(arguments, token)
 	end
-	if arguments[1] == "judgement"then
+
+	if arguments[1] == "debug" then
+		if arguments[2] ~= "on"
+			and arguments[2] ~= "off"
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
+				return
+		end
+	elseif arguments[1] == "judgement"then
 		if IWin.hasPallyPower then
 			DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Judgements are managed by your Pally Power.|r")
 			return
@@ -57,7 +65,11 @@ function SlashCmdList.IWINPALADIN(command)
 				return
 		end
 	end
-    if arguments[1] == "judgement" then
+
+	if arguments[1] == "debug" then
+        IWin_Settings["debug"] = arguments[2]
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Debug: |r" .. IWin_Settings["debug"])
+    elseif arguments[1] == "judgement" then
         IWin_Settings["judgement"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Judgement: |r" .. IWin_Settings["judgement"])
 	elseif arguments[1] == "wisdom" then
@@ -78,6 +90,7 @@ function SlashCmdList.IWINPALADIN(command)
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin : Current setup|r")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin debug [|r" .. IWin_Settings["debug"] .. "|cff0066ff]:|r Enable/disable debug.")
 		if IWin.hasPallyPower then
 			DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Judgements managed by PallyPowerTW|r")
 		else
