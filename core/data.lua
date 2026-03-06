@@ -52,8 +52,9 @@ IWin_UnitClassification = {
 }
 
 IWin_PartySize = {
-	["raid"] = 40,
+	["raid"] = 6,
 	["group"] = 5,
+	["duo"] = 2,
 	["solo"] = 1,
 	["targetincombat"] = 0,
 	["off"] = 0,
@@ -150,4 +151,10 @@ IWin_DrinkConjured = {
 
 IWin_Texture = {
 	["Interface\\Icons\\Spell_Holy_RighteousFury"] = "Judgement",
+}
+
+IWin_PowerType = {
+	[0] = "mana",
+	[1] = "rage",
+	[3] = "energy",
 }

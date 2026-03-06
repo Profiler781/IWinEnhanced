@@ -1,14 +1,11 @@
 if UnitClass("player") ~= "Paladin" then return end
 
 local GetTime = GetTime
-local UnitMana = UnitMana
-local UnitManaMax = UnitManaMax
 local UnitExists = UnitExists
 local UnitName = UnitName
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitInRaid = UnitInRaid
 local UnitIsPVP = UnitIsPVP
-local GetNumPartyMembers = GetNumPartyMembers
 local CastSpellByName = CastSpellByName
 
 function IWin:InitializeRotation()
@@ -18,9 +15,9 @@ end
 function IWin:BlessingOfKings()
 	local spell = "Blessing of Kings"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsBuffActive("player", spell)
-		and not IWin:IsBuffActive("player", "Greater Blessing of Kings")
-		and GetNumPartyMembers() == 0
+	if not IWin:IsBuffActive("player", spell, nil, false)
+		and not IWin:IsBuffActive("player", "Greater Blessing of Kings", nil, false)
+		and not IWin:IsMinGroupSize("duo", false)
 		and IWin.hasPallyPower
 		and PallyPower_Assignments[UnitName("player")][4] == 4 then
 			IWin:Cast(spell)
@@ -30,9 +27,9 @@ end
 function IWin:BlessingOfLight()
 	local spell = "Blessing of Light"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsBuffActive("player", spell)
-		and not IWin:IsBuffActive("player", "Greater Blessing of Light")
-		and GetNumPartyMembers() == 0
+	if not IWin:IsBuffActive("player", spell, nil, false)
+		and not IWin:IsBuffActive("player", "Greater Blessing of Light", nil, false)
+		and not IWin:IsMinGroupSize("duo", false)
 		and IWin.hasPallyPower
 		and PallyPower_Assignments[UnitName("player")][4] == 3 then
 			IWin:Cast(spell)
@@ -42,17 +39,17 @@ end
 function IWin:BlessingOfMight()
 	local spell = "Blessing of Might"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if GetNumPartyMembers() == 0
+	if not IWin:IsMinGroupSize("duo", false)
 		and (
 				(
 					not IWin.hasPallyPower
-					and not IWin:IsBlessingActive()
+					and not IWin:IsBlessingActive(false)
 				)
 			or (
 					IWin.hasPallyPower
 					and PallyPower_Assignments[UnitName("player")][4] == 1
-					and not IWin:IsBuffActive("player",spell)
-					and not IWin:IsBuffActive("player","Greater Blessing of Might")
+					and not IWin:IsBuffActive("player", spell, nil, false)
+					and not IWin:IsBuffActive("player", "Greater Blessing of Might", nil, false)
 				)
 			) then
 				IWin:Cast(spell)
@@ -62,9 +59,9 @@ end
 function IWin:BlessingOfSalvation()
 	local spell = "Blessing of Salvation"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsBuffActive("player", spell)
-		and not IWin:IsBuffActive("player", "Greater Blessing of Salvation")
-		and GetNumPartyMembers() == 0
+	if not IWin:IsBuffActive("player", spell, nil, false)
+		and not IWin:IsBuffActive("player", "Greater Blessing of Salvation", nil, false)
+		and not IWin:IsMinGroupSize("duo", false)
 		and IWin.hasPallyPower
 		and PallyPower_Assignments[UnitName("player")][4] == 2 then
 			IWin:Cast(spell)
@@ -74,9 +71,9 @@ end
 function IWin:BlessingOfSanctuary()
 	local spell = "Blessing of Sanctuary"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsBuffActive("player", spell)
-		and not IWin:IsBuffActive("player", "Greater Blessing of Sanctuary")
-		and GetNumPartyMembers() == 0
+	if not IWin:IsBuffActive("player", spell, nil, false)
+		and not IWin:IsBuffActive("player", "Greater Blessing of Sanctuary", nil, false)
+		and not IWin:IsMinGroupSize("duo", false)
 		and (
 				not IWin.hasPallyPower
 				or PallyPower_Assignments[UnitName("player")][4] == 5
@@ -88,17 +85,17 @@ end
 function IWin:BlessingOfWisdom()
 	local spell = "Blessing of Wisdom"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if GetNumPartyMembers() == 0
+	if not IWin:IsMinGroupSize("duo", false)
 		and (
 				(
 					not IWin.hasPallyPower
-					and not IWin:IsBlessingActive()
+					and not IWin:IsBlessingActive(false)
 				)
 			or (
 					IWin.hasPallyPower
 					and PallyPower_Assignments[UnitName("player")][4] == 0
-					and not IWin:IsBuffActive("player", spell)
-					and not IWin:IsBuffActive("player", "Greater Blessing of Wisdom")
+					and not IWin:IsBuffActive("player", spell, nil, false)
+					and not IWin:IsBuffActive("player", "Greater Blessing of Wisdom", nil, false)
 				)
 			) then
 				IWin:Cast(spell)
@@ -116,7 +113,7 @@ end
 function IWin:ConcentrationAura()
 	local spell = "Concentration Aura"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsAuraActive()
+	if not IWin:IsAuraActive(false)
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 2 then
 			IWin:Cast(spell)
@@ -126,7 +123,7 @@ end
 function IWin:Consecration(manaPercent)
 	local spell = "Consecration"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetManaPercent("player") > manaPercent then
+	if IWin:GetPowerPercent("player") > manaPercent then
 		IWin:Cast(spell)
 	end
 end
@@ -143,10 +140,10 @@ end
 function IWin:CrusaderStrike(manaPercent, queueTime)
 	local spell = "Crusader Strike"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetManaPercent("player") > manaPercent
+	if IWin:GetPowerPercent("player") > manaPercent
 		and (
 				IWin:GetBuffRemaining("player","Zeal") < 13
-				or IWin:GetManaPercent("player") > 80
+				or IWin:GetPowerPercent("player") > 80
 			) then
 				IWin:Cast(spell)
 	end
@@ -155,7 +152,7 @@ end
 function IWin:DevotionAura()
 	local spell = "Devotion Aura"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsAuraActive()
+	if not IWin:IsAuraActive(false)
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 0 then
 			IWin:Cast(spell)
@@ -173,7 +170,7 @@ end
 function IWin:Exorcism(manaPercent)
 	local spell = "Exorcism"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetManaPercent("player") > manaPercent
+	if IWin:GetPowerPercent("player") > manaPercent
 		and (
 				IWin:IsCreatureType("Undead")
 				or IWin:IsCreatureType("Demon")
@@ -185,7 +182,7 @@ end
 function IWin:ExorcismRanged(manaPercent)
 	local spell = "Exorcism"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetManaPercent("player") > manaPercent
+	if IWin:GetPowerPercent("player") > manaPercent
 		and (
 				IWin:IsCreatureType("Undead")
 				or IWin:IsCreatureType("Demon")
@@ -198,7 +195,7 @@ end
 function IWin:FireResistanceAura()
 	local spell = "Fire Resistance Aura"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsAuraActive()
+	if not IWin:IsAuraActive(false)
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 5 then
 			IWin:Cast(spell)
@@ -208,7 +205,7 @@ end
 function IWin:FrostResistanceAura()
 	local spell = "Frost Resistance Aura"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsAuraActive()
+	if not IWin:IsAuraActive(false)
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 4 then
 			IWin:Cast(spell)
@@ -229,7 +226,7 @@ function IWin:HammerOfWrath(manaPercent)
 				(
 					IWin:IsElite()
 					and not IWin:IsTanking()
-					and IWin:GetManaPercent("player") > manaPercent
+					and IWin:GetPowerPercent("player") > manaPercent
 				)
 				or UnitIsPVP("target")
 			)
@@ -259,9 +256,9 @@ end
 function IWin:HolyShield(manaPercent, minParty)
 	local spell = "Holy Shield"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetManaPercent("player") > manaPercent
+	if IWin:GetPowerPercent("player") > manaPercent
 		and IWin:IsShieldEquipped()
-		and GetNumPartyMembers() >= minParty
+		and IWin:IsMinGroupSize(minParty)
 		and (
 				not UnitAffectingCombat("target")
 				or IWin:IsTanking()
@@ -276,7 +273,7 @@ function IWin:HolyShock(manaPercent)
 	if IWin:IsTanking()
 		and not IWin:IsBuffActive("player", "Mortal Strike")
 		and IWin:GetHealthPercent("player") < 80
-		and IWin:GetManaPercent("player") > manaPercent then
+		and IWin:GetPowerPercent("player") > manaPercent then
 			IWin:Cast(spell, nil, "player")
 	end
 end
@@ -286,7 +283,7 @@ function IWin:HolyShockPull(manaPercent)
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsInRange(spell)
 		and UnitExists("target")
-		and IWin:GetManaPercent("player") > manaPercent
+		and IWin:GetPowerPercent("player") > manaPercent
 		and not UnitAffectingCombat("target") then
 			IWin:Cast(spell)
 	end
@@ -316,7 +313,7 @@ function IWin:HolyWrath(manaPercent)
 				IWin:IsCreatureType("Undead")
 				or IWin:IsCreatureType("Demon")
 			)
-		and IWin:GetManaPercent("player") > manaPercent then
+		and IWin:GetPowerPercent("player") > manaPercent then
 			IWin:Cast(spell)
 	end
 end
@@ -329,7 +326,7 @@ function IWin:Judgement(manaPercent,queueTime)
 				(
 					IWin:GetTalentRank(1, 3) == 3
 					and not IWin:IsBuffActive("player","Holy Judgement")
-					and IWin:GetManaPercent("player") > manaPercent
+					and IWin:GetPowerPercent("player") > manaPercent
 				)
 				or (
 						not IWin:IsJudgementOverwrite("Judgement of Wisdom","Seal of Wisdom")
@@ -355,7 +352,7 @@ function IWin:Judgement(manaPercent,queueTime)
 										IWin:GetBuffRemaining("player","Seal of Command") < 5
 										and IWin:IsBuffActive("player","Seal of Command")
 									)
-								or IWin:GetManaPercent("player") > manaPercent
+								or IWin:GetPowerPercent("player") > manaPercent
 							)
 					)
 			)
@@ -375,7 +372,7 @@ function IWin:JudgementReact()
 			)
 		and (
 				not IWin:IsJudgementOverwrite("Judgement of Wisdom","Seal of Wisdom")
-				or IWin:GetManaPercent("player") > 60
+				or IWin:GetPowerPercent("player") > 60
 			) then
 				IWin:Cast(spell, false)
 	end
@@ -417,7 +414,7 @@ end
 function IWin:RetributionAura()
 	local spell = "Retribution Aura"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsAuraActive()
+	if not IWin:IsAuraActive(false)
 		and (
 				(
 					IWin.hasPallyPower
@@ -440,7 +437,7 @@ end
 function IWin:SanctityAura()
 	local spell = "Sanctity Aura"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsAuraActive()
+	if not IWin:IsAuraActive(false)
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 6 then
 			IWin:Cast(spell)
@@ -450,7 +447,7 @@ end
 function IWin:SealOfCommand(manaPercent)
 	local spell = "Seal of Command"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetManaPercent("player") > manaPercent
+	if IWin:GetPowerPercent("player") > manaPercent
 		and (
 				(
 					IWin_CombatVar["weaponAttackSpeed"] > 3.49
@@ -461,7 +458,7 @@ function IWin:SealOfCommand(manaPercent)
 		and (
 				not IWin:IsSealActive()
 				or IWin:IsHiddenSealUsed()
-				or IWin:GetManaPercent("player") > 95
+				or IWin:GetPowerPercent("player") > 95
 			) then
 				IWin:Cast(spell)
 	end
@@ -526,12 +523,12 @@ end
 function IWin:SealOfRighteousness(manaPercent)
 	local spell = "Seal of Righteousness"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetManaPercent("player") > manaPercent
+	if IWin:GetPowerPercent("player") > manaPercent
 		and (
 				not IWin:IsSealActive()
 				or IWin:IsHiddenSealUsed()
 				or (
-						IWin:GetManaPercent("player") > 95
+						IWin:GetPowerPercent("player") > 95
 						and (
 								not IWin:IsBuffActive("player", spell)
 								or IWin:IsHiddenSealUsed("Seal of Righteousness")
@@ -576,15 +573,15 @@ function IWin:SealOfWisdom(manaPercent)
 				or IWin:IsHiddenSealUsed()
 			)
 		and (
-				IWin:GetManaPercent("player") < manaPercent
+				IWin:GetPowerPercent("player") < manaPercent
 				or (
-						IWin:GetManaPercent("player") < 70
+						IWin:GetPowerPercent("player") < 70
 						and not IWin:IsBuffActive("target","Judgement of Wisdom")
 						and IWin:GetTimeToDie() > 20
 						and not IWin:IsElite()
 					)
 				or (
-						GetNumPartyMembers() < 3
+						not IWin:IsMinGroupSize("duo")
 						and not IWin:IsElite()
 						and not UnitAffectingCombat("player")
 					)
@@ -628,7 +625,7 @@ end
 function IWin:ShadowResistanceAura()
 	local spell = "Shadow Resistance Aura"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if not IWin:IsAuraActive()
+	if not IWin:IsAuraActive(false)
 		and IWin.hasPallyPower
 		and PallyPower_AuraAssignments[UnitName("player")] == 3 then
 			IWin:Cast(spell)

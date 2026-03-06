@@ -1,14 +1,11 @@
 if UnitClass("player") ~= "Druid" then return end
 
 local GetTime = GetTime
-local UnitMana = UnitMana
 local UnitExists = UnitExists
 local UnitLevel = UnitLevel
 local UnitAffectingCombat = UnitAffectingCombat
 local UnitIsPVP = UnitIsPVP
 local UnitPowerType = UnitPowerType
-local GetNumPartyMembers = GetNumPartyMembers
-local GetComboPoints = GetComboPoints
 local CheckInteractDistance = CheckInteractDistance
 local CastSpellByName = CastSpellByName
 
@@ -130,7 +127,7 @@ function IWin:Thorns()
 		and not (CheckInteractDistance("target", 4) ~= nil)
 		and IWin:GetBuffRemaining("player","Thorns") < 60
 		and not UnitAffectingCombat("player")
-		and GetNumPartyMembers() == 0 then
+		and not IWin:IsMinGroupSize("duo") then
 			IWin_CombatVar["queueGCD"] = false
 			IWin:CancelForm()
 			CastSpellByName("Thorns","player")
@@ -219,17 +216,17 @@ function IWin:Powershift()
 			)
 		and (
 				(
-					UnitMana("player") < 20
+					IWin:GetPower("player") < 20
 					and UnitPowerType("player") == 3 --energy
 				) or (
-					UnitMana("player") < 10
+					IWin:GetPower("player") < 10
 					and UnitPowerType("player") == 1 --rage
 				)
 			)
 		and (
 					IWin:GetPlayerDruidManaPercent() > 70
 				or (
-						GetNumPartyMembers() ~= 0
+						IWin:IsMinGroupSize("duo")
 						and IWin:IsDruidManaAvailable("Reshift")
 						and IWin:GetPlayerDruidManaPercent() > 20
 					)
@@ -288,7 +285,7 @@ end
 function IWin:Enrage()
 	if IWin:IsSpellLearnt("Enrage")
 		and not IWin:IsOnCooldown("Enrage")
-		and UnitMana("player") < 50 then
+		and IWin:GetPower("player") < 50 then
 			CastSpellByName("Enrage")
 	end
 end
@@ -349,7 +346,7 @@ function IWin:BerserkCat()
 		and IWin_Settings["berserkCat"] == "on"
 		and not IWin:IsBlacklistFear()
 		and not IWin:IsOnCooldown("Berserk")
-		and UnitMana("player") <= 50
+		and IWin:GetPower("player") <= 50
 		and UnitAffectingCombat("player") then
 			IWin_CombatVar["queueGCD"] = false
 			CastSpellByName("Berserk")
@@ -383,7 +380,7 @@ function IWin:FerociousBite()
 		and not IWin:IsOnCooldown("Ferocious Bite")
 		and IWin:IsEnergyAvailable("Ferocious Bite")
 		and (
-				GetComboPoints() == 5
+				IWin:GetComboPoints() == 5
 				or (
 						IWin:GetTimeToDie() < 3
 						and GetComboPoints() >= 3
@@ -395,10 +392,10 @@ function IWin:FerociousBite()
 end
 
 function IWin:SetReservedEnergyFerocious()
-	if GetComboPoints() == 5
+	if IWin:GetComboPoints(false) == 5
 		or (
 				IWin:GetTimeToDie() < 3
-				and GetComboPoints() >= 3
+				and IWin:GetComboPoints(false) >= 3
 			) then
 				IWin:SetReservedEnergy("Ferocious Bite", "nocooldown")
 	end
@@ -415,7 +412,7 @@ function IWin:Pounce()
 					IWin:GetTimeToDie() > 18
 					and IWin:GetTalentRank(2, 6) == 3
 				)
-				or GetNumPartyMembers() < 3
+				or not IWin:IsMinGroupSize("duo")
 			)
 		and IWin:IsBehind() then
 			IWin_CombatVar["queueGCD"] = false
@@ -437,7 +434,7 @@ function IWin:Rake()
 						and (
 								IWin:GetBleedCount() >= 1 --1 more bleed to claw
 								or (
-										GetComboPoints() == 4 --rip will be used after rake cp. 2 bleeds will allow claw
+										IWin:GetComboPoints() == 4 --rip will be used after rake cp. 2 bleeds will allow claw
 										and IWin:GetTimeToDie() > 15
 									)
 							)
@@ -458,7 +455,7 @@ function IWin:SetReservedEnergyRake()
 						and (
 								IWin:GetBleedCount() >= 1 --1 more bleed to claw
 								or (
-										GetComboPoints() == 4 --rip will be used after rake cp. 2 bleeds will allow claw
+										IWin:GetComboPoints(false) == 4 --rip will be used after rake cp. 2 bleeds will allow claw
 										and IWin:GetTimeToDie() > 15
 									)
 							)
@@ -467,7 +464,7 @@ function IWin:SetReservedEnergyRake()
 		and not IWin:IsImmune("target", "bleed")
 		and not (
 					IWin:GetTalentRank(2, 17) == 2 --dont plan rake refresh if we will refresh it with carnage talent
-					and GetComboPoints() == 4
+					and IWin:GetComboPoints(false) == 4
 				) then
 			IWin:SetReservedEnergy("Rake", "buff", "target")
 	end
@@ -496,15 +493,15 @@ function IWin:Rip()
 		and not IWin:IsBuffActive("target","Rip","player")
 		and (
 				(
-					GetComboPoints() == 3
+					IWin:GetComboPoints() == 3
 					and IWin:GetTimeToDie() > 10
 					and IWin:GetTimeToDie() < 14
 				) or (
-					GetComboPoints() == 4
+					IWin:GetComboPoints() == 4
 					and IWin:GetTimeToDie() > 12
 					and IWin:GetTimeToDie() < 16
 				) or (
-					GetComboPoints() == 5
+					IWin:GetComboPoints() == 5
 					and IWin:GetTimeToDie() > 14
 				)
 			)
@@ -518,15 +515,15 @@ function IWin:SetReservedEnergyRip()
 	if not IWin:IsBuffActive("target","Rip","player")
 		and (
 				(
-					GetComboPoints() == 3
+					IWin:GetComboPoints(false) == 3
 					and IWin:GetTimeToDie() > 10
 					and IWin:GetTimeToDie() < 14
 				) or (
-					GetComboPoints() == 4
+					IWin:GetComboPoints(false) == 4
 					and IWin:GetTimeToDie() > 12
 					and IWin:GetTimeToDie() < 16
 				) or (
-					GetComboPoints() == 5
+					IWin:GetComboPoints(false) == 5
 					and IWin:GetTimeToDie() > 14
 				)
 			)
@@ -548,7 +545,7 @@ function IWin:Shred()
 			)
 		and (
 				(
-					UnitMana("player") < 100
+					IWin:GetPower("player") < 100
 					and IWin_Settings["frontShred"] == "on"
 				)
 				or IWin:IsBehind()
@@ -566,7 +563,7 @@ function IWin:SetReservedEnergyShred()
 		)
 		and (
 				(
-					UnitMana("player") < 100
+					IWin:GetPower("player") < 100
 					and IWin_Settings["frontShred"] == "on"
 				)
 				or IWin:IsBehind()

@@ -1,7 +1,6 @@
 if UnitClass("player") ~= "Warrior" then return end
 
 local GetTime = GetTime
-local UnitMana = UnitMana
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
 local UnitExists = UnitExists
@@ -11,7 +10,6 @@ local UnitIsUnit = UnitIsUnit
 local UnitInRaid = UnitInRaid
 local UnitIsPVP = UnitIsPVP
 local UnitAttackSpeed = UnitAttackSpeed
-local GetNumPartyMembers = GetNumPartyMembers
 local CastSpellByName = CastSpellByName
 local SpellStopCasting = SpellStopCasting
 local GetInventoryItemLink = GetInventoryItemLink
@@ -52,7 +50,7 @@ function IWin:BattleShoutRefreshOOC()
 		and IWin_CombatVar["queueGCD"]
 		and IWin:GetBuffRemaining("player","Battle Shout") < 30
 		and IWin:IsRageAvailable("Battle Shout")
-		and UnitMana("player") > 60
+		and IWin:GetPower("player") > 60
 		and not UnitAffectingCombat("player")
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
@@ -67,7 +65,7 @@ function IWin:BerserkerRage()
 		and not IWin:IsBlacklistFear()
 		and not IWin:IsOnCooldown("Berserker Rage")
 		and UnitAffectingCombat("player")
-		and UnitMana("player") < 70
+		and IWin:GetPower("player") < 70
 		and (
 				IWin:IsTanking()
 				or IWin:GetTalentRank(2, 14) ~= 0
@@ -94,7 +92,7 @@ end
 
 function IWin:Bloodrage()
 	if IWin:IsSpellLearnt("Bloodrage")
-		and UnitMana("player") < 70
+		and IWin:GetPower("player") < 70
 		and IWin:GetHealthPercent("player") > 25
 		and not IWin:IsBuffActive("player","Enrage")
 		and not IWin:IsOnCooldown("Bloodrage")
@@ -110,7 +108,7 @@ function IWin:Bloodrage()
 							or IWin:IsSpellLearnt("Bloodthirst")
 							or IWin:IsSpellLearnt("Shield Slam")
 							or IWin:GetTalentRank(2, 9) ~= 0
-							or GetNumPartyMembers() ~= 0
+							or IWin:IsMinGroupSize("duo")
 						)
 					)
 			) then
@@ -140,7 +138,7 @@ function IWin:BloodthirstHighAP(queueTime)
 		and IWin_CombatVar["queueGCD"]
 		and IWin:GetCooldownRemaining("Bloodthirst") < queueTime
 		and IWin:IsRageAvailable("Bloodthirst")
-		and UnitMana("player") < 60
+		and IWin:GetPower("player") < 60
 		and IWin:IsHighAP()
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
@@ -176,17 +174,8 @@ function IWin:Charge()
 end
 
 function IWin:ChargePartySize()
-	local partySize = IWin_Settings["charge"]
-	if (
-			UnitInRaid("player")
-			and IWin_PartySize[partySize] == 40
-		) or (
-			GetNumPartyMembers() ~= 0
-			and IWin_PartySize[partySize] >= 5
-		) or (
-			GetNumPartyMembers() == 0
-			and IWin_PartySize[partySize] >= 1
-		) or (
+	if IWin:IsMinGroupSize(IWin_Settings["charge"])
+		or (
 			IWin_Settings["charge"] == "targetincombat"
 			and UnitAffectingCombat("target")
 		) or (
@@ -200,7 +189,7 @@ end
 function IWin:Cleave()
 	if IWin:IsSpellLearnt("Cleave") then
 		if IWin:IsRageAvailable("Cleave")
-			or UnitMana("player") > 75 then
+			or IWin:GetPower("player") > 75 then
 				IWin_CombatVar["swingAttackQueued"] = true
 				IWin_RotationVar["startAttackThrottle"] = GetTime() + 0.2
 				CastSpellByName("Cleave")
@@ -302,7 +291,7 @@ function IWin:Execute()
 						not IWin:Is2HanderEquipped()
 						and (
 								UnitInRaid("player")
-								or UnitMana("player") < 40
+								or IWin:GetPower("player") < 40
 							)
 					)
 				or IWin:GetTimeToDie() < 4
@@ -331,7 +320,7 @@ function IWin:SetReservedRageExecute()
 						not IWin:Is2HanderEquipped()
 						and (
 								UnitInRaid("player")
-								or UnitMana("player") < 40
+								or IWin:GetPower("player") < 40
 							)
 					)
 				or IWin:GetTimeToDie() < 4
@@ -410,7 +399,7 @@ function IWin:HamstringJousting()
 		and not IWin:IsOnCooldown("Hamstring")
 		and IWin:IsInRange("Hamstring")
 		and IWin:IsRageCostAvailable("Hamstring")
-		and GetNumPartyMembers() == 0
+		and not IWin:IsMinGroupSize("duo")
 		and IWin_Settings["jousting"] == "on"
 		and not IWin_CombatVar["slamQueued"] then
 			IWin_CombatVar["queueGCD"] = false
@@ -441,7 +430,7 @@ function IWin:HeroicStrike()
 	if IWin:IsSpellLearnt("Heroic Strike") then
 		if IWin:IsRageAvailable("Heroic Strike")
 			or (
-					UnitMana("player") > 75
+					IWin:GetPower("player") > 75
 					and (
 							not IWin:IsSpellLearnt("Whirlwind")
 							or IWin:GetCooldownRemaining("Whirlwind") > 0
@@ -504,16 +493,8 @@ end
 
 function IWin:InterceptPartySize()
 	local partySize = IWin_Settings["charge"]
-	if (
-			UnitInRaid("player")
-			and IWin_PartySize[partySize] == 40
-		) or (
-			GetNumPartyMembers() ~= 0
-			and IWin_PartySize[partySize] >= 5
-		) or (
-			GetNumPartyMembers() == 0
-			and IWin_PartySize[partySize] >= 1
-		) or (
+	if IWin:IsMinGroupSize(IWin_Settings["charge"])
+		or (
 			IWin_Settings["charge"] == "targetincombat"
 			and UnitAffectingCombat("target")
 		) or (
@@ -572,16 +553,8 @@ end
 
 function IWin:IntervenePartySize()
 	local partySize = IWin_Settings["charge"]
-	if (
-			UnitInRaid("player")
-			and IWin_PartySize[partySize] == 40
-		) or (
-			GetNumPartyMembers() ~= 0
-			and IWin_PartySize[partySize] >= 5
-		) or (
-			GetNumPartyMembers() == 0
-			and IWin_PartySize[partySize] >= 1
-		) or (
+	if IWin:IsMinGroupSize(IWin_Settings["charge"])
+		or (
 			IWin_Settings["charge"] == "targetincombat"
 			and UnitAffectingCombat("target")
 		) or (

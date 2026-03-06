@@ -1,6 +1,6 @@
 if UnitClass("player") ~= "Paladin" then return end
 
-function IWin:IsJudgementTarget(judgement)
+function IWin:IsJudgementTarget(judgement, debugmsg)
 	if (
 			IWin_Settings[judgement] == "elite"
 			and IWin:IsElite()
@@ -8,10 +8,10 @@ function IWin:IsJudgementTarget(judgement)
 			IWin_Settings[judgement] == "boss"
 			and IWin:IsBoss()
 		) then
-			IWin:Debug("Target classification for assigned judgement: true")
+			IWin:Debug("Target classification for assigned judgement: true", debugmsg)
 			return true
 	end
-	IWin:Debug("Target classification for assigned judgement: false")
+	IWin:Debug("Target classification for assigned judgement: false", debugmsg)
 	return false
 end
 
@@ -26,22 +26,22 @@ function IWin:IsSealActive(debugmsg)
 	return result
 end
 
-function IWin:IsJudgementOverwrite(judgement, seal)
+function IWin:IsJudgementOverwrite(judgement, seal, debugmsg)
 	local result = IWin:IsBuffActive("target", judgement, nil, false) and IWin:IsBuffActive("player", seal, nil, false)
-	IWin:Debug(judgement.." already applied: "..tostring(result))
+	IWin:Debug(judgement.." already applied: "..tostring(result), debugmsg)
 	return result
 end
 
-function IWin:IsJudgementActive()
+function IWin:IsJudgementActive(debugmsg)
 	local result = IWin:IsBuffActive("target","Judgement of Wisdom", "player", false)
 					or IWin:IsBuffActive("target","Judgement of Light", "player", false)
 					or IWin:IsBuffActive("target","Judgement of Justice", "player", false)
 					or IWin:IsBuffActive("target","Judgement of the Crusader", "player", false)
-	IWin:Debug("Player has an active judgement: "..tostring(result))
+	IWin:Debug("Player has an active judgement: "..tostring(result), debugmsg)
 	return result
 end
 
-function IWin:IsAuraActive()
+function IWin:IsAuraActive(debugmsg)
 	local result = IWin:IsStanceActive("Devotion Aura", false)
 					or IWin:IsStanceActive("Retribution Aura", false)
 					or IWin:IsStanceActive("Concentration Aura", false)
@@ -49,11 +49,11 @@ function IWin:IsAuraActive()
 					or IWin:IsStanceActive("Frost Resistance Aura", false)
 					or IWin:IsStanceActive("Fire Resistance Aura", false)
 					or IWin:IsStanceActive("Sanctity Aura", false)
-	IWin:Debug("Player has an active aura: "..tostring(result), false)
+	IWin:Debug("Player has an active aura: "..tostring(result), debugmsg)
 	return result
 end
 
-function IWin:IsBlessingActive()
+function IWin:IsBlessingActive(debugmsg)
 	local result = IWin:IsBuffActive("player","Blessing of Sanctuary", nil, false)
 					or IWin:IsBuffActive("player","Greater Blessing of Sanctuary", nil, false)
 					or IWin:IsBuffActive("player","Blessing of Might", nil, false)
@@ -66,18 +66,18 @@ function IWin:IsBlessingActive()
 					or IWin:IsBuffActive("player","Greater Blessing of Kings", nil, false)
 					or IWin:IsBuffActive("player","Blessing of Salvation", nil, false)
 					or IWin:IsBuffActive("player","Greater Blessing of Salvation", nil, false)
-	IWin:Debug("Player has an active blessing: "..tostring(result), false)
+	IWin:Debug("Player has an active blessing: "..tostring(result), debugmsg)
 	return result
 end
 
-function IWin:IsHiddenSealUsed(seal) --fix for Doiteaura not removing used seal from hidden buff
+function IWin:IsHiddenSealUsed(seal, debugmsg) --fix for Doiteaura not removing used seal from hidden buff
 	local result
 	if seal then
 		result = IWin:IsBuffActive("player", seal, nil, false) and (not IWin:IsActionUsable("Judgement", false))
-		IWin:Debug("Player has used hidden "..seal..": "..tostring(result))
+		IWin:Debug("Player has used hidden "..seal..": "..tostring(result), debugmsg)
 	else
 		result = IWin:IsSealActive(false) and (not IWin:IsActionUsable("Judgement", false))
-		IWin:Debug("Player has used hidden seal: "..tostring(result))
+		IWin:Debug("Player has used hidden seal: "..tostring(result), debugmsg)
 	end
 	return result
 end

@@ -1,24 +1,24 @@
 if UnitClass("player") ~= "Rogue" then return end
 
-function IWin:IsSurpriseAttackAvailable()
+function IWin:IsSurpriseAttackAvailable(debugmsg)
 	local surpriseAttackRemaining = IWin_RotationVar["surpriseAttackAvailable"] - GetTime()
  	local result = surpriseAttackRemaining > IWin:GetGCDRemaining(false)
- 	IWin:Debug("Surprise attack available: "..tostring(result))
+ 	IWin:Debug("Surprise attack available: "..tostring(result), debugmsg)
  	return result
 end
 
-function IWin:IsRiposteAvailable()
+function IWin:IsRiposteAvailable(debugmsg)
 	local riposteRemaining = IWin_RotationVar["riposteAvailable"] - GetTime()
  	local result = riposteRemaining > IWin:GetGCDRemaining(false)
- 	IWin:Debug("Riposte available: "..tostring(result))
+ 	IWin:Debug("Riposte available: "..tostring(result), debugmsg)
  	return result
 end
 
 function IWin:IsMaxComboPoints(debugmsg)
-	if GetComboPoints() == 5
+	if GetComboPoints(false) == 5
 		or (
-				GetComboPoints() == 4
-				and IWin:GetTalentRank(1, 17) == 5 --seal of fate
+				IWin:GetComboPoints(false) == 4
+				and IWin:GetTalentRank(1, 17, false) == 5 --seal of fate
 			) then
 				IWin:Debug("Max combo: true", debugmsg)
 				return true
@@ -28,15 +28,15 @@ function IWin:IsMaxComboPoints(debugmsg)
 end
 
 function IWin:GetRuptureDuration(debugmsg)
-	local cpDuration = 6 + GetComboPoints() * 2
-	local tasteForBloodDuration = IWin:GetTalentRank(1, 10) * 2
+	local cpDuration = 6 + IWin:GetComboPoints(false) * 2
+	local tasteForBloodDuration = IWin:GetTalentRank(1, 10, false) * 2
 	local result = cpDuration + tasteForBloodDuration
 	IWin:Debug("Rupture full duration: "..tostring(result), debugmsg)
 	return result
 end
 
-function IWin:GetMaxEnergy()
-	local result = 100 + IWin:GetTalentRank(1, 16) * 5
-	IWin:Debug("Max energy: "..tostring(result))
+function IWin:GetMaxEnergy(debugmsg)
+	local result = 100 + IWin:GetTalentRank(1, 16, false) * 5
+	IWin:Debug("Max energy: "..tostring(result), debugmsg)
 	return result
 end

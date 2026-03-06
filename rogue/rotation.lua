@@ -26,8 +26,8 @@ function SlashCmdList.IDPSROGUE()
 	IWin:SetReservedEnergyShadowOfDeath()
 	IWin:Rupture()
 	IWin:SetReservedEnergyRupture()
-	IWin:Evicerate()
-	IWin:SetReservedEnergyEvicerate()
+	IWin:Eviscerate()
+	IWin:SetReservedEnergyEviscerate()
 
 	--utilities
 	IWin:Riposte()
