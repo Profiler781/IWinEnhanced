@@ -1,183 +1,163 @@
 if UnitClass("player") ~= "Warrior" then return end
 
-local GetTime = GetTime
-local UnitHealth = UnitHealth
-local UnitHealthMax = UnitHealthMax
-local UnitExists = UnitExists
-local UnitAffectingCombat = UnitAffectingCombat
-local UnitIsFriend = UnitIsFriend
-local UnitIsUnit = UnitIsUnit
-local UnitInRaid = UnitInRaid
-local UnitIsPVP = UnitIsPVP
-local UnitAttackSpeed = UnitAttackSpeed
-local CastSpellByName = CastSpellByName
-local SpellStopCasting = SpellStopCasting
-local GetInventoryItemLink = GetInventoryItemLink
-local GetItemInfo = GetItemInfo
-
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
 	IWin_CombatVar["slamQueued"] = false
-	if IWin_RotationVar["reservedRageStanceLast"] + IWin_Settings["GCD"] < GetTime() then
+	if IWin_RotationVar["reservedRageStanceLast"] < IWin:GetTime(false) then
+		IWin:Debug("Stance unlocked", debugmsg)
 		IWin_RotationVar["reservedRageStance"] = nil
 	end
 end
 
 function IWin:BattleShout()
-	if IWin:IsSpellLearnt("Battle Shout")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsBuffActive("player","Battle Shout")
-		and IWin:IsRageAvailable("Battle Shout")
+	local spell = "Battle Shout"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsBuffActive("player", spell)
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Battle Shout")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:BattleShoutRefresh()
-	if IWin:IsSpellLearnt("Battle Shout")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:GetBuffRemaining("player","Battle Shout") < 9
-		and IWin:IsRageAvailable("Battle Shout")
+	local spell = "Battle Shout"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetBuffRemaining("player", spell) < 9
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Battle Shout")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:BattleShoutRefreshOOC()
-	if IWin:IsSpellLearnt("Battle Shout")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:GetBuffRemaining("player","Battle Shout") < 30
-		and IWin:IsRageAvailable("Battle Shout")
+	local spell = "Battle Shout"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsAffectingCombat("player")
+		and IWin:GetBuffRemaining("player", spell) < 30
 		and IWin:GetPower("player") > 60
-		and not UnitAffectingCombat("player")
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Battle Shout")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:BerserkerRage()
-	if IWin:IsSpellLearnt("Berserker Rage")
-		and IWin_CombatVar["queueGCD"]
+	local spell = "Berserker Rage"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if (
+			IWin:IsTanking()
+			or IWin:GetTalentRank("Improved Berserker Rage") ~= 0
+		)
 		and IWin:IsStanceActive("Berserker Stance")
 		and not IWin:IsBlacklistFear()
-		and not IWin:IsOnCooldown("Berserker Rage")
-		and UnitAffectingCombat("player")
+		and IWin:IsAffectingCombat("player")
 		and IWin:GetPower("player") < 70
-		and (
-				IWin:IsTanking()
-				or IWin:GetTalentRank(2, 14) ~= 0
-			)
 		and not IWin_CombatVar["slamQueued"] then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Berserker Rage")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:BerserkerRageImmune()
-	if IWin:IsSpellLearnt("Berserker Rage")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Berserker Rage")
-		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			if not IWin:IsStanceActive("Berserker Stance") then
-				CastSpellByName("Berserker Stance")
-			else
-				CastSpellByName("Berserker Rage")
-			end
+	local spell = "Berserker Rage"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin_CombatVar["slamQueued"] then
+		if not IWin:IsStanceActive("Berserker Stance") then
+			IWin:Cast("Berserker Stance", false)
+		else
+			IWin:Cast(spell)
+		end
 	end
 end
 
 function IWin:Bloodrage()
-	if IWin:IsSpellLearnt("Bloodrage")
+	local spell = "Bloodrage"
+	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
+	if not IWin:IsBuffActive("player", "Enrage")
 		and IWin:GetPower("player") < 70
 		and IWin:GetHealthPercent("player") > 25
-		and not IWin:IsBuffActive("player","Enrage")
-		and not IWin:IsOnCooldown("Bloodrage")
 		and (
 					(
 						IWin:IsStanceActive("Defensive Stance")
-						and not IWin:IsInRange("Charge","ranged")
+						and not IWin:IsInRange("Charge", "ranged")
 					)
 				or (
-					UnitAffectingCombat("player")
+					IWin:IsAffectingCombat("player")
 					and (
 							IWin:IsSpellLearnt("Mortal Strike")
 							or IWin:IsSpellLearnt("Bloodthirst")
 							or IWin:IsSpellLearnt("Shield Slam")
-							or IWin:GetTalentRank(2, 9) ~= 0
-							or IWin:IsMinGroupSize("duo")
+							or IWin:GetTalentRank("Enrage") ~= 0
+							or IWin:GetGroupSize() > 1
 						)
 					)
 			) then
-				CastSpellByName("Bloodrage")
+				IWin:Cast(spell, false)
 	end
 end
 
 function IWin:Bloodthirst(queueTime)
-	if IWin:IsSpellLearnt("Bloodthirst")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:GetCooldownRemaining("Bloodthirst") < queueTime
-		and IWin:IsRageAvailable("Bloodthirst")
+	local spell = "Bloodthirst"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Bloodthirst")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedRageBloodthirst()
-	if not IWin:IsHighAP() then 
-		IWin:SetReservedRage("Bloodthirst", "cooldown")
+	local spell = "Bloodthirst"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if not IWin:IsHighAP(false) then 
+		IWin:SetReservedRage(spell, "cooldown")
 	end
 end
 
 function IWin:BloodthirstHighAP(queueTime)
-	if IWin:IsSpellLearnt("Bloodthirst")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:GetCooldownRemaining("Bloodthirst") < queueTime
-		and IWin:IsRageAvailable("Bloodthirst")
+	local spell = "Bloodthirst"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsHighAP()
 		and IWin:GetPower("player") < 60
-		and IWin:IsHighAP()
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Bloodthirst")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedRageBloodthirstHighAP()
-	if IWin:IsHighAP() then 
-		IWin:SetReservedRage("Bloodthirst", "cooldown")
+	local spell = "Bloodthirst"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsHighAP(false) then 
+		IWin:SetReservedRage(spell, "cooldown")
 	end
 end
 
 function IWin:Charge()
-	if IWin:IsSpellLearnt("Charge")
-		and not IWin:IsOnCooldown("Charge")
-		and IWin:IsInRange("Charge","ranged")
-		and not UnitAffectingCombat("player") then
-			IWin_CombatVar["queueGCD"] = false
+	local spell = "Charge"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsInRange(spell, "ranged")
+		and not IWin:IsAffectingCombat("player") then
 			if not IWin:IsStanceActive("Battle Stance")
 				and (
-						IWin:IsStanceSwapMaxRageLoss(25, "Charge")
-						or UnitIsPVP("target")
+						IWin:IsStanceSwapMaxRageLoss(25, spell)
+						or IWin:IsPVP("target")
 					) then
-					CastSpellByName("Battle Stance")
+						IWin:Cast("Battle Stance", false)
 			end
 			if IWin:IsStanceActive("Battle Stance") then
-				CastSpellByName("Charge")
-				IWin_RotationVar["charge"] = GetTime()
+				IWin_RotationVar["charge"] = IWin:GetTime(false)
 				IWin:MarkSkull()
+				IWin:Cast(spell)
 			end
 	end
 end
 
 function IWin:ChargePartySize()
+	local spell = "Charge"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsMinGroupSize(IWin_Settings["charge"])
 		or (
 			IWin_Settings["charge"] == "targetincombat"
-			and UnitAffectingCombat("target")
+			and IWin:IsAffectingCombat("target")
 		) or (
 			IWin_Settings["chargewl"] == "on"
 			and IWin:IsWhitelistCharge()
@@ -187,316 +167,312 @@ function IWin:ChargePartySize()
 end
 
 function IWin:Cleave()
-	if IWin:IsSpellLearnt("Cleave") then
-		if IWin:IsRageAvailable("Cleave")
-			or IWin:GetPower("player") > 75 then
-				IWin_CombatVar["swingAttackQueued"] = true
-				IWin_RotationVar["startAttackThrottle"] = GetTime() + 0.2
-				CastSpellByName("Cleave")
-		else
-			--SpellStopCasting()
-		end
+	local spell = "Cleave"
+	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
+	if IWin:IsRageAvailable(spell)
+		or IWin:GetPower("player") > 75 then
+			IWin_CombatVar["swingAttackQueued"] = true
+			IWin_RotationVar["startAttackThrottle"] = IWin:GetTime(false) + 0.2
+			IWin:Cast(spell, false)
 	end
 end
 
 function IWin:CleaveStance()
+	local spell = "Berserker Stance"
+	IWin:Debug("+++ checking conditions: "..spell, debugmsg)
 	if IWin:IsStanceActive("Defensive Stance") then
 		if not IWin:IsSpellLearnt("Sweeping Strikes")
-			and IWin:IsSpellLearnt("Berserker Stance") then
-				CastSpellByName("Berserker Stance")
+			and IWin:IsSpellLearnt(spell) then
+				IWin:Cast(spell, false)
 		elseif IWin:IsSpellLearnt("Battle Stance") then
-			CastSpellByName("Battle Stance")
+			IWin:Cast("Battle Stance", false)
 		end
 	end
 end
 
 function IWin:ConcussionBlow()
-	if IWin:IsSpellLearnt("Concussion Blow")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Concussion Blow")
-		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Concussion Blow")
+	local spell = "Concussion Blow"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin_CombatVar["slamQueued"] then
+		IWin:Cast(spell)
 	end
 end
 
 function IWin:DemoralizingShout()
-	if IWin:IsSpellLearnt("Demoralizing Shout")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageAvailable("Demoralizing Shout")
-		and not IWin:IsBlacklistAOEDebuff()
+	local spell = "Demoralizing Shout"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsBuffActive("target", spell)
 		and IWin_Settings["demo"] == "on"
+		and not IWin:IsBlacklistAOEDebuff()
 		and IWin:IsInRange("Intimidating Shout")
-		and not IWin:IsBuffActive("target", "Demoralizing Shout")
 		and IWin:GetTimeToDie() > 10
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Demoralizing Shout")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedRageDemoralizingShout()
-	if not IWin:IsBlacklistAOEDebuff()
+	local spell = "Demoralizing Shout"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if not IWin:IsBuffActive("target", spell, nil, false)
 		and IWin_Settings["demo"] == "on"
-		and not IWin:IsBuffActive("target", "Demoralizing Shout")
-		and IWin:GetTimeToDie() > 10 then
-			IWin:SetReservedRage("Demoralizing Shout", "buff", "target")
+		and not IWin:IsBlacklistAOEDebuff(false)
+		and IWin:GetTimeToDie(false) > 10 then
+			IWin:SetReservedRage(spell, "buff", "target")
 	end
 end
 
 function IWin:DPSStance()
+	local spell = "Berserker Stance"
+	IWin:Debug("+++ checking conditions: "..spell, debugmsg)
 	if IWin:IsStanceActive("Defensive Stance") then
-		if IWin:IsSpellLearnt("Berserker Stance") then
-			CastSpellByName("Berserker Stance")
+		if IWin:IsSpellLearnt(spell) then
+			IWin:Cast(spell, false)
 		else
-			CastSpellByName("Battle Stance")
+			IWin:Cast("Battle Stance", false)
 		end
 	end
 end
 
 function IWin:DPSStanceDefault()
+	local spell = "Berserker Stance"
+	IWin:Debug("+++ checking conditions: "..spell, debugmsg)
 	if IWin:IsInRange("Rend") then
-		if IWin:IsSpellLearnt("Berserker Stance")
-			and IWin:IsReservedRageStance("Berserker Stance")
-			and UnitExists("target")
+		if IWin:IsSpellLearnt(spell)
+			and IWin:IsReservedRageStance(spell)
+			and IWin:IsExists("target")
 			and (
-					UnitAffectingCombat("player")
+					IWin:IsAffectingCombat("player")
 					or IWin:IsInRange()
 				) then
-				if not IWin:IsStanceActive("Berserker Stance") then
+				if not IWin:IsStanceActive(spell) then
 					IWin:SetReservedRageStanceCast()
-					CastSpellByName("Berserker Stance")
+					IWin:Cast(spell, false)
 				end
-		elseif IWin:IsSpellLearnt("Battle Stance")
+		elseif not IWin:IsStanceActive("Battle Stance")
+			and IWin:IsSpellLearnt("Battle Stance")
 			and IWin:IsReservedRageStance("Battle Stance")
-			and UnitExists("target") then
-				if not IWin:IsStanceActive("Battle Stance") then
-					IWin:SetReservedRageStanceCast()
-					CastSpellByName("Battle Stance")
-				end
+			and IWin:IsExists("target") then
+				IWin:SetReservedRageStanceCast()
+				IWin:Cast("Battle Stance", false)
 		end
 	end
 end
 
 function IWin:Execute()
-	if IWin:IsSpellLearnt("Execute")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsExecutePhase()
-		and IWin:IsRageAvailable("Execute")
+	local spell = "Execute"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsExecutePhase()
 		and (
-				UnitIsPVP("target")
+				IWin:IsPVP("target")
 				or IWin:GetHealthPercent("player") < 40
 				or IWin:IsElite()
 				or (
 						not IWin:Is2HanderEquipped()
 						and (
-								UnitInRaid("player")
+								IWin:GetGroupSize() > 5
 								or IWin:GetPower("player") < 40
 							)
 					)
 				or IWin:GetTimeToDie() < 4
 			)
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
 			if IWin:IsStanceActive("Defensive Stance") then
-				CastSpellByName("Battle Stance")
+				IWin:Cast("Battle Stance", false)
 			else
-				CastSpellByName("Execute")
+				IWin:Cast(spell)
 			end
 	end
 end
 
 function IWin:SetReservedRageExecute()
-	local lowHealthTarget = (UnitHealthMax("player") * 0.3 > UnitHealth("target"))
+	local spell = "Execute"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	local lowHealthTarget = (IWin:GetHealthMax("player", false) * 0.3 > IWin:GetHealth("target", false))
 	if (
 			lowHealthTarget
-			or IWin:IsExecutePhase()
+			or IWin:IsExecutePhase(false)
 		)
 		and (
-				UnitIsPVP("target")
-				or IWin:GetHealthPercent("player") < 40
-				or IWin:IsElite()
+				IWin:IsPVP("target", false)
+				or IWin:GetHealthPercent("player", false) < 40
+				or IWin:IsElite(false)
 				or (
-						not IWin:Is2HanderEquipped()
+						not IWin:Is2HanderEquipped(false)
 						and (
-								UnitInRaid("player")
-								or IWin:GetPower("player") < 40
+								IWin:GetGroupSize(false) > 5
+								or IWin:GetPower("player", false) < 40
 							)
 					)
-				or IWin:GetTimeToDie() < 4
+				or IWin:GetTimeToDie(false) < 4
 			) then 
-			IWin:SetReservedRage("Execute", "cooldown")
+			IWin:SetReservedRage(spell, "cooldown")
 	end
 end
 
 function IWin:Execute2Hander()
-	if IWin:IsSpellLearnt("Execute")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsExecutePhase()
-		and IWin:IsRageAvailable("Execute")
+	local spell = "Execute"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsExecutePhase(false)
 		and IWin:Is2HanderEquipped()
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
 			if IWin:IsStanceActive("Defensive Stance") then
-				CastSpellByName("Battle Stance")
+				IWin:Cast("Battle Stance", false)
 			else
-				CastSpellByName("Execute")
+				IWin:Cast(spell)
 			end
 	end
 end
 
 function IWin:ExecuteDefensiveTactics()
-	if IWin:IsSpellLearnt("Execute")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsExecutePhase()
-		and IWin:IsRageAvailable("Execute")
+	local spell = "Execute"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsExecutePhase()
 		and IWin:IsDefensiveTacticsActive()
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
 			if IWin:IsStanceActive("Defensive Stance")
 				and IWin:IsDefensiveTacticsActive("Battle Stance") then
-					CastSpellByName("Battle Stance")
+					IWin:Cast("Battle Stance", false)
 			elseif IWin:IsStanceActive("Defensive Stance")
 				and IWin:IsDefensiveTacticsActive("Berserker Stance") then
-					CastSpellByName("Berserker Stance")
+					IWin:Cast("Berserker Stance", false)
 			end
 			if IWin:IsStanceActive("Battle Stance")
 				or IWin:IsStanceActive("Berserker Stance") then
-					CastSpellByName("Execute")
+					IWin:Cast(spell)
 			end
 	end
 end
 
 function IWin:SetReservedRageExecuteDefensiveTactics()
-	local lowHealthTarget = (UnitHealthMax("player") * 0.3 > UnitHealth("target"))
+	local spell = "Execute"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	local lowHealthTarget = (IWin:GetHealthMax("player", false) * 0.3 > IWin:GetHealth("target", false))
 	if (
 			lowHealthTarget
-			or IWin:IsExecutePhase()
+			or IWin:IsExecutePhase(false)
 		)
 		and (
-				IWin:IsDefensiveTacticsActive("Battle Stance")
-				or IWin:IsDefensiveTacticsActive("Berserker Stance")
+				IWin:IsDefensiveTacticsActive("Battle Stance", false)
+				or IWin:IsDefensiveTacticsActive("Berserker Stance", false)
 			) then 
-			IWin:SetReservedRage("Execute", "cooldown")
+				IWin:SetReservedRage(spell, "cooldown")
 	end
 end
 
 function IWin:Hamstring()
-	if IWin:IsSpellLearnt("Hamstring")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Hamstring")
-		and IWin:IsInRange("Hamstring")
-		and IWin:IsRageCostAvailable("Hamstring")
+	local spell = "Hamstring"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsInRange(spell)
+		and IWin:IsRageCostAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Hamstring")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:HamstringJousting()
-	if IWin:IsSpellLearnt("Hamstring")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Hamstring")
-		and IWin:IsInRange("Hamstring")
-		and IWin:IsRageCostAvailable("Hamstring")
-		and not IWin:IsMinGroupSize("duo")
-		and IWin_Settings["jousting"] == "on"
+	local spell = "Hamstring"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin_Settings["jousting"] == "on"
+		and IWin:IsInRange(spell)
+		and IWin:GetGroupSize() == 1
+		and IWin:IsRageCostAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Hamstring")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:HamstringWindfury()
-	if IWin:IsSpellLearnt("Hamstring")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Hamstring")
-		and IWin:IsRageAvailable("Hamstring")
-		and not IWin:IsStanceActive("Defensive Stance")
-		and IWin:IsBuffActive("player", "Windfury Totem") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Hamstring")
+	local spell = "Hamstring"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if IWin:IsBuffActive("player", "Windfury Totem", nil, false)
+		and not IWin:IsStanceActive("Defensive Stance", false)
+		and IWin:IsRageAvailable(spell, false) then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedRageHamstringWindfury()
-	if not IWin:IsStanceActive("Defensive Stance")
-		and IWin:IsBuffActive("player", "Windfury Totem") then
-		IWin:SetReservedRage("Hamstring", "cooldown")
+	local spell = "Hamstring"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsBuffActive("player", "Windfury Totem", nil, false)
+		and not IWin:IsStanceActive("Defensive Stance", false) then
+			IWin:SetReservedRage(spell, "cooldown", nil, false)
 	end
 end
 
 function IWin:HeroicStrike()
-	if IWin:IsSpellLearnt("Heroic Strike") then
-		if IWin:IsRageAvailable("Heroic Strike")
-			or (
-					IWin:GetPower("player") > 75
-					and (
-							not IWin:IsSpellLearnt("Whirlwind")
-							or IWin:GetCooldownRemaining("Whirlwind") > 0
-						)
-				) then
-					IWin_CombatVar["swingAttackQueued"] = true
-					IWin_RotationVar["startAttackThrottle"] = GetTime() + 0.2
-					CastSpellByName("Heroic Strike")
-		else
-			--SpellStopCasting()
-		end
+	local spell = "Heroic Strike"
+	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
+	if IWin:IsRageAvailable(spell)
+		or (
+				IWin:GetPower("player") > 75
+				and (
+						not IWin:IsSpellLearnt("Whirlwind")
+						or IWin:GetCooldownRemaining("Whirlwind") > 0
+					)
+			) then
+				IWin_CombatVar["swingAttackQueued"] = true
+				IWin_RotationVar["startAttackThrottle"] = IWin:GetTime(false) + 0.2
+				IWin:Cast(spell, false)
 	end
 end
 
 function IWin:Intercept()
-	if IWin:IsSpellLearnt("Intercept")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Intercept")
-		and IWin:IsInRange("Intercept","ranged")
+	local spell = "Intercept"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsInRange(spell, "ranged")
 		and not IWin:IsCharging()
 		and (
 				(
-					not UnitAffectingCombat("player")
+					not IWin:IsAffectingCombat("player")
 					and IWin:IsOnCooldown("Charge")
 				)
-				or UnitAffectingCombat("player")
+				or IWin:IsAffectingCombat("player")
 				or (
 						IWin:IsStanceActive("Berserker Stance")
 						and not IWin:IsStanceSwapMaxRageLoss(25)
-						and not UnitIsPVP("target")
+						and not IWin:IsPVP("target")
 					)
 			)
 		and (
 				(
-					IWin:IsRageCostAvailable("Intercept")
+					IWin:IsRageCostAvailable(spell)
 					and (
 							IWin:IsStanceActive("Berserker Stance")
-							or IWin:GetStanceSwapRageRetain() >= IWin_RageCost["Intercept"]
+							or IWin:GetStanceSwapRageRetain() >= IWin_RageCost[spell]
 						)
 				)
 				or not IWin:IsOnCooldown("Bloodrage")
 			)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
 			if IWin:IsStanceActive("Battle Stance")
 				or (
 						IWin:IsStanceActive("Defensive Stance")
 						and not IWin:IsTanking()
 					) then
-				CastSpellByName("Berserker Stance")
+				IWin:Cast("Berserker Stance", false)
 			end
-			if not IWin:IsRageCostAvailable("Intercept") then
-				CastSpellByName("Bloodrage")
+			if not IWin:IsRageCostAvailable(spell) then
+				IWin:Cast("Bloodrage", false)
 			end
 			if IWin:IsStanceActive("Berserker Stance") then
-				CastSpellByName("Intercept")
+				IWin:Cast(spell)
 			end
 	end
 end
 
 function IWin:InterceptPartySize()
-	local partySize = IWin_Settings["charge"]
+	local spell = "Intercept"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsMinGroupSize(IWin_Settings["charge"])
 		or (
 			IWin_Settings["charge"] == "targetincombat"
-			and UnitAffectingCombat("target")
+			and IWin:IsAffectingCombat("target")
 		) or (
 			IWin_Settings["chargewl"] == "on"
 			and IWin:IsWhitelistCharge()
@@ -506,57 +482,56 @@ function IWin:InterceptPartySize()
 end
 
 function IWin:Intervene()
-	if IWin:IsSpellLearnt("Intervene")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Intervene")
-		and (
-				(
-					IWin:IsInRange("Intervene","ranged","target")
-					and UnitIsFriend("player", "target")
-				) or (
-					IWin:IsInRange("Intervene","ranged","targettarget")
-					and UnitIsFriend("player", "targettarget")
-				)
+	local spell = "Intervene"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if (
+			(
+				IWin:IsInRange(spell, "ranged", "target")
+				and IWin:IsFriend("player", "target")
+			) or (
+				IWin:IsInRange(spell, "ranged", "targettarget")
+				and IWin:IsFriend("player", "targettarget")
 			)
+		)
 		and not IWin:IsCharging()
 		and IWin:IsBehind()
 		and not IWin:IsTanking()
 		and (
 				(
-					IWin:IsRageCostAvailable("Intervene")
+					IWin:IsRageCostAvailable(spell)
 					and (
 							IWin:IsStanceActive("Defensive Stance")
-							or IWin:GetStanceSwapRageRetain() >= IWin_RageCost["Intervene"]
+							or IWin:GetStanceSwapRageRetain() >= IWin_RageCost[spell]
 						)
 				)
 				or not IWin:IsOnCooldown("Bloodrage")
 			)
 		and not IWin_CombatVar["slamQueued"] then
 			if not IWin:IsStanceActive("Defensive Stance") then
-				CastSpellByName("Defensive Stance")
+				IWin:Cast("Defensive Stance", false)
 			end
-			if not IWin:IsRageCostAvailable("Intervene") then
-				CastSpellByName("Bloodrage")
+			if not IWin:IsRageCostAvailable(spell) then
+				IWin:Cast("Bloodrage", false)
 			end
 			if IWin:IsStanceActive("Defensive Stance") then
-				IWin_CombatVar["queueGCD"] = false
-				if IWin:IsInRange("Intervene","ranged","target")
-					and UnitIsFriend("player", "target") then
-						CastSpellByName("Intervene", "target")
-				elseif IWin:IsInRange("Intervene","ranged","targettarget")
-					and UnitIsFriend("player", "targettarget") then
-						CastSpellByName("Intervene", "targettarget")
+				if IWin:IsInRange(spell, "ranged", "target")
+					and IWin:IsFriend("player", "target") then
+						IWin:Cast(spell, true, "target")
+				elseif IWin:IsInRange(spell, "ranged", "targettarget")
+					and IWin:IsFriend("player", "targettarget") then
+						IWin:Cast(spell, true, "targettarget")
 				end
 			end
 	end
 end
 
 function IWin:IntervenePartySize()
-	local partySize = IWin_Settings["charge"]
+	local spell = "Intervene"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsMinGroupSize(IWin_Settings["charge"])
 		or (
 			IWin_Settings["charge"] == "targetincombat"
-			and UnitAffectingCombat("target")
+			and IWin:IsAffectingCombat("target")
 		) or (
 			IWin_Settings["chargewl"] == "on"
 			and IWin:IsWhitelistCharge()
@@ -566,155 +541,157 @@ function IWin:IntervenePartySize()
 end
 
 function IWin:MasterStrike()
-	if IWin:IsSpellLearnt("Master Strike")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Master Strike")
-		and IWin:IsRageAvailable("Master Strike")
-		and (
-				IWin:IsTanking()
-				or UnitIsPVP("target")
-			)
+	local spell = "Master Strike"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if (
+			IWin:IsTanking()
+			or IWin:IsPVP("target")
+		)
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Master Strike")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedRageMasterStrike()
-	if IWin:IsTanking()
-		or UnitIsPVP("target") then
-			IWin:SetReservedRage("Master Strike", "cooldown")
+	local spell = "Master Strike"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsTanking(false)
+		or IWin:IsPVP("target", false) then
+			IWin:SetReservedRage(spell, "cooldown")
 	end
 end
 
 function IWin:MasterStrikeWindfury()
-	if IWin:IsSpellLearnt("Master Strike")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Master Strike")
-		and IWin:IsRageAvailable("Master Strike")
-		and IWin:IsBuffActive("player", "Windfury Totem") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Master Strike")
+	local spell = "Master Strike"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if IWin:IsBuffActive("player", "Windfury Totem", nil, false)
+		and IWin:IsRageAvailable(spell, false) then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedRageMasterStrikeWindfury()
-	if IWin:IsBuffActive("player", "Windfury Totem") then
-		IWin:SetReservedRage("Master Strike", "cooldown")
+	local spell = "Master Strike"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsBuffActive("player", "Windfury Totem", nil, false) then
+		IWin:SetReservedRage(spell, "cooldown", nil, false)
 	end
 end
 
 function IWin:MockingBlow()
-	if IWin:IsSpellLearnt("Mocking Blow")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsTanking()
+	local spell = "Mocking Blow"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsTanking()
 		and IWin:IsOnCooldown("Taunt")
-		and not IWin:IsOnCooldown("Mocking Blow")
-		and not IWin:IsImmune("target", "Mocking Blow")
+		--and not IWin:IsImmune("target", "Mocking Blow")
 		and not IWin:IsTaunted() then
-			IWin_CombatVar["queueGCD"] = false
 			if not IWin:IsStanceActive("Battle Stance") then
-				CastSpellByName("Battle Stance")
+				IWin:Cast("Battle Stance", false)
 			else
-				CastSpellByName("Mocking Blow")
+				IWin:Cast(spell)
 			end
 	end
 end
 
 function IWin:MortalStrike(queueTime)
-	if IWin:IsSpellLearnt("Mortal Strike")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:GetCooldownRemaining("Mortal Strike") < queueTime
-		and IWin:IsRageAvailable("Mortal Strike")
+	local spell = "Mortal Strike"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Mortal Strike")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Overpower()
-	if IWin:IsSpellLearnt("Overpower")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsOverpowerAvailable()
-		and not IWin:IsOnCooldown("Overpower")
+	local spell = "Overpower"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsOverpowerAvailable()
 		and (
-				IWin:IsRageAvailable("Overpower")
+				IWin:IsRageAvailable(spell)
 				or IWin:IsStanceActive("Battle Stance")
 			)
-		and IWin:IsRageCostAvailable("Overpower")
+		and IWin:IsRageCostAvailable(spell)
 		and not IWin_CombatVar["slamQueued"]
 		and IWin:IsReservedRageStance("Battle Stance") then
-			IWin_CombatVar["queueGCD"] = false
 			if not IWin:IsStanceActive("Battle Stance")
 				and (
 						(
 							IWin:IsStanceSwapMaxRageLoss(25)
-							and IWin:GetStanceSwapRageRetain() >= IWin_RageCost["Overpower"]
+							and IWin:GetStanceSwapRageRetain() >= IWin_RageCost[spell]
 						)
-						or UnitIsPVP("target")
+						or IWin:IsPVP("target")
 					) then
 						IWin:SetReservedRageStance("Battle Stance")
 						IWin:SetReservedRageStanceCast()
-						CastSpellByName("Battle Stance")
+						IWin:Cast("Battle Stance", false)
 			end
 			if IWin:IsStanceActive("Battle Stance") then
 				IWin:SetReservedRageStance("Battle Stance")
-				CastSpellByName("Overpower")
+				IWin:Cast(spell)
 			end
 	end
 end
 
 function IWin:OverpowerDefensiveTactics()
-	if IWin:IsSpellLearnt("Overpower")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsOverpowerAvailable()
-		and not IWin:IsOnCooldown("Overpower")
+	local spell = "Overpower"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsOverpowerAvailable()
 		and (
-				IWin:IsRageAvailable("Overpower")
+				IWin:IsRageAvailable(spell)
 				or IWin:IsStanceActive("Battle Stance")
 			)
-		and IWin:IsRageCostAvailable("Overpower")
+		and IWin:IsRageCostAvailable(spell)
 		and IWin:IsReservedRageStance("Battle Stance")
 		and IWin:IsDefensiveTacticsStanceAvailable("Battle Stance")
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
 			if not IWin:IsStanceActive("Battle Stance")
 				and (
 						IWin:IsStanceSwapMaxRageLoss(15)
-						or UnitIsPVP("target")
+						or IWin:IsPVP("target")
 					) then
 						IWin:SetReservedRageStance("Battle Stance")
 						IWin:SetReservedRageStanceCast()
-						CastSpellByName("Battle Stance")
+						IWin:Cast("Battle Stance", false)
 			end
 			if IWin:IsStanceActive("Battle Stance") then
 				IWin:SetReservedRageStance("Battle Stance")
-				CastSpellByName("Overpower")
+				IWin:Cast(spell)
 			end
+	end
+end
+
+function IWin:OverpowerReact()
+	local spell = "Overpower"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsOverpowerAvailable()
+		and IWin:IsStanceActive("Battle Stance")
+		and IWin:IsReservedRageStanceCast()
+		and IWin:IsRageCostAvailable(spell)
+		and not IWin_CombatVar["slamQueued"] then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:PiercingHowl()
-	if IWin:IsSpellLearnt("Piercing Howl")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsInRange("Intimidating Shout")
-		and IWin:IsRageCostAvailable("Piercing Howl") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Piercing Howl")
+	local spell = "Piercing Howl"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsInRange("Intimidating Shout")
+		and IWin:IsRageCostAvailable(spell) then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Pummel()
-	if IWin:IsSpellLearnt("Pummel")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Pummel")
-		and IWin:IsCasting("target")
+	local spell = "Pummel"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsCasting("target")
 		and (
 				(
-					IWin:IsRageCostAvailable("Pummel")
+					IWin:IsRageCostAvailable(spell)
 					and (
 							IWin:IsStanceActive("Berserker Stance")
-							or IWin:GetStanceSwapRageRetain() >= IWin_RageCost["Pummel"]
+							or IWin:GetStanceSwapRageRetain() >= IWin_RageCost[spell]
 						)
 				)
 				or not IWin:IsOnCooldown("Bloodrage")
@@ -723,389 +700,383 @@ function IWin:Pummel()
 				not IWin:IsShieldEquipped()
 				or not IWin:IsStanceActive("Defensive Stance")
 			) then
-				IWin_CombatVar["queueGCD"] = false
 				if IWin:IsStanceActive("Defensive Stance") then
-					CastSpellByName("Battle Stance")
+					IWin:Cast("Battle Stance", false)
 				else
-					if not IWin:IsRageCostAvailable("Pummel") then
-						CastSpellByName("Bloodrage")
+					if not IWin:IsRageCostAvailable(spell) then
+						IWin:Cast("Bloodrage", false)
 					end
-					if IWin_RotationVar["slamCasting"] > GetTime() then
-						SpellStopCasting()
+					if IWin_RotationVar["slamCasting"] > IWin:GetTime(false) then
+						IWin:SpellStopCasting()
 					end
-					CastSpellByName("Pummel")
+					IWin:Cast(spell)
 				end
 	end
 end
 
 function IWin:PummelWindfury()
-	if IWin:IsSpellLearnt("Pummel")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Pummel")
-		and IWin:IsRageAvailable("Pummel")
-		and not IWin:IsStanceActive("Defensive Stance")
-		and IWin:IsBuffActive("player", "Windfury Totem")
-		and not IWin:IsBlacklistKick() then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Pummel")
+	local spell = "Pummel"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if IWin:IsBuffActive("player", "Windfury Totem", nil, false)
+		and not IWin:IsStanceActive("Defensive Stance", false)
+		and not IWin:IsBlacklistKick(false)
+		and IWin:IsRageAvailable(spell, false) then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedRagePummelWindfury()
-	if not IWin:IsStanceActive("Defensive Stance")
-		and IWin:IsBuffActive("player", "Windfury Totem")
-		and not IWin:IsBlacklistKick() then
-		IWin:SetReservedRage("Pummel", "cooldown")
+	local spell = "Pummel"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsBuffActive("player", "Windfury Totem", nil, false)
+		and not IWin:IsStanceActive("Defensive Stance", false)
+		and not IWin:IsBlacklistKick(false) then
+			IWin:SetReservedRage(spell, "cooldown", nil, false)
 	end
 end
 
 function IWin:Rend()
-	if IWin:IsSpellLearnt("Rend")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageAvailable("Rend")
+	local spell = "Rend"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsBuffActive("target", spell, "player")
 		and IWin:GetTimeToDie() > 9
-		and not UnitInRaid("player")
-		and not IWin:IsBuffActive("target","Rend","player")
+		and IWin:GetGroupSize() < 6
 		and not IWin:IsImmune("target", "bleed")
 		and not IWin:IsStanceActive("Berserker Stance")
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Rend")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Revenge()
-	if IWin:IsSpellLearnt("Revenge")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Revenge")
-		and IWin:IsRageCostAvailable("Revenge")
-		and IWin:IsRevengeAvailable()
+	local spell = "Revenge"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsRevengeAvailable()
 		and IWin:IsReservedRageStance("Defensive Stance")
+		and IWin:IsRageCostAvailable(spell)
 		and not IWin_CombatVar["slamQueued"]
 		and (
 				not IWin:IsDefensiveTacticsAvailable()
 				or IWin:IsDefensiveTacticsStanceAvailable("Defensive Stance")
 			) then
-				IWin_CombatVar["queueGCD"] = false
 				if not IWin:IsStanceActive("Defensive Stance")
 					and (
 							IWin:IsStanceSwapMaxRageLoss(5)
-							or UnitIsPVP("target")
+							or IWin:IsPVP("target")
 						) then
 							IWin:SetReservedRageStance("Defensive Stance")
 							IWin:SetReservedRageStanceCast()
-							CastSpellByName("Defensive Stance")
+							IWin:Cast("Defensive Stance", false)
 				end
 				if IWin:IsStanceActive("Defensive Stance") then
 					IWin:SetReservedRageStance("Defensive Stance")
-					CastSpellByName("Revenge")
+					IWin:Cast(spell)
 				end
 	end
 end
 
 function IWin:SetReservedRageRevenge()
-	if IWin:IsTanking() then
-		IWin:SetReservedRage("Revenge", "cooldown")
+	local spell = "Revenge"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsTanking(false) then
+		IWin:SetReservedRage(spell, "cooldown")
+	end
+end
+
+function IWin:RevengeReact()
+	local spell = "Revenge"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsRevengeAvailable()
+		and IWin:IsStanceActive("Defensive Stance")
+		and IWin:IsReservedRageStanceCast()
+		and IWin:IsRageCostAvailable(spell)
+		and not IWin_CombatVar["slamQueued"] then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:ShieldBash()
-	if IWin:IsSpellLearnt("Shield Bash")
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsOnCooldown("Shield Bash")
-		and IWin:IsCasting("target")
+	local spell = "Shield Bash"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsCasting("target")
 		and IWin:IsShieldEquipped() 
 		and (
 				(
-					IWin:IsRageCostAvailable("Shield Bash")
+					IWin:IsRageCostAvailable(spell)
 					and (
 							not IWin:IsStanceActive("Berserker Stance")
-							or IWin:GetStanceSwapRageRetain() >= IWin_RageCost["Shield Bash"]
+							or IWin:GetStanceSwapRageRetain() >= IWin_RageCost[spell]
 						)
 				)
 				or not IWin:IsOnCooldown("Bloodrage")
 			)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
 			if IWin:IsStanceActive("Berserker Stance") then
-				CastSpellByName("Defensive Stance")
+				IWin:Cast("Defensive Stance", false)
 			else
-				if not IWin:IsRageCostAvailable("Shield Bash") then
-					CastSpellByName("Bloodrage")
+				if not IWin:IsRageCostAvailable(spell) then
+					IWin:Cast("Bloodrage", false)
 				end
-				CastSpellByName("Shield Bash")
+				IWin:Cast(spell)
 			end
 	end
 end
 
 function IWin:ShieldBlock()
-	if IWin:IsSpellLearnt("Shield Block")
-		and not IWin:IsOnCooldown("Shield Block")
+	local spell = "Shield Block"
+	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
+	if IWin:IsStanceActive("Defensive Stance")
 		and IWin:IsShieldEquipped()
 		and IWin:IsTanking()
 		and IWin:IsBuffStack("target", "Sunder Armor", 5)
-		and IWin:IsRageAvailable("Shield Block")
 		and not IWin:IsBuffActive("player", "Improved Shield Slam")
-		and not IWin:IsBuffActive("player", "Shield Block")
+		and not IWin:IsBuffActive("player", spell)
 		and IWin:GetCooldownRemaining("Revenge") < IWin_Settings["GCD"]
 		and not IWin:IsRevengeAvailable()
-		and IWin:IsStanceActive("Defensive Stance") then
-			CastSpellByName("Shield Block")
+		and IWin:IsRageAvailable(spell) then
+			IWin:Cast(spell, false)
 	end
 end
 
 function IWin:ShieldBlockFRD()
-	if IWin:IsSpellLearnt("Shield Block")
-		and not IWin:IsOnCooldown("Shield Block")
+	local spell = "Shield Block"
+	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
+	if IWin:IsStanceActive("Defensive Stance")
 		and IWin:IsShieldEquipped()
 		and IWin:IsTanking()
-		and IWin:IsRageAvailable("Shield Block")
 		and IWin:IsItemEquipped(17, "Force Reactive Disk")
-		and IWin:IsStanceActive("Defensive Stance") then
-			CastSpellByName("Shield Block")
+		and IWin:IsRageAvailable(spell) then
+			IWin:Cast(spell, false)
 	end
 end
 
 function IWin:ShieldSlam(queueTime)
-	if IWin:IsSpellLearnt("Shield Slam")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsShieldEquipped() 
-		and IWin:GetCooldownRemaining("Shield Slam") < queueTime
-		and IWin:IsRageAvailable("Shield Slam")
+	local spell = "Shield Slam"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsShieldEquipped()
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Shield Slam")
+			IWin:Cast(spell)
 	end
-end
-
-function IWin:Shoot()
-	local rangedLink = GetInventoryItemLink("player", 18)
-	local itemSubType = nil
-	if rangedLink then
-		_, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(rangedLink)))
-	end
-	if itemSubType == "Bows" then
-		CastSpellByName("Shoot Bow")
-	elseif itemSubType == "Guns" then
-		CastSpellByName("Shoot Gun")
-	elseif itemSubType == "Crossbows" then
-		CastSpellByName("Shoot Crossbow")
-	elseif itemSubType == "Thrown" then
-		CastSpellByName("Throw")
-	end
-	IWin:MarkSkull()
 end
 
 function IWin:Slam()
-	if IWin:IsSpellLearnt("Slam")
-		and IWin_CombatVar["queueGCD"]
-		and IWin_RotationVar["reservedRageStanceLast"] + 0.2 < GetTime()
-		and IWin:IsRageAvailable("Slam")
+	local spell = "Slam"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin_RotationVar["reservedRageStanceLast"] + 0.2 < IWin:GetTime(false)
 		and IWin:Is2HanderEquipped()
 		and (
 				not st_timer
-				or st_timer > UnitAttackSpeed("player") * 0.5
+				or st_timer > IWin:GetAttackSpeed("player") * 0.5
 				--or st_timer > IWin:GetCastTime("Slam")
 				--or (
-				--		IWin_RotationVar["slamClipAllowedMax"] > GetTime()
-				--		and IWin_RotationVar["slamClipAllowedMin"] < GetTime()
+				--		IWin_RotationVar["slamClipAllowedMax"] > IWin:GetTime(false)
+				--		and IWin_RotationVar["slamClipAllowedMin"] < IWin:GetTime(false)
 				--	)
 			)
 		and (
 				not IWin:IsStanceActive("Battle Stance")
 				or not IWin:IsSpellLearnt("Berserker Stance")
-			) then
-				IWin_CombatVar["queueGCD"] = false
-				CastSpellByName("Slam")
+			)
+		and IWin:IsRageAvailable(spell) then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SlamThreat()
-	if IWin:IsSpellLearnt("Slam", "Rank 5") then
-		IWin:Slam()
-	end
+	local spell = "Slam"
+	if IWin:IsSpellSkip(spell, "Rank 5", true, queueTime, true) then return end
+	IWin:Slam()
 end
 
 function IWin:SetSlamQueued()
+	local spell = "Slam"
 	if not st_timer then return end
-	if IWin:IsSpellLearnt("Slam")
-		and IWin:Is2HanderEquipped() then
-			local nextSwing = st_timer + UnitAttackSpeed("player")
-			local nextSlam = IWin_Settings["GCD"] + IWin:GetCastTime("Slam")
+	if IWin:IsSpellLearnt(spell, nil, false)
+		and IWin:Is2HanderEquipped(false) then
+			local nextSwing = st_timer + IWin:GetAttackSpeed("player", false)
+			local nextSlam = IWin_Settings["GCD"] + IWin:GetCastTime(spell, false)
 			if nextSlam > nextSwing
-				and IWin_RotationVar["slamGCDAllowed"] < GetTime() then
+				and IWin_RotationVar["slamGCDAllowed"] < IWin:GetTime(false) then
 					IWin_CombatVar["slamQueued"] = true
 			end
 	end
 end
 
 function IWin:SetSlamQueuedThreat()
-	if (not st_timer) or (not IWin:IsSpellLearnt("Slam", "Rank 5")) then return end
+	local spell = "Slam"
+	if (not st_timer) or (not IWin:IsSpellLearnt(spell, "Rank 5", false)) then return end
 	IWin:SetSlamQueued()
 end
 
 function IWin:SetReservedRageSlam()
-	if IWin:Is2HanderEquipped() then
-		IWin:SetReservedRage("Slam", "nocooldown")
+	local spell = "Slam"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:Is2HanderEquipped(false) then
+		IWin:SetReservedRage(spell, "nocooldown")
 	end
-	if IWin_RotationVar["slamCasting"] > GetTime() then
-		IWin:SetReservedRage("Slam", "nocooldown")
+	if IWin_RotationVar["slamCasting"] > IWin:GetTime(false) then
+		IWin:SetReservedRage(spell, "nocooldown")
 	end
 end
 
 function IWin:SetReservedRageSlamThreat()
-	if IWin:IsSpellLearnt("Slam", "Rank 5") then
-		IWin:SetReservedRageSlam()
-	end
+	local spell = "Slam"
+	if not IWin:IsSpellLearnt(spell, "Rank 5", false) then return end
+	IWin:SetReservedRageSlam()
 end
 
 function IWin:SunderArmor()
-	if IWin:IsSpellLearnt("Sunder Armor")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageAvailable("Sunder Armor")
+	local spell = "Sunder Armor"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Sunder Armor")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SunderArmorFirstStack()
-	if IWin:IsSpellLearnt("Sunder Armor")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageCostAvailable("Sunder Armor")
-		and not IWin:IsBuffActive("target", "Sunder Armor")
+	local spell = "Sunder Armor"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsBuffActive("target", "Sunder Armor")
 		and not IWin:IsBuffActive("target", "Expose Armor")
+		and IWin:IsRageCostAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Sunder Armor")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SunderArmorDPS()
-	if IWin:IsSpellLearnt("Sunder Armor")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageAvailable("Sunder Armor")
-		and not (IWin_Settings["sunder"] == "off")
-		and IWin:GetTimeToDie() > 5
-		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
+	local spell = "Sunder Armor"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not (IWin_Settings["sunder"] == "off")
+		and not IWin:IsBuffStack("target", spell, 5)
 		and not IWin:IsBuffActive("target", "Expose Armor")
+		and IWin:GetTimeToDie() > 5
 		and not IWin:IsGCDActive()
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Sunder Armor")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedRageSunderArmorDPS()
-	if IWin:IsSpellLearnt("Sunder Armor")
-		and not (IWin_Settings["sunder"] == "off")
-		and IWin:GetTimeToDie() > 5
-		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
-		and not IWin:IsBuffActive("target", "Expose Armor")
-		and not IWin:Is2HanderEquipped() then
-			IWin:SetReservedRage("Sunder Armor", "nocooldown")
+	local spell = "Sunder Armor"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if not (IWin_Settings["sunder"] == "off")
+		and not IWin:IsBuffStack("target", spell, 5, nil, false)
+		and not IWin:IsBuffActive("target", "Expose Armor", nil, false)
+		and IWin:GetTimeToDie(false) > 5
+		and not IWin:Is2HanderEquipped(false) then
+			IWin:SetReservedRage(spell, "nocooldown")
 	end
 end
 
 function IWin:SunderArmorDPS2Hander()
+	local spell = "Sunder Armor"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:Is2HanderEquipped() then
 		IWin:SunderArmorDPS()
 	end
 end
 
 function IWin:SetReservedRageSunderArmorDPS2Hander()
-	if IWin:IsSpellLearnt("Sunder Armor")
-		and not (IWin_Settings["sunder"] == "off")
-		and IWin:GetTimeToDie() > 5
-		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
-		and not IWin:IsBuffActive("target", "Expose Armor")
-		and IWin:Is2HanderEquipped() then
-			IWin:SetReservedRage("Sunder Armor", "nocooldown")
+	local spell = "Sunder Armor"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if not (IWin_Settings["sunder"] == "off")
+		and not IWin:IsBuffStack("target", spell, 5, nil, false)
+		and not IWin:IsBuffActive("target", "Expose Armor", nil, false)
+		and IWin:GetTimeToDie(false) > 5
+		and IWin:Is2HanderEquipped(false) then
+			IWin:SetReservedRage(spell, "nocooldown")
 	end
 end
 
 function IWin:SunderArmorElite()
-	if IWin:IsSpellLearnt("Sunder Armor")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageAvailable("Sunder Armor")
-		and IWin_Settings["sunder"] == "high"
+	local spell = "Sunder Armor"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin_Settings["sunder"] == "high"
+		and not IWin:IsBuffStack("target", spell, 5)
+		and not IWin:IsBuffActive("target", "Expose Armor")
 		and IWin:GetTimeToDie() > 5
 		and IWin:IsElite()
-		and not IWin:IsBuffStack("target", "Sunder Armor", 5)
-		and not IWin:IsBuffActive("target", "Expose Armor")
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Sunder Armor")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SunderArmorDPSRefresh()
-	if IWin:IsSpellLearnt("Sunder Armor")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageCostAvailable("Sunder Armor")
-		and not (IWin_Settings["sunder"] == "off")
-		and IWin:IsBuffActive("target", "Sunder Armor")
-		and IWin:GetBuffRemaining("target", "Sunder Armor") < 6
-		and IWin:GetBuffRemaining("target", "Sunder Armor") < IWin:GetTimeToDie()
+	local spell = "Sunder Armor"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not (IWin_Settings["sunder"] == "off")
+		and IWin:IsBuffActive("target", spell)
+		and IWin:GetBuffRemaining("target", spell) < 6
+		and IWin:GetBuffRemaining("target", spell) < IWin:GetTimeToDie()
+		and IWin:IsRageCostAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Sunder Armor")
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SunderArmorWindfury()
-	if IWin:IsSpellLearnt("Sunder Armor")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageAvailable("Sunder Armor")
-		and IWin:IsBuffActive("player", "Windfury Totem") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Sunder Armor")
+	local spell = "Sunder Armor"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if IWin:IsBuffActive("player", "Windfury Totem", nil, false)
+		and IWin:IsRageAvailable(spell, false) then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:SetReservedRageSunderArmorWindfury()
-	if IWin:IsBuffActive("player", "Windfury Totem") then
-		IWin:SetReservedRage("Sunder Armor", "nocooldown")
+	local spell = "Sunder Armor"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsBuffActive("player", "Windfury Totem", nil, false) then
+		IWin:SetReservedRage(spell, "nocooldown", nil, false)
 	end
 end
 
 function IWin:SweepingStrikes()
-	if IWin:IsSpellLearnt("Sweeping Strikes")
+	local spell = "Sweeping Strikes"
+	if IWin:IsSpellLearnt(spell)
 		and IWin:IsReservedRageStance("Battle Stance")
 		and not IWin_CombatVar["slamQueued"]
-		and IWin:IsTimeToReserveRage("Sweeping Strikes", "cooldown") then
+		and IWin:IsTimeToReserveRage(spell, "cooldown") then
 			if not IWin:IsStanceActive("Battle Stance")
-				and UnitAffectingCombat("player") then
+				and IWin:IsAffectingCombat("player") then
 					IWin:SetReservedRageStance("Battle Stance")
 					IWin:SetReservedRageStanceCast()
-					CastSpellByName("Battle Stance")
+					IWin:Cast("Battle Stance", false)
 			end
 			if IWin:IsStanceActive("Battle Stance") then
 				IWin:SetReservedRageStance("Battle Stance")
-				if IWin:IsRageAvailable("Sweeping Strikes") then
-					CastSpellByName("Sweeping Strikes")
+				if IWin:IsRageAvailable(spell) then
+					IWin:Cast(spell)
 				end
 			end
 	end
 end
 
 function IWin:TankStance()
-	if IWin:IsSpellLearnt("Defensive Stance")
+	local spell = "Defensive Stance"
+	IWin:Debug("+++ checking conditions: "..spell, debugmsg)
+	if IWin:IsSpellLearnt(spell)
 		and (
 				not IWin:IsDefensiveTacticsAvailable()
 				or (
 						not IWin:IsDefensiveTacticsActive()
-						and IWin:IsDefensiveTacticsStanceAvailable("Defensive Stance")
+						and IWin:IsDefensiveTacticsStanceAvailable(spell)
 					)
 			)
-		and UnitAffectingCombat("player")
-		and not IWin:IsStanceActive("Defensive Stance") then
-			CastSpellByName("Defensive Stance")
+		and IWin:IsAffectingCombat("player")
+		and not IWin:IsStanceActive(spell) then
+			IWin:Cast(spell, false)
 	elseif IWin:IsSpellLearnt("Battle Stance")
 		and (
 					(
 						not IWin:IsDefensiveTacticsAvailable()
-						and not IWin:IsSpellLearnt("Defensive Stance")
+						and not IWin:IsSpellLearnt(spell)
 					)
 				or (
 						not IWin:IsDefensiveTacticsActive()
@@ -1113,86 +1084,80 @@ function IWin:TankStance()
 					)
 			)
 		and not IWin:IsStanceActive("Battle Stance") then
-			CastSpellByName("Battle Stance")
+			IWin:Cast("Battle Stance", false)
 	elseif IWin:IsSpellLearnt("Berserker Stance")
 		and not IWin:IsDefensiveTacticsActive()
 		and IWin:IsDefensiveTacticsStanceAvailable("Berserker Stance")
 		and not IWin:IsStanceActive("Berserker Stance") then
-			CastSpellByName("Berserker Stance")
+			IWin:Cast("Berserker Stance", false)
 	end
 end
 
 function IWin:Taunt()
-	if IWin:IsSpellLearnt("Taunt")
-		and not IWin:IsTanking()
-		and not IWin:IsOnCooldown("Taunt")
-		and not IWin:IsImmune("target", "Taunt")
+	local spell = "Taunt"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsTanking()
+		--and not IWin:IsImmune("target", "Taunt")
 		and not IWin:IsTaunted() then
 			if not IWin:IsStanceActive("Defensive Stance") then
-				CastSpellByName("Defensive Stance")
+				IWin:Cast("Defensive Stance", false)
 			else
-				CastSpellByName("Taunt")
+				IWin:Cast(spell)
 			end
 	end
 end
 
 function IWin:ThunderClap(queueTime)
-	if IWin:IsSpellLearnt("Thunder Clap")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageAvailable("Thunder Clap")
-		and IWin:IsInRange()
-		and IWin:GetCooldownRemaining("Thunder Clap") < queueTime
+	local spell = "Thunder Clap"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsInRange()
+		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
-			IWin_CombatVar["queueGCD"] = false
 			if IWin:IsStanceActive("Berserker Stance") then
-				CastSpellByName("Defensive Stance")
+				IWin:Cast("Defensive Stance", false)
 			else
-				CastSpellByName("Thunder Clap")
+				IWin:Cast(spell)
 			end
 	end
 end
 
 function IWin:ThunderClapDPS()
-	if IWin:IsSpellLearnt("Thunder Clap")
-		and IWin_CombatVar["queueGCD"]
-		and IWin:IsRageAvailable("Thunder Clap")
-		and IWin:IsInRange()
-		and not IWin:IsOnCooldown("Thunder Clap")
-		and not IWin_CombatVar["slamQueued"]
-		and not IWin:IsStanceActive("Berserker Stance") then
-			IWin_CombatVar["queueGCD"] = false
-			CastSpellByName("Thunder Clap")
+	local spell = "Thunder Clap"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsInRange()
+		and not IWin:IsStanceActive("Berserker Stance")
+		and IWin:IsRageAvailable(spell)
+		and not IWin_CombatVar["slamQueued"] then
+			IWin:Cast(spell)
 	end
 end
 
 function IWin:Whirlwind(queueTime)
+	local spell = "Whirlwind"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsBlacklistAOEDamage() then
 		IWin:WhirlwindAOE(queueTime)
 	end
 end
 
 function IWin:WhirlwindAOE(queueTime)
-	if IWin:IsSpellLearnt("Whirlwind")
-		and IWin_CombatVar["queueGCD"]
+	local spell = "Whirlwind"
+	if IWin:IsSpellLearnt(spell)
+		and IWin:IsAffectingCombat("player")
 		and IWin:IsReservedRageStance("Berserker Stance")
 		and not IWin_CombatVar["slamQueued"]
-		and IWin:IsTimeToReserveRage("Whirlwind", "cooldown")
-		and (
-				IWin:GetCooldownRemaining("Whirlwind") < queueTime
-				or not IWin:IsOnCooldown("Whirlwind")
-			)
-		and UnitAffectingCombat("player") then
-			IWin_CombatVar["queueGCD"] = false
+		and IWin:IsTimeToReserveRage(spell, "cooldown")
+		and IWin_CombatVar["queueGCD"] then
 			if not IWin:IsStanceActive("Berserker Stance") then
 				IWin:SetReservedRageStance("Berserker Stance")
 				IWin:SetReservedRageStanceCast()
-				CastSpellByName("Berserker Stance")
+				IWin:Cast("Berserker Stance", false)
 			end
 			if IWin:IsInRange("Rend")
 				and IWin:IsStanceActive("Berserker Stance") then
 					IWin:SetReservedRageStance("Berserker Stance")
-					if IWin:IsRageAvailable("Whirlwind") then
-						CastSpellByName("Whirlwind")
+					if IWin:IsRageAvailable(spell) then
+						IWin:Cast(spell)
 					end
 			end
 	end

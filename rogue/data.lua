@@ -7,7 +7,7 @@ IWin_HemorrhageCostReduction = {
 }
 
 function IWin:GetHemorrhageCostReduction()
-	local rank = IWin:GetTalentRank(3, 17, false)
+	local rank = IWin:GetTalentRank("Bloody Mess", false)
 	return IWin_HemorrhageCostReduction[rank]
 end
 
@@ -16,12 +16,12 @@ IWin_EnergyCost = {
 	["Ambush"] = 60,
 	["Backstab"] = 60,
 	["Blade Flurry"] = 25,
-	["Cheap Shot"] = 60 - IWin:GetTalentRank(3, 14, false) * 10,
+	["Cheap Shot"] = 60 - IWin:GetTalentRank("Dirty Deeds", false) * 10,
 	["Deadly Throw"] = 40,
 	["Envenom"] = 20,
 	["Eviscerate"] = 30,
 	["Expose Armor"] = 20,
-	["Garrote"] = 50 - IWin:GetTalentRank(3, 14, false) * 10,
+	["Garrote"] = 50 - IWin:GetTalentRank("Dirty Deeds", false) * 10,
 	["Gouge"] = 45,
 	["Hemorrhage"] = 40 - IWin:GetHemorrhageCostReduction(),
 	["Kick"] = 25,

@@ -1,13 +1,11 @@
-local GetTime = GetTime
 local CastSpellByName = CastSpellByName
-local UnitExists = UnitExists
-local UnitIsDead = UnitIsDead
-local UnitIsFriend = UnitIsFriend
+
+
 local UnitLevel = UnitLevel
-local UnitAffectingCombat = UnitAffectingCombat
 local GetContainerNumSlots = GetContainerNumSlots
 local GetContainerItemLink = GetContainerItemLink
 local UseContainerItem = UseContainerItem
+local SpellStopCasting = SpellStopCasting
 
 function IWin:InitializeRotationCore()
 	IWin:Debug("=== Rotation processing ===")
@@ -29,11 +27,18 @@ function IWin:InitializeRotationCore()
 	    end
 		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
 	end
-	IWin_CombatVar = {}
-	IWin_CombatVar["queueGCD"] = true
-	IWin_CombatVar["reservedRage"] = 0
-	IWin_CombatVar["reservedEnergy"] = 0
-	IWin_CombatVar["swingAttackQueued"] = false
+	IWin_CombatVar = {
+		["affectingCombat"] = {},
+		["dead"] = {},
+		["energyPerSecondPrediction"] = 0,
+		["GCD"] = 0,
+		["level"] = {},
+		["queueGCD"] = true,
+		["reservedEnergy"] = 0,
+		["reservedRage"] = 0,
+		["startAttackThrottle"] = 0,
+		["swingAttackQueued"] = false,
+	}
 	IWin_CastTime = {}
 end
 
@@ -49,10 +54,15 @@ function IWin:Cast(spell, gcd, unit)
 	end
 end
 
+function IWin:SpellStopCasting()
+	IWin:Debug("=> Stop casting!")
+	SpellStopCasting()
+end
+
 function IWin:TargetEnemy()
-	if not UnitExists("target")
-		or UnitIsDead("target")
-		or UnitIsFriend("target", "player") then
+	if not IWin:IsExists("target", false)
+		or IWin:IsDead("target", false)
+		or IWin:IsFriend("target", "player", false) then
 			TargetNearestEnemy()
 	end
 end
@@ -60,7 +70,7 @@ end
 function IWin:StartAttack()
 	--IWin:Debug("+++ checking conditions: startattack")
 	if IWin:IsBuffActive("player", "Prowl", nil, false) or IWin:IsBuffActive("player", "Stealth", nil, false) then return end
-	if IWin_CombatVar["swingAttackQueued"] or IWin_RotationVar["startAttackThrottle"] and IWin_RotationVar["startAttackThrottle"] > GetTime() then return end
+	if IWin_CombatVar["swingAttackQueued"] or IWin_RotationVar["startAttackThrottle"] and IWin_RotationVar["startAttackThrottle"] > IWin:GetTime(false) then return end
 	local attackActionFound = false
 	for action = 1, 172 do
 		if IsAttackAction(action) then
@@ -83,11 +93,11 @@ function IWin:PetAttack()
 end
 
 function IWin:MarkSkull()
-	if UnitExists("target")
+	if IWin:IsExists("target", false)
 		and GetRaidTargetIndex("target") ~= 8
-		and not UnitIsFriend("player", "target")
+		and not IWin:IsFriend("player", "target", false)
 		and not UnitInRaid("player")
-		and GetNumPartyMembers() ~= 0 then
+		and IWin:GetGroupSize(false) > 1 then
 			IWin:Debug("=> MarkSkull")
 			SetRaidTarget("target", 8)
 	end
@@ -95,10 +105,10 @@ end
 
 function IWin:Perception()
 	local spell = "Perception"
-	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if UnitAffectingCombat("player")
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
+	if IWin:IsAffectingCombat("player", false)
 		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsGCDActive() then
+		and not IWin:IsGCDActive(false) then
 			IWin:Cast(spell)
 	end
 end
@@ -145,7 +155,33 @@ end
 function IWin:Shoot()
 	local spell = "Shoot"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:IsWandEquipped() then
+	if IWin:IsItemSubTypeEquipped("Wands") then
 		IWin:Cast(spell)
+		return
 	end
+	local spell = "Shoot Bow"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsItemSubTypeEquipped("Bows") then
+		IWin:Cast(spell)
+		return
+	end
+	local spell = "Shoot Gun"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsItemSubTypeEquipped("Guns") then
+		IWin:Cast(spell)
+		return
+	end
+	local spell = "Shoot Crossbow"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsItemSubTypeEquipped("Crossbows") then
+		IWin:Cast(spell)
+		return
+	end
+	local spell = "Throw"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsItemSubTypeEquipped("Thrown") then
+		IWin:Cast(spell)
+		return
+	end
+	IWin:MarkSkull()
 end

@@ -1,6 +1,14 @@
-# IWinEnhanced v2.1
+# IWinEnhanced v2.2
 
 1-button rotation macros for Turtle Druids, Paladins and Warriors.
+
+Author: Agamemnoth - Ambershire
+
+Contributor: Vlad/Goodnice - Tel'Abim
+
+## Latest features
+
+Debug mod
 
 ## Mods Dependencies
 
@@ -36,6 +44,7 @@ Optionnal Addons:
 ## Setup commands
 
     /iwin                             Current setup
+    /iwin debug <toggle>              Enable/disable debug
     /iwin frontshred <toggle>         Setup for Front Shredding
     /iwin berserkcat <toggle>         Setup for Berserk in Cat Form
 
@@ -62,6 +71,7 @@ Example: /iwin frontshred on
 ## Setup commands
 
     /iwin                                   Current setup
+    /iwin debug <toggle>                    Enable/disable debug
     /iwin judgement <judgementName>         Setup for Judgement on elites and worldbosses
     /iwin wisdom <classification>           Setup for Seal of Wisdom target classification
     /iwin crusader <classification>         Setup for Seal of the Crusader target classification
@@ -95,6 +105,7 @@ Example: /iwin judgement wisdom
 ## Setup commands
 
     /iwin                             Current setup
+    /iwin debug <toggle>              Enable/disable debug
     /iwin charge <partySize>          Setup for Charge and Intercept.
     /iwin chargewl <toggle>           Setup to allow Charge and Intercept on whitelist targets.
     /iwin sunder <priority>           Setup for Sunder Armor priority as DPS.

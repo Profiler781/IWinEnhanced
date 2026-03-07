@@ -20,33 +20,33 @@ IWin_ThunderClapCostReduction = {
 }
 
 function IWin:GetExecuteCostReduction()
-	local rank = IWin:GetTalentRank(2, 13)
+	local rank = IWin:GetTalentRank("Improved Execute")
 	return IWin_ExecuteCostReduction[rank]
 end
 
 function IWin:GetBloodrageCostReduction()
-	local rank = IWin:GetTalentRank(3, 1)
+	local rank = IWin:GetTalentRank("Improved Bloodrage")
 	return IWin_BloodrageCostReduction[rank]
 end
 
 function IWin:GetThunderClapCostReduction()
-	local rank = IWin:GetTalentRank(1, 6)
+	local rank = IWin:GetTalentRank("Improved Thunder Clap")
 	return IWin_ThunderClapCostReduction[rank]
 end
 
 IWin_RageCost = {
 	["Battle Shout"] = 10,
-	["Berserker Rage"] = 0 - IWin:GetTalentRank(2, 14) * 5,
+	["Berserker Rage"] = 0 - IWin:GetTalentRank("Improved Berserker Rage") * 5,
 	["Bloodrage"] = - 10 - IWin:GetBloodrageCostReduction(),
 	["Bloodthirst"] = 30,
-	["Charge"] = - 15 - IWin:GetTalentRank(1, 4) * 5,
+	["Charge"] = - 15 - IWin:GetTalentRank("Improved Charge") * 5,
 	["Cleave"] = 20,
 	["Concussion Blow"] = - 10,
 	["Demoralizing Shout"] = 10,
 	["Disarm"] = 20,
 	["Execute"] = 15 - IWin:GetExecuteCostReduction(),
 	["Hamstring"] = 10,
-	["Heroic Strike"] = 15 - IWin:GetTalentRank(1, 1),
+	["Heroic Strike"] = 15 - IWin:GetTalentRank("Improved Heroic Strike"),
 	["Intercept"] = 10,
 	["Intervene"] = 10,
 	["Master Strike"] = 20,

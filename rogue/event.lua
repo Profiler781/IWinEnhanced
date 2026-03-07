@@ -1,7 +1,6 @@
 if UnitClass("player") ~= "Rogue" then return end
 
 local string_find = string.find
-local GetTime = GetTime
 
 IWin:RegisterEvent("ADDON_LOADED")
 IWin:RegisterEvent("CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES")
@@ -20,15 +19,15 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["energyPerSecondPrediction"] == nil then IWin_Settings["energyPerSecondPrediction"] = 10 end
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES" then
 		if string_find(arg1,"parry") then
-			IWin_RotationVar["riposteAvailable"] = GetTime() + 5
+			IWin_RotationVar["riposteAvailable"] = IWin:GetTime(false) + 4
 		end
 	elseif event == "CHAT_MSG_COMBAT_SELF_MISSES" or event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF" then
 		if string_find(arg1,"dodge") then
-			IWin_RotationVar["surpriseAttackAvailable"] = GetTime() + 5
+			IWin_RotationVar["surpriseAttackAvailable"] = IWin:GetTime(false) + 4
 		end
 	elseif event == "CHAT_MSG_SPELL_SELF_DAMAGE" then
 		if string_find(arg1,"dodged") then
-			IWin_RotationVar["surpriseAttackAvailable"] = GetTime() + 5
+			IWin_RotationVar["surpriseAttackAvailable"] = IWin:GetTime(false) + 4
 		end
 	end
 end)

@@ -1,6 +1,5 @@
 if UnitClass("player") ~= "Warrior" then return end
 
-local GetTime = GetTime
 local string_find = string.find
 local UnitAttackSpeed = UnitAttackSpeed
 
@@ -32,26 +31,26 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["jousting"] == nil then IWin_Settings["jousting"] = "off" end
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS" then
 		if string_find(arg1,"blocked") then
-			IWin_RotationVar["revengeAvailable"] = GetTime() + 5
+			IWin_RotationVar["revengeAvailable"] = IWin:GetTime(false) + 4
 		end
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES" then
 		if string_find(arg1,"dodge") or string.find(arg1,"parry") then
-			IWin_RotationVar["revengeAvailable"] = GetTime() + 5
+			IWin_RotationVar["revengeAvailable"] = IWin:GetTime(false) + 4
 		end
 	elseif event == "CHAT_MSG_COMBAT_SELF_MISSES" or event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF" then
 		if string_find(arg1,"dodge") then
-			IWin_RotationVar["overpowerAvailable"] = GetTime() + 5
+			IWin_RotationVar["overpowerAvailable"] = IWin:GetTime(false) + 4
 		end
 	elseif event == "CHAT_MSG_SPELL_SELF_DAMAGE" then
 		if string_find(arg1,"dodged") then
-			IWin_RotationVar["overpowerAvailable"] = GetTime() + 5
+			IWin_RotationVar["overpowerAvailable"] = IWin:GetTime(false) + 4
 		end
 	elseif event == "SPELLCAST_START" and arg1 == "Slam" then
-		IWin_RotationVar["slamCasting"] = GetTime() + (arg2 / 1000)
+		IWin_RotationVar["slamCasting"] = IWin:GetTime(false) + (arg2 / 1000)
 		if st_timer and st_timer > UnitAttackSpeed("player") * 0.9 then
 			IWin_RotationVar["slamGCDAllowed"] = IWin_RotationVar["slamCasting"] + 0.2
 			IWin_RotationVar["slamClipAllowedMax"] = IWin_RotationVar["slamGCDAllowed"] + IWin_Settings["GCD"]
-			IWin_RotationVar["slamClipAllowedMin"] = st_timer + GetTime()
+			IWin_RotationVar["slamClipAllowedMin"] = st_timer + IWin:GetTime(false)
 		end
 	end
 end)

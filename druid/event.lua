@@ -1,7 +1,5 @@
 if UnitClass("player") ~= "Druid" then return end
 
-local GetTime = GetTime
-
 IWin:RegisterEvent("ADDON_LOADED")
 IWin:RegisterEvent("SPELLCAST_START")
 
@@ -22,6 +20,6 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["berserkCat"] == nil then IWin_Settings["berserkCat"] = "on" end
 	elseif event == "SPELLCAST_START" and (arg1 == "Wrath" or arg1 == "Starfire") then
 		IWin_RotationVar["lastMoonkinSpell"] = arg1
-		IWin_RotationVar["lastMoonkinSpellTime"] = GetTime() + (arg2 / 1000)
+		IWin_RotationVar["lastMoonkinSpellTime"] = IWin:GetTime(false) + (arg2 / 1000)
 	end
 end)

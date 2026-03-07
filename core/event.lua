@@ -17,9 +17,15 @@ IWin_core:SetScript("OnEvent", function()
 	elseif event == "ADDON_LOADED" and (arg1 == "SuperCleveRoidMacros" or arg1 == "IWinEnhanced") then
 		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
 	elseif event == "PLAYER_TARGET_CHANGED" then
-		IWin_Target = {}
+		IWin_Target = {
+			["exists"] = {},
+			["name"] = {},
+			["pvp"] = {},
+		}
 	elseif event == "SPELLS_CHANGED" then
-		IWin_Spellbook = {}
+		IWin_Spellbook = {
+			["talent"] = {},
+		}
 	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" then
 		IWin_Inventory = {}
 	elseif (event == "UNIT_MANA" or event == "UNIT_MAXMANA") and arg1 == "player" then

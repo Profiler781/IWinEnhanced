@@ -18,7 +18,7 @@ function IWin:IsMaxComboPoints(debugmsg)
 	if GetComboPoints(false) == 5
 		or (
 				IWin:GetComboPoints(false) == 4
-				and IWin:GetTalentRank(1, 17, false) == 5 --seal of fate
+				and IWin:GetTalentRank("Seal Fate", false) == 5
 			) then
 				IWin:Debug("Max combo: true", debugmsg)
 				return true
@@ -29,14 +29,14 @@ end
 
 function IWin:GetRuptureDuration(debugmsg)
 	local cpDuration = 6 + IWin:GetComboPoints(false) * 2
-	local tasteForBloodDuration = IWin:GetTalentRank(1, 10, false) * 2
+	local tasteForBloodDuration = IWin:GetTalentRank("Taste for Blood", false) * 2
 	local result = cpDuration + tasteForBloodDuration
 	IWin:Debug("Rupture full duration: "..tostring(result), debugmsg)
 	return result
 end
 
 function IWin:GetMaxEnergy(debugmsg)
-	local result = 100 + IWin:GetTalentRank(1, 16, false) * 5
+	local result = 100 + IWin:GetTalentRank("Vigor", false) * 5
 	IWin:Debug("Max energy: "..tostring(result), debugmsg)
 	return result
 end

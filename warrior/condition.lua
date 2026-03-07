@@ -1,61 +1,86 @@
 if UnitClass("player") ~= "Warrior" then return end
 
-function IWin:IsOverpowerAvailable()
-	local overpowerRemaining = IWin_RotationVar["overpowerAvailable"] - GetTime() - 0.2
- 	return overpowerRemaining > IWin:GetGCDRemaining()
+local UnitAttackPower = UnitAttackPower
+
+function IWin:IsOverpowerAvailable(debugmsg)
+	local overpowerRemaining = IWin_RotationVar["overpowerAvailable"] - IWin:GetTime(false) - 0.2
+ 	local result = overpowerRemaining > IWin:GetGCDRemaining(false)
+ 	IWin:Debug("Overpower available: "..tostring(result), debugmsg)
+ 	return result
 end
 
-function IWin:IsRevengeAvailable()
-	local revengeRemaining = IWin_RotationVar["revengeAvailable"] - GetTime()
- 	return revengeRemaining > IWin:GetGCDRemaining()
+function IWin:IsRevengeAvailable(debugmsg)
+	local revengeRemaining = IWin_RotationVar["revengeAvailable"] - IWin:GetTime(false)
+ 	local result = revengeRemaining > IWin:GetGCDRemaining(false)
+ 	IWin:Debug("Revenge available: "..tostring(result), debugmsg)
+ 	return result
 end
 
-function IWin:IsCharging()
-	local chargeTimeActive = GetTime() - IWin_RotationVar["charge"]
-	return chargeTimeActive < 1
+function IWin:IsCharging(debugmsg)
+	local chargeTimeActive = IWin:GetTime(false) - IWin_RotationVar["charge"]
+	local result = chargeTimeActive < 1
+	IWin:Debug("Player is charging: "..tostring(result), debugmsg)
+	return result
 end
 
-function IWin:GetStanceSwapRageRetain()
-	return math.min(IWin:GetTalentRank(1, 2) * 5, UnitMana("player"))
+function IWin:GetStanceSwapRageRetain(debugmsg)
+	local result = math.min(IWin:GetTalentRank("Tactical Mastery", false) * 5, IWin:GetPower("player", false))
+	IWin:Debug("Rage kept after next stance swap: "..tostring(result), debugmsg)
+	return result
 end
 
-function IWin:IsStanceSwapMaxRageLoss(maxRageLoss, spell)
+function IWin:IsStanceSwapMaxRageLoss(maxRageLoss, spell, debugmsg)
 	if IWin_Settings["ragePerSecondPrediction"] > 29 then return true end
 	local spellCost = 0
 	if spell then
 		spellCost = IWin_RageCost[spell]
 	end
-	return maxRageLoss >= math.max(0, UnitMana("player") - IWin:GetStanceSwapRageRetain() + IWin_CombatVar["reservedRage"] + spellCost)
+	local result = maxRageLoss >= math.max(0, IWin:GetPower("player", false) - IWin:GetStanceSwapRageRetain(false) + IWin_CombatVar["reservedRage"] + spellCost)
+	IWin:Debug("Maximum "..maxRageLoss.." rage lost after next stance swap: "..tostring(result), debugmsg)
+	return result
 end
 
-function IWin:IsReservedRageStance(stance)
+function IWin:IsReservedRageStance(stance, debugmsg)
 	if IWin_RotationVar["reservedRageStance"] then
-		return IWin_RotationVar["reservedRageStance"] == stance
+		local result = IWin_RotationVar["reservedRageStance"] == stance
+		IWin:Debug(stance.." is reserved: "..tostring(result), debugmsg)
+		return result
 	end
+	IWin:Debug("No stance is reserved", debugmsg)
 	return true
 end
 
-function IWin:SetReservedRageStance(stance)
-	if IWin_RotationVar["reservedRageStanceLast"] +  IWin_Settings["GCD"] < GetTime() then
+function IWin:SetReservedRageStance(stance, debugmsg)
+	if IWin_RotationVar["reservedRageStanceLast"] + IWin_Settings["GCD"] < IWin:GetTime(false) then
+		IWin:Debug(stance.." has been reserved", debugmsg)
 		IWin_RotationVar["reservedRageStance"] = stance
 	end
 end
 
-function IWin:SetReservedRageStanceCast()
-	IWin_RotationVar["reservedRageStanceLast"] = GetTime()
+function IWin:IsReservedRageStanceCast(debugmsg)
+	local result = IWin_RotationVar["reservedRageStanceLast"] > IWin:GetTime(false)
+	IWin:Debug("Stance is locked: "..tostring(result), debugmsg)
+	return result
 end
 
-function IWin:IsDefensiveTacticsAvailable()
-	if IWin:GetTalentRank(3, 18) ~= 0
-		and IWin:IsShieldEquipped() then
+function IWin:SetReservedRageStanceCast(debugmsg)
+	IWin:Debug("Stance locked for 1 GCD", debugmsg)
+	IWin_RotationVar["reservedRageStanceLast"] = IWin:GetTime(false) + IWin_Settings["GCD"]
+end
+
+function IWin:IsDefensiveTacticsAvailable(debugmsg)
+	if IWin:GetTalentRank("Defensive Tactics", false) ~= 0
+		and IWin:IsShieldEquipped(false) then
+			IWin:Debug("Defensive Tactics available: true", debugmsg)
 			return true
 	end
+	IWin:Debug("Defensive Tactics available: false", debugmsg)
 	return false
 end
 
-function IWin:IsDefensiveTacticsActive(stance)
-	local dtStance = stance or IWin:GetStance()
-	if IWin:IsDefensiveTacticsAvailable()
+function IWin:IsDefensiveTacticsActive(stance, debugmsg)
+	local dtStance = stance or IWin:GetStance(false)
+	if IWin:IsDefensiveTacticsAvailable(false)
 		and (
 				(
 					IWin_Settings["dtBattle"] == "on"
@@ -63,21 +88,22 @@ function IWin:IsDefensiveTacticsActive(stance)
 				) or (
 					IWin_Settings["dtDefensive"] == "on"
 					and dtStance == "Defensive Stance"
-					and IWin:IsSpellLearnt("Defensive Stance")
+					and IWin:IsSpellLearnt("Defensive Stance", nil, false)
 				) or (
 					IWin_Settings["dtBerserker"] == "on"
 					and dtStance == "Berserker Stance"
-					and IWin:IsSpellLearnt("Berserker Stance")
+					and IWin:IsSpellLearnt("Berserker Stance", nil, false)
 				)
 			) then
-			return true
-	else
-		return false
+				IWin:Debug(stance.." allowed for Defensive Tactics: true", debugmsg)
+				return true
 	end
+	IWin:Debug(stance.." allowed for Defensive Tactics: false", debugmsg)
+	return false
 end
 
-function IWin:IsDefensiveTacticsStanceAvailable(stance)
-	if IWin:IsDefensiveTacticsAvailable()
+function IWin:IsDefensiveTacticsStanceAvailable(stance, debugmsg)
+	if IWin:IsDefensiveTacticsAvailable(false)
 		and (
 				(
 					IWin_Settings["dtBattle"] == "on"
@@ -85,20 +111,23 @@ function IWin:IsDefensiveTacticsStanceAvailable(stance)
 				) or (
 					IWin_Settings["dtDefensive"] == "on"
 					and stance == "Defensive Stance"
-					and IWin:IsSpellLearnt("Defensive Stance")
+					and IWin:IsSpellLearnt("Defensive Stance", nil, false)
 				) or (
 					IWin_Settings["dtBerserker"] == "on"
 					and stance == "Berserker Stance"
-					and IWin:IsSpellLearnt("Berserker Stance")
+					and IWin:IsSpellLearnt("Berserker Stance", nil, false)
 				)
 			) then
+				IWin:Debug(stance.." allowed for Defensive Tactics: true", debugmsg)
 				return true
-	else
-		return false
 	end
+	IWin:Debug(stance.." allowed for Defensive Tactics: false", debugmsg)
+	return false
 end
 
-function IWin:IsHighAP()
+function IWin:IsHighAP(debugmsg)
 	local APbase, APpos, APneg = UnitAttackPower("player")
-	return (APbase + APpos - APneg) * 0.35 + 200 > 600 + 20 * 15
+	local result = (APbase + APpos - APneg) * 0.35 + 200
+	IWin:Debug("Attack power : "..tostring(result), debugmsg)
+	return result > 600 + 20 * 15
 end

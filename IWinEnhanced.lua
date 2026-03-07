@@ -3,8 +3,9 @@
 IWin_core = CreateFrame("frame", nil, UIParent)
 
 IWin = CreateFrame("frame", nil, UIParent)
-IWin.t = CreateFrame("GameTooltip", "IWin_T", UIParent, "GameTooltipTemplate")
+IWin_T = CreateFrame("GameTooltip", "IWin_T", UIParent, "GameTooltipTemplate")
 IWin_T:SetOwner(WorldFrame, "ANCHOR_NONE")
+IWin_T:Hide()
 
 function IWin:Print(message)
 	DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff"..message.."|r")

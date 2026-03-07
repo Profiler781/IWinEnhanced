@@ -1,7 +1,25 @@
-function IWin:GetTalentRank(tabIndex, talentIndex, debugmsg)
-	local _, _, _, _, currentRank = GetTalentInfo(tabIndex, talentIndex)
-	IWin:Debug(tabIndex.."/"..talentIndex.." talent points: "..tostring(currentRank), debugmsg)
-	return currentRank
+IWin_Spellbook = {
+	["talent"] = {},
+}
+
+function IWin:GetTalentRank(talentName, debugmsg)
+	local cached = IWin_Spellbook["talent"][talentName]
+    if cached ~= nil then
+    	IWin:Debug(talentName.." talent points: "..tostring(cached), debugmsg)
+        return cached
+    end
+	for tabIndex = 1, GetNumTalentTabs() do
+        for talentIndex = 1, GetNumTalents(tabIndex) do
+            local name, _, _, _, rank = GetTalentInfo(tabIndex, talentIndex)
+            if name == talentName then
+            	IWin_Spellbook["talent"][talentName] = tonumber(rank)
+            	IWin:Debug(talentName.." talent points: "..rank, debugmsg)
+        		return tonumber(rank)
+            end
+        end
+    end
+    IWin:Debug("Unknown talent: "..talentName, debugmsg)
+    return 0
 end
 
 IWin_Taunt = {

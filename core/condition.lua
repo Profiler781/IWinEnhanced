@@ -1,37 +1,39 @@
-local GetTime = GetTime
-local GetSpellName = GetSpellName
-local GetSpellCooldown = GetSpellCooldown
+local CheckInteractDistance = CheckInteractDistance
+local GetComboPoints = GetComboPoints
+local GetContainerItemLink = GetContainerItemLink
+local GetContainerNumSlots = GetContainerNumSlots
+local GetInventoryItemLink = GetInventoryItemLink
+local GetItemInfo = GetItemInfo
+local GetNumPartyMembers = GetNumPartyMembers
+local GetNumRaidMembers = GetNumRaidMembers
+local GetNumShapeshiftForms = GetNumShapeshiftForms
 local GetPlayerBuff = GetPlayerBuff
 local GetPlayerBuffID = GetPlayerBuffID
 local GetPlayerBuffTimeLeft = GetPlayerBuffTimeLeft
+local GetShapeshiftFormInfo = GetShapeshiftFormInfo
+local GetSpellCooldown = GetSpellCooldown
+local GetSpellName = GetSpellName
+local GetTime = GetTime
 local SpellInfo = SpellInfo
-local UnitMana = UnitMana
-local UnitManaMax = UnitManaMax
+local UnitAffectingCombat = UnitAffectingCombat
+local UnitBuff = UnitBuff
+local UnitClassification = UnitClassification
+local UnitCreatureType = UnitCreatureType
+local UnitDebuff = UnitDebuff
+local UnitExists = UnitExists
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
-local UnitExists = UnitExists
-local UnitName = UnitName
-local UnitAffectingCombat = UnitAffectingCombat
-local GetNumShapeshiftForms = GetNumShapeshiftForms
-local GetShapeshiftFormInfo = GetShapeshiftFormInfo
-local GetInventoryItemLink = GetInventoryItemLink
-local GetItemInfo = GetItemInfo
-local UnitClassification = UnitClassification
-local CheckInteractDistance = CheckInteractDistance
-local GetNumPartyMembers = GetNumPartyMembers
-local GetNumRaidMembers = GetNumRaidMembers
-local UnitInRaid = UnitInRaid
-local GetContainerNumSlots = GetContainerNumSlots
-local GetContainerItemLink = GetContainerItemLink
-local UnitBuff = UnitBuff
-local UnitDebuff = UnitDebuff
+local UnitIsDead = UnitIsDead
+local UnitIsPVP = UnitIsPVP
 local UnitIsUnit = UnitIsUnit
-local UnitCreatureType = UnitCreatureType
+local UnitMana = UnitMana
+local UnitManaMax = UnitManaMax
+local UnitName = UnitName
+
 local string_find = string.find
 local string_lower = string.lower
 local string_gsub = string.gsub
 local string_gfind = string.gfind
-local string_match = string.match
 local math_max = math.max
 
 -- Buff #######################################################################################################################################
@@ -198,6 +200,24 @@ function IWin:IsTaunted(debugmsg)
 	return false
 end
 
+function IWin:IsFeared(debugmsg)
+	local cached = IWin_CombatVar["feared"]
+	if cached ~= nil then
+		IWin:Debug("Player is feared: "..tostring(cached), debugmsg)
+		return cached
+	end
+	for fear in IWin_Fear do
+		if IWin:IsBuffActive("player", IWin_Fear[fear], nil, false) then
+			IWin:Debug("Player is feared: true", debugmsg)
+			IWin_CombatVar["feared"] = true
+			return true
+		end
+	end
+	IWin:Debug("Player is feared: false", debugmsg)
+	IWin_CombatVar["feared"] = false
+	return false
+end
+
 -- Spell #######################################################################################################################################
 --helper
 function IWin:GetSpellSpellbookID(spell, rank)
@@ -226,7 +246,7 @@ function IWin:GetCooldownRemaining(spell, debugmsg)
 	if not spellID then return false end
 	local start, duration = GetSpellCooldown(spellID, "BOOKTYPE_SPELL")
 	if start ~= 0 and duration ~= IWin_Settings["GCD"] then
-		local result = duration - (GetTime() - start)
+		local result = duration - (IWin:GetTime(false) - start)
 		IWin:Debug("Cooldown "..spell.." remaining: "..tostring(result), debugmsg)
 		return result
 	else
@@ -284,7 +304,7 @@ end
 function IWin:ParseCastTimeFromText(text)
     if not text then return nil end
     -- Match patterns like "1.5 sec cast", "1.59 sec cast", "2 sec cast"
-    local castTime = string_match(text, "(%d+%.?%d*) sec cast")
+    local castTime = string.match(text, "(%d+%.?%d*) sec cast")
     if castTime then
         return tonumber(castTime)
     end
@@ -385,6 +405,7 @@ end
 --todo
 function IWin:IsCasting(unit, spell, debugmsg)
 	local result = CleveRoids.CheckSpellCast(unit, spell)
+	local spell = spell or ""
 	IWin:Debug(unit.." is casting "..spell.." :"..tostring(result), debugmsg)
 	return result
 end
@@ -412,6 +433,17 @@ function IWin:IsSpellSkip(spell, rank, gcd, queueTime, debugmsg)
 	return false
 end
 
+function IWin:GetAttackSpeed(unit, debugmsg)
+	local cached = IWin_CombatVar["attackSpeed"]
+	if cached ~= nil then
+		IWin:Debug("Attack Speed: "..tostring(cached), debugmsg)
+		return cached
+	end
+	local result = UnitAttackSpeed(unit)
+	IWin_CombatVar["attackSpeed"] = result
+	IWin:Debug("Attack Speed: "..tostring(result), debugmsg)
+	return result
+end
 
 -- Stance #######################################################################################################################################
 --helper
@@ -441,27 +473,23 @@ function IWin:IsStanceActive(stance, debugmsg)
 end
 
 -- Health #######################################################################################################################################
-function IWin:GetTimeToDie(debugmsg)
-	local cached = IWin_CombatVar["timeToDie"]
-	if cached ~= nil then
-		IWin:Debug("Target time to die: "..tostring(cached), debugmsg)
-		return cached
-	end
-	local ttd = 0
-	local numPartyMembers = math_max(2, GetNumPartyMembers(), GetNumRaidMembers())
-	if (not UnitInRaid("player")) or type(TimeToKill) ~= "table" or type(TimeToKill.GetTTK) ~= "function" or TimeToKill.GetTTK() == nil then
-		ttd = UnitHealth("target") / UnitHealthMax("player") * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / numPartyMembers * 2
-	else
-		ttd = TimeToKill.GetTTK() - 1
-	end
-	IWin_CombatVar["timeToDie"] = ttd
-	IWin:Debug("Target time to die: "..tostring(ttd), debugmsg)
-	return ttd
+--todo
+function IWin:GetHealth(unit, debugmsg)
+	local result = UnitHealth(unit)
+	IWin:Debug(unit.." health: "..tostring(result), debugmsg)
+	return result
+end
+
+--todo
+function IWin:GetHealthMax(unit, debugmsg)
+	local result = UnitHealthMax(unit)
+	IWin:Debug(unit.." max health: "..tostring(result), debugmsg)
+	return result
 end
 
 --todo
 function IWin:GetHealthPercent(unit, debugmsg)
-	local result = UnitHealth(unit) / UnitHealthMax(unit) * 100
+	local result = IWin:GetHealth(unit, false) / IWin:GetHealthMax(unit, false) * 100
 	IWin:Debug(unit.." health %: "..tostring(result), debugmsg)
 	return result
 end
@@ -472,38 +500,63 @@ function IWin:IsExecutePhase(debugmsg)
 		IWin:Debug("Execute phase: "..tostring(cached), debugmsg)
 		return cached
 	end
-	local result = IWin:GetHealthPercent("target") <= 20
+	local result = IWin:GetHealthPercent("target", false) <= 20
 	IWin_CombatVar["executePhase"] = result
 	IWin:Debug("Execute phase: "..tostring(result), debugmsg)
 	return result
 end
 
+function IWin:GetTimeToDie(debugmsg)
+	local cached = IWin_CombatVar["timeToDie"]
+	if cached ~= nil then
+		IWin:Debug("Target time to die: "..tostring(cached), debugmsg)
+		return cached
+	end
+	local ttd = 0
+	local numPartyMembers = math_max(2, GetNumPartyMembers(), GetNumRaidMembers())
+	if type(TimeToKill) ~= "table" or type(TimeToKill.GetTTK) ~= "function" or TimeToKill.GetTTK() == nil or TimeToKill.GetTTK() == -1 then
+		ttd = IWin:GetHealth("target", false) / IWin:GetHealthMax("player", false) * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / numPartyMembers * 2
+	else
+		ttd = TimeToKill.GetTTK() - 1
+	end
+	IWin_CombatVar["timeToDie"] = ttd
+	IWin:Debug("Target time to die: "..tostring(ttd), debugmsg)
+	return ttd
+end
+
 -- Power #######################################################################################################################################
+--todo
+function IWin:GetPowerType(unit, debugmsg)
+	local result = IWin_PowerType[UnitPowerType(unit)]
+	IWin:Debug(unit.." power type: "..result, debugmsg)
+	return result
+end
+
 --todo
 function IWin:GetPower(unit, debugmsg)
 	local result = UnitMana(unit)
-	IWin:Debug(unit.." "..IWin_PowerType[UnitPowerType(unit)]..": "..tostring(result), debugmsg)
+	IWin:Debug(unit.." "..IWin:GetPowerType(unit, false)..": "..tostring(result), debugmsg)
 	return result
 end
 
 --todo
 function IWin:GetPowerMax(unit, debugmsg)
 	local result = UnitManaMax(unit)
-	IWin:Debug(unit.." "..IWin_PowerType[UnitPowerType(unit)]..": "..tostring(result), debugmsg)
+	IWin:Debug(unit.." "..IWin:GetPowerType(unit, false)..": "..tostring(result), debugmsg)
 	return result
 end
 
 --todo
 function IWin:GetPowerPercent(unit, debugmsg)
 	local result = UnitMana(unit) / UnitManaMax(unit) * 100
-	IWin:Debug(unit.." "..IWin_PowerType[UnitPowerType(unit)].." %: "..tostring(result), debugmsg)
+	IWin:Debug(unit.." "..IWin:GetPowerType(unit, false).." %: "..tostring(result), debugmsg)
 	return result
 end
 
 --todo
 function IWin:IsPowerAvailable(spell, debugmsg)
 	local result = UnitMana("player") >= IWin_ManaCost[spell]
-	IWin:Debug(IWin_PowerType[UnitPowerType(unit)].." available for "..spell..": "..tostring(result), debugmsg)
+	IWin:Debug(IWin:GetPowerType(unit, false).." available for "..spell..": "..tostring(result), debugmsg)
 	return result
 end
 
@@ -544,16 +597,16 @@ end
 function IWin:IsRageAvailable(spell, debugmsg)
 	local rageRequired = IWin_RageCost[spell] + IWin_CombatVar["reservedRage"]
 	-- Replacing auto attack will prevent getting rage from next swing, so rage cost is higher.
-	if spell == "Heroic Strike" or spell == "Cleave" or spell == "Maul" then
+	if spell == "Heroic Strike" or spell == "Cleave" then
 		rageRequired = rageRequired + 20 --fix before rework
 	end
-	local result = UnitMana("player") >= rageRequired or IWin:IsBuffActive("player", "Clearcasting", nil, false)
+	local result = IWin:GetPower("player", false) >= rageRequired or IWin:IsBuffActive("player", "Clearcasting", nil, false)
 	IWin:Debug("Rage available for "..spell..": "..tostring(result), debugmsg)
 	return result
 end
 
 function IWin:IsRageCostAvailable(spell, debugmsg)
-	local result = UnitMana("player") >= IWin_RageCost[spell] or IWin:IsBuffActive("player", "Clearcasting", nil, false)
+	local result = IWin:GetPower("player", false) >= IWin_RageCost[spell] or IWin:IsBuffActive("player", "Clearcasting", nil, false)
 	IWin:Debug("Rage cost available for "..spell..": "..tostring(result), debugmsg)
 	return result
 end
@@ -562,7 +615,7 @@ function IWin:GetRageToReserve(spell, trigger, unit, debugmsg)
 	local spellTriggerTime = 0
 	local rageCost = IWin_RageCost[spell]
 	-- Replacing auto attack will prevent getting rage from next swing, so rage cost is higher.
-	if spell == "Heroic Strike" or spell == "Cleave" or spell == "Maul" then
+	if spell == "Heroic Strike" or spell == "Cleave" then
 		rageCost = rageCost + 20 --fix before rework
 	end
 	if trigger == "nocooldown" and IWin:IsSpellLearnt(spell, nil, false) then
@@ -603,13 +656,13 @@ end
 -- Energy #######################################################################################################################################
 function IWin:IsEnergyAvailable(spell, debugmsg)
 	local energyRequired = IWin_EnergyCost[spell] + IWin_CombatVar["reservedEnergy"]
-	local result = (UnitMana("player") >= energyRequired) or IWin:IsBuffActive("player", "Clearcasting", nil, false) or (UnitMana("player") > (100 - IWin_CombatVar["energyPerSecondPrediction"] * 2))
+	local result = (IWin:GetPower("player", false) >= energyRequired) or IWin:IsBuffActive("player", "Clearcasting", nil, false) or (IWin:GetPower("player", false) > (100 - IWin_CombatVar["energyPerSecondPrediction"] * 2))
 	IWin:Debug("Energy available for "..spell..": "..tostring(result), debugmsg)
 	return result
 end
 
 function IWin:IsEnergyCostAvailable(spell, debugmsg)
-	local result = UnitMana("player") >= IWin_EnergyCost[spell] or IWin:IsBuffActive("player", "Clearcasting", nil, false)
+	local result = IWin:GetPower("player", false) >= IWin_EnergyCost[spell] or IWin:IsBuffActive("player", "Clearcasting", nil, false)
 	IWin:Debug("Energy cost available for "..spell..": "..tostring(result), debugmsg)
 	return result
 end
@@ -655,16 +708,20 @@ end
 --todo
 function IWin:IsInRange(spell, distance, unit, debugmsg)
 	if unit == nil then unit = "target" end
-	if not UnitExists(unit) then
+	if not IWin:IsExists(unit, false) then
 		IWin:Debug("No range for unkown "..unit, debugmsg)
 		return false
 	end
 	if not IsSpellInRange
 		or not spell
 		or not IWin:IsSpellLearnt(spell, nil, false) then
-			if distance == "ranged" then
-				local result = not (CheckInteractDistance(unit, 3) ~= nil)
+			if distance == "farranged" then
+				local result = not (CheckInteractDistance(unit, 4) ~= nil)
 				IWin:Debug("Far range for "..unit..": "..tostring(result), debugmsg)
+				return result
+			elseif distance == "ranged" then
+				local result = not (CheckInteractDistance(unit, 3) ~= nil)
+				IWin:Debug("Mid range for "..unit..": "..tostring(result), debugmsg)
 				return result
 			else
         		local result = CheckInteractDistance(unit, 3) ~= nil
@@ -690,7 +747,7 @@ function IWin:IsTanking(debugmsg)
 		IWin:Debug("Player is tanking target: "..tostring(cached), debugmsg)
 		return cached
 	end
-	local result = UnitIsUnit("targettarget", "player")
+	local result = UnitIsUnit("targettarget", "player") and true or false
 	IWin_CombatVar["tanking"] = result
 	IWin:Debug("Player is tanking target: "..tostring(result), debugmsg)
 	return result
@@ -702,7 +759,7 @@ function IWin:IsBehind(debugmsg)
 		IWin:Debug("Player is behind target: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if not UnitExists("target") then
+	if not IWin:IsExists("target", false) then
 		IWin:Debug("Player is behind target: false", debugmsg)
 		IWin_CombatVar["behind"] = false
 		return false
@@ -719,7 +776,7 @@ function IWin:IsTrainingDummy(debugmsg)
 		IWin:Debug("Target is Training Dummy: "..tostring(cached), debugmsg)
 		return cached
 	end
-	local name = UnitName("target")
+	local name = IWin:GetName("target", false)
 	if name and string_find(name,"Training Dummy") then
 		IWin_Target["trainingDummy"] = true
 		IWin:Debug("Target is Training Dummy: true", debugmsg)
@@ -775,8 +832,8 @@ function IWin:IsBlacklistAOEDebuff(debugmsg)
 		IWin:Debug("Target is blacklisted for aoe debuff: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if not UnitExists("target")
-		or IWin_BlacklistAOEDebuff[UnitName("target")] then
+	if not IWin:IsExists("target", false)
+		or IWin_BlacklistAOEDebuff[IWin:GetName("target", false)] then
 			IWin_Target["blacklistAOEDebuff"] = true
 			IWin:Debug("Target is blacklisted for aoe debuff: true", debugmsg)
 			return true
@@ -792,8 +849,8 @@ function IWin:IsBlacklistAOEDamage(debugmsg)
 		IWin:Debug("Target is blacklisted for aoe damage: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if not UnitExists("target")
-		or IWin_BlacklistAOEDamage[UnitName("target")] then
+	if not IWin:IsExists("target", false)
+		or IWin_BlacklistAOEDamage[IWin:GetName("target", false)] then
 			IWin_Target["blacklistAOEDamage"] = true
 			IWin:Debug("Target is blacklisted for aoe damage: true", debugmsg)
 			return true
@@ -809,8 +866,8 @@ function IWin:IsBlacklistKick(debugmsg)
 		IWin:Debug("Target is blacklisted for kick: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if not UnitExists("target")
-		or IWin_BlacklistKick[UnitName("target")] then
+	if not IWin:IsExists("target", false)
+		or IWin_BlacklistKick[IWin:GetName("target", false)] then
 			IWin_Target["blacklistKick"] = true
 			IWin:Debug("Target is blacklisted for kick: true", debugmsg)
 			return true
@@ -823,11 +880,11 @@ end
 function IWin:IsBlacklistFear(debugmsg)
 	local cached = IWin_Target["blacklistFear"]
 	if cached ~= nil then
-		IWin:Debug("Target is can cast fear: "..tostring(cached), debugmsg)
+		IWin:Debug("Target can cast fear: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if not UnitExists("target")
-		or IWin_BlacklistFear[UnitName("target")] then
+	if not IWin:IsExists("target", false)
+		or IWin_BlacklistFear[IWin:GetName("target", false)] then
 			IWin_Target["blacklistFear"] = true
 			IWin:Debug("Target can cast fear: true", debugmsg)
 			return true
@@ -843,8 +900,8 @@ function IWin:IsWhitelistCharge(debugmsg)
 		IWin:Debug("Target can be charged: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if not UnitExists("target")
-		or IWin_WhitelistCharge[UnitName("target")] then
+	if not IWin:IsExists("target", false)
+		or IWin_WhitelistCharge[IWin:GetName("target", false)] then
 			IWin_Target["whitelistCharge"] = true
 			IWin:Debug("Target can be charged: true", debugmsg)
 			return true
@@ -860,8 +917,8 @@ function IWin:IsWhitelistBoss(debugmsg)
 		IWin:Debug("Target is considered Boss: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if not UnitExists("target")
-		or IWin_WhitelistBoss[UnitName("target")] then
+	if not IWin:IsExists("target", false)
+		or IWin_WhitelistBoss[IWin:GetName("target", false)] then
 			IWin_Target["whitelistBoss"] = true
 			IWin:Debug("Target is considered Boss: true", debugmsg)
 			return true
@@ -883,6 +940,84 @@ function IWin:IsCreatureType(creatureType, debugmsg)
 	end
 	local result = IWin_Target["creatureType"] == creatureType
 	IWin:Debug("Target is a "..creatureType..": "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:IsExists(unit, debugmsg)
+	local cached = IWin_Target["exists"][unit]
+	if cached ~= nil then
+		IWin:Debug(unit.." exists: "..tostring(cached), debugmsg)
+		return cached
+	end
+	local result = UnitExists(unit) and true or false
+	IWin_Target["exists"][unit] = result
+	IWin:Debug(unit.." exists: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:GetName(unit, debugmsg)
+	local cached = IWin_Target["name"][unit]
+	if cached ~= nil then
+		IWin:Debug(unit.." name: "..tostring(cached), debugmsg)
+		return cached
+	end
+	local result = UnitName(unit)
+	IWin_Target["name"][unit] = result
+	IWin:Debug(unit.." name: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:IsAffectingCombat(unit, debugmsg)
+	local cached = IWin_CombatVar["affectingCombat"][unit]
+	if cached ~= nil then
+		IWin:Debug(unit.." is in combat: "..tostring(cached), debugmsg)
+		return cached
+	end
+	local result = UnitAffectingCombat(unit) and true or false
+	IWin_CombatVar["affectingCombat"][unit] = result
+	IWin:Debug(unit.." is in combat: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:IsPVP(unit, debugmsg)
+	local cached = IWin_Target["pvp"][unit]
+	if cached ~= nil then
+		IWin:Debug(unit.." is in pvp: "..tostring(cached), debugmsg)
+		return cached
+	end
+	local result = UnitIsPVP(unit) and true or false
+	IWin_Target["pvp"][unit] = result
+	IWin:Debug(unit.." is in pvp: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:IsDead(unit, debugmsg)
+	local cached = IWin_CombatVar["dead"][unit]
+	if cached ~= nil then
+		IWin:Debug(unit.." is dead: "..tostring(cached), debugmsg)
+		return cached
+	end
+	local result = UnitIsDead(unit) and true or false
+	IWin_CombatVar["dead"][unit] = result
+	IWin:Debug(unit.." is dead: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:IsFriend(unit, unit2, debugmsg)
+	local result = UnitIsFriend(unit, unit2) and true or false
+	IWin:Debug(unit.." is an ally to "..unit2..": "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:GetLevel(unit, debugmsg)
+	local cached = IWin_CombatVar["level"][unit]
+	if cached ~= nil then
+		IWin:Debug(unit.." is level: "..tostring(cached), debugmsg)
+		return cached
+	end
+	local result = UnitLevel(unit)
+	IWin_CombatVar["level"][unit] = result
+	IWin:Debug(unit.." is level: "..tostring(result), debugmsg)
 	return result
 end
 
@@ -913,23 +1048,17 @@ function IWin:IsShieldEquipped(debugmsg)
 	return false
 end
 
-function IWin:IsWandEquipped(debugmsg)
-	local cached = IWin_Inventory["wandEquipped"]
-	if cached ~= nil then
-		IWin:Debug("A wand is equipped: "..tostring(cached), debugmsg)
-		return cached
+function IWin:IsItemSubTypeEquipped(subType, debugmsg)
+	if IWin_Inventory["itemSubTypeEquipped"] == nil then
+		local rangedLink = GetInventoryItemLink("player", 18)
+		if rangedLink then
+			local _, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(rangedLink)))
+			IWin_Inventory["itemSubTypeEquipped"] = itemSubType
+		end
 	end
-	local rangedLink = GetInventoryItemLink("player", 18)
-	if rangedLink then
-		local _, _, _, _, _, itemSubType = GetItemInfo(tonumber(IWin:GetItemID(rangedLink)))
-		local result = itemSubType == "Wands"
-		IWin_Inventory["wandEquipped"] = result
-		IWin:Debug("A wand is equipped: "..tostring(result), debugmsg)
-		return result
-	end
-	IWin_Inventory["wandEquipped"] = false
-	IWin:Debug("A wand is equipped: false", debugmsg)
-	return false
+	local result = IWin_Inventory["itemSubTypeEquipped"] == subType
+	IWin:Debug(subType.." equipped: "..tostring(result), debugmsg)
+	return result
 end
 
 function IWin:IsDaggerEquipped(debugmsg)
@@ -1007,6 +1136,67 @@ function IWin:GetItemCountInBag(item, debugmsg)
 	return itemCount
 end
 
+--helper
+function IWin:ParseWeaponSpeedFromText(text)
+    if not text then return nil end
+    -- Match patterns like "Speed 1.5", "Speed 1.59", "Speed 2"
+    local weaponSpeed = string.match(text, "Speed (%d+%.?%d*)")
+    if weaponSpeed then
+        return tonumber(weaponSpeed)
+    end
+    return nil
+end
+
+function IWin:GetWeaponSpeed(debugmsg)
+    local cached = IWin_Inventory["weaponSpeed"]
+    if cached ~= nil then
+        IWin:Debug("Weapon speed: " .. tostring(cached), debugmsg)
+        return cached
+    end
+
+    local mainHandLink = GetInventoryItemLink("player", 16)
+    if not mainHandLink then
+        IWin_Inventory["weaponSpeed"] = 2
+        IWin:Debug("No weapon. Unarmed speed: 2", debugmsg)
+        return 2
+    end
+
+    IWin_T:ClearLines()
+    IWin_T:SetOwner(WorldFrame, "ANCHOR_NONE")
+    IWin_T:SetInventoryItem("player", 16)
+
+    for i = 1, IWin_T:NumLines() do
+        local left  = _G["IWin_TTextLeft" .. i]
+        local right = _G["IWin_TTextRight" .. i]
+        if right and right.GetText then
+            local text = right:GetText()
+            if text then
+                local speed = IWin:ParseWeaponSpeedFromText(text)
+                if speed then
+                    IWin_Inventory["weaponSpeed"] = speed
+                    IWin:Debug("Weapon speed: " .. speed, debugmsg)
+                    return speed
+                end
+            end
+        end
+        if left and left.GetText then
+            local text = left:GetText()
+            if text then
+                local speed = IWin:ParseWeaponSpeedFromText(text)
+                if speed then
+                    IWin_Inventory["weaponSpeed"] = speed
+                    IWin:Debug("Weapon speed: " .. speed, debugmsg)
+                    return speed
+                end
+            end
+        end
+    end
+
+    IWin_Inventory["weaponSpeed"] = 2
+    IWin:Debug("No weapon speed found. Default speed: 2", debugmsg)
+    return 2
+end
+
 -- Movement #######################################################################################################################################
 function IWin:IsMoving(debugmsg)
 	local cached = IWin_CombatVar["moving"]
@@ -1049,5 +1239,18 @@ end
 function IWin:IsMinGroupSize(size, debugmsg)
 	local result = IWin:GetGroupSize(false) >= IWin_PartySize[size]
 	IWin:Debug("Group minimum size is "..size..": "..tostring(result), debugmsg)
+	return result
+end
+
+-- System #######################################################################################################################################
+function IWin:GetTime(debugmsg)
+	local cached = IWin_CombatVar["time"]
+	if cached ~= nil then
+		IWin:Debug("Current time: "..tostring(cached), debugmsg)
+		return cached
+	end
+	local result = GetTime()
+	IWin_CombatVar["time"] = result
+	IWin:Debug("Current time: "..tostring(result), debugmsg)
 	return result
 end

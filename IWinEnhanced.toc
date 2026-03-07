@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: IWinEnhanced
 ## Notes: 1-button rotation macros for turtle druids, paladins and warriors.
-## Version: 2.1
+## Version: 2.2
 ## Author: Profiler781(Agamemnoth), Vlad
 ## SavedVariablesPerCharacter: IWin_Settings
 ## Dependencies: SuperCleveRoidMacros

@@ -8,6 +8,21 @@ function SlashCmdList.IWINMAGE(command)
 		table.insert(arguments, token)
 	end
 
-	DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
-	DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin:|r Current setup")
+	if arguments[1] == "debug" then
+		if arguments[2] ~= "on"
+			and arguments[2] ~= "off"
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
+				return
+		end
+	end
+	
+	if arguments[1] == "debug" then
+        IWin_Settings["debug"] = arguments[2]
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Debug: |r" .. IWin_Settings["debug"])
+	else
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin:|r Current setup")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin debug [|r" .. IWin_Settings["debug"] .. "|cff0066ff]:|r Enable/disable debug.")
+	end
 end

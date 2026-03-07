@@ -79,11 +79,11 @@ function IWin:Envenom()
 				IWin:GetTimeToDie() > 6 --longer fight
 				or ( --solo will engage next fight
 						IWin:GetHealthPercent("player") > 50
-						and not IWin:IsMinGroupSize("duo")
+						and IWin:GetGroupSize() == 1
 					)
 				or ( --group will engage next pack
 						not IWin:IsBoss()
-						and IWin:IsMinGroupSize("duo", false)
+						and IWin:GetGroupSize(false) > 1
 					)
 			)
 		and IWin:IsEnergyAvailable(spell) then
@@ -101,11 +101,11 @@ function IWin:SetReservedEnergyEnvenom()
 				IWin:GetTimeToDie(false) > 6 --longer fight
 				or ( --solo will engage next fight
 						IWin:GetHealthPercent("player", false) > 50
-						and not IWin:IsMinGroupSize("duo", false)
+						and IWin:GetGroupSize(false) == 1
 					)
 				or ( --group will engage next pack
 						not IWin:IsBoss(false)
-						and IWin:IsMinGroupSize("duo", false)
+						and IWin:GetGroupSize(false) > 1
 					)
 			) then
 				IWin:SetReservedEnergy(spell, "buff", "player")
@@ -142,7 +142,7 @@ end
 function IWin:ExposeArmor()
 	local spell = "Expose Armor"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetTalentRank(3, 2) == 2
+	if IWin:GetTalentRank("Improved Expose Armor") == 2
 		and IWin:IsMaxComboPoints()
 		and IWin:IsBoss()
 		and IWin:GetTimeToDie() > IWin:GetBuffRemaining("target", spell)
@@ -155,7 +155,7 @@ end
 function IWin:SetReservedEnergyExposeArmor()
 	local spell = "Expose Armor"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if IWin:GetTalentRank(3, 2, false) == 2
+	if IWin:GetTalentRank("Improved Expose Armor", false) == 2
 		and IWin:IsMaxComboPoints(false)
 		and IWin:IsBoss(false)
 		and IWin:GetTimeToDie(false) > IWin:GetBuffRemaining("target", spell, nil, false)
@@ -262,7 +262,7 @@ function IWin:Rupture()
 					)
 				or (
 						IWin:GetBuffRemaining("player", "Taste for Blood") < 3
-						and IWin:GetTalentRank(1, 10) ~= 0
+						and IWin:GetTalentRank("Taste for Blood") ~= 0
 					)
 			)
 		and IWin:IsEnergyAvailable(spell) then
@@ -282,7 +282,7 @@ function IWin:SetReservedEnergyRupture()
 					)
 				or (
 						IWin:GetBuffRemaining("player", "Taste for Blood", nil, false) < 3
-						and IWin:GetTalentRank(1, 10, false) ~= 0
+						and IWin:GetTalentRank("Taste for Blood", false) ~= 0
 					)
 			) then
 				IWin:SetReservedEnergy(spell, "nocooldown")
@@ -324,11 +324,11 @@ function IWin:SliceAndDice()
 				IWin:GetTimeToDie() > 6 --longer fight
 				or ( --solo will engage next fight
 						IWin:GetHealthPercent("player") > 50
-						and not IWin:IsMinGroupSize("duo")
+						and IWin:GetGroupSize() == 1
 					)
 				or ( --group will engage next pack
 						not IWin:IsBoss()
-						and IWin:IsMinGroupSize("duo", false)
+						and IWin:GetGroupSize(false) > 1
 					)
 			)
 		and IWin:IsEnergyAvailable(spell) then
@@ -346,11 +346,11 @@ function IWin:SetReservedEnergySliceAndDice()
 				IWin:GetTimeToDie(false) > 6 --longer fight
 				or ( --solo will engage next fight
 						IWin:GetHealthPercent("player", false) > 50
-						and not IWin:IsMinGroupSize("duo", false)
+						and IWin:GetGroupSize(false) == 1
 					)
 				or ( --group will engage next pack
 						not IWin:IsBoss(false)
-						and IWin:IsMinGroupSize("duo", false)
+						and IWin:GetGroupSize(false) > 1
 					)
 			) then
 				IWin:SetReservedEnergy(spell, "buff", "player")

@@ -8,7 +8,14 @@ function SlashCmdList.IWINWARRIOR(command)
 		table.insert(arguments, token)
 	end
 
-	if arguments[1] == "charge"then
+	if arguments[1] == "debug" then
+		if arguments[2] ~= "on"
+			and arguments[2] ~= "off"
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
+				return
+		end
+	elseif arguments[1] == "charge"then
 		if arguments[2] ~= "raid"
 			and arguments[2] ~= "group"
 			and arguments[2] ~= "solo"
@@ -82,7 +89,10 @@ function SlashCmdList.IWINWARRIOR(command)
 		end
 	end
 
-    if arguments[1] == "charge" then
+    if arguments[1] == "debug" then
+        IWin_Settings["debug"] = arguments[2]
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Debug: |r" .. IWin_Settings["debug"])
+	elseif arguments[1] == "charge" then
         IWin_Settings["charge"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Charge: |r" .. IWin_Settings["charge"])
 	elseif arguments[1] == "chargewl" then
@@ -115,6 +125,7 @@ function SlashCmdList.IWINWARRIOR(command)
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin:|r Current setup")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin debug [|r" .. IWin_Settings["debug"] .. "|cff0066ff]:|r Enable/disable debug.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin charge [|r" .. IWin_Settings["charge"] .. "|cff0066ff]:|r Setup for Charge and Intercept")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin chargewl [|r" .. IWin_Settings["chargewl"] .. "|cff0066ff]:|r Setup for Charge and Intercept whitelist")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin sunder [|r" .. IWin_Settings["sunder"] .. "|cff0066ff]:|r Setup for Sunder Armor priority as DPS")

@@ -22,11 +22,5 @@ IWin:SetScript("OnEvent", function()
 		IWin_CombatVar["weaponAttackSpeed"] = UnitAttackSpeed("player")
 	elseif event == "ADDON_LOADED" and arg1 == "PallyPowerTW" then
 		IWin.hasPallyPower = PallyPower_SealAssignments and true or false
-	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" then
-		if not IWin.libdebuff then
-			IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
-	    	if not IWin.libdebuff then return 0 end
-		end
-		IWin_CombatVar["weaponAttackSpeed"] = UnitAttackSpeed("player") * (1 + IWin:GetBuffStack("player","Zeal", nil, false) * 0.05)
 	end
 end)

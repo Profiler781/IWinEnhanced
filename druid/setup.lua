@@ -7,7 +7,15 @@ function SlashCmdList.IWINDRUID(command)
 	for token in string.gfind(command, "%S+") do
 		table.insert(arguments, token)
 	end
-	if arguments[1] == "frontshred" then
+
+	if arguments[1] == "debug" then
+		if arguments[2] ~= "on"
+			and arguments[2] ~= "off"
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
+				return
+		end
+	elseif arguments[1] == "frontshred" then
 		if arguments[2] ~= "on"
 			and arguments[2] ~= "off"
 			and arguments[2] ~= nil then
@@ -22,7 +30,11 @@ function SlashCmdList.IWINDRUID(command)
 				return
 		end
 	end
-    if arguments[1] == "frontshred" then
+	
+    if arguments[1] == "debug" then
+        IWin_Settings["debug"] = arguments[2]
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Debug: |r" .. IWin_Settings["debug"])
+	elseif arguments[1] == "frontshred" then
         IWin_Settings["frontShred"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("Front Shred: " .. IWin_Settings["frontShred"])
 	elseif
@@ -32,6 +44,7 @@ function SlashCmdList.IWINDRUID(command)
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("Usage:")
 		DEFAULT_CHAT_FRAME:AddMessage(" /iwin : Current setup")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin debug [|r" .. IWin_Settings["debug"] .. "|cff0066ff]:|r Enable/disable debug.")
 		DEFAULT_CHAT_FRAME:AddMessage(" /iwin frontshred [" .. IWin_Settings["frontShred"] .. "] : Setup for Front Shredding")
 		DEFAULT_CHAT_FRAME:AddMessage(" /iwin berserkcat [" .. IWin_Settings["berserkCat"] .. "] : Setup for Berserk in Cat Form")
     end
