@@ -95,10 +95,10 @@ function IWin:IsDefensiveTacticsActive(stance, debugmsg)
 					and IWin:IsSpellLearnt("Berserker Stance", nil, false)
 				)
 			) then
-				IWin:Debug(stance.." allowed for Defensive Tactics: true", debugmsg)
+				IWin:Debug(dtStance.." allowed for Defensive Tactics: true", debugmsg)
 				return true
 	end
-	IWin:Debug(stance.." allowed for Defensive Tactics: false", debugmsg)
+	IWin:Debug(dtStance.." allowed for Defensive Tactics: false", debugmsg)
 	return false
 end
 
@@ -130,4 +130,5 @@ function IWin:IsHighAP(debugmsg)
 	local result = (APbase + APpos - APneg) * 0.35 + 200
 	IWin:Debug("Attack power : "..tostring(result), debugmsg)
 	return result > 600 + 20 * 15
+
 end
