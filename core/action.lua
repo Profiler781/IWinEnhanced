@@ -1,13 +1,11 @@
 local CastSpellByName = CastSpellByName
-
-
-local UnitLevel = UnitLevel
 local GetContainerNumSlots = GetContainerNumSlots
 local GetContainerItemLink = GetContainerItemLink
 local UseContainerItem = UseContainerItem
 local SpellStopCasting = SpellStopCasting
 
 function IWin:InitializeRotationCore()
+	IWin:Debug("")
 	IWin:Debug("=== Rotation processing ===")
 	if not IWin.hasSuperwow then
     	DEFAULT_CHAT_FRAME:AddMessage("|cFF00FFFFbalakethelock's SuperWoW|r required:")
@@ -30,6 +28,7 @@ function IWin:InitializeRotationCore()
 	IWin_CombatVar = {
 		["affectingCombat"] = {},
 		["dead"] = {},
+		["enemyInRange"] = {},
 		["energyPerSecondPrediction"] = 0,
 		["GCD"] = 0,
 		["level"] = {},
@@ -137,15 +136,15 @@ function IWin:UseItem(item)
 end
 
 function IWin:UseDrinkItem()
-	local playerLevel = UnitLevel("player")
+	local playerLevel = IWin:GetLevel("player")
 	for drinkItem in IWin_DrinkConjured do
-		if IWin:IsBuffActive("player", "Drink") then break end
+		if IWin:IsBuffActive("player", "Drink", nil, false) then break end
 		if playerLevel >= IWin_DrinkConjured[drinkItem] then
 			IWin:UseItem(drinkItem)
 		end
 	end
 	for drinkItem in IWin_DrinkVendor do
-		if IWin:IsBuffActive("player", "Drink") then break end
+		if IWin:IsBuffActive("player", "Drink", nil, false) then break end
 		if playerLevel >= IWin_DrinkVendor[drinkItem] then
 			IWin:UseItem(drinkItem)
 		end

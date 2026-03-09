@@ -553,7 +553,7 @@ function IWin:InsectSwarm()
 	if (
 			not IWin:IsBuffActive("target", spell, "player")
 			or (
-					IWin:GetBuffRemaining("player", "Nature Eclipse") < IWin:GetCastTimeWrath() + 0.5
+					IWin:GetBuffRemaining("player", "Nature Eclipse") < IWin:GetCastTime("Wrath") + 0.5
 					and IWin:IsBuffActive("player", "Nature Eclipse")
 					and IWin:GetBuffRemaining("target", spell, "player") < 8
 				)
@@ -579,7 +579,7 @@ function IWin:Moonfire()
 	if (
 			not IWin:IsBuffActive("target", spell, "player")
 			or (
-					IWin:GetBuffRemaining("player", "Arcane Eclipse") < IWin:GetCastTimeStarfire() + 0.5
+					IWin:GetBuffRemaining("player", "Arcane Eclipse") < IWin:GetCastTime("Starfire") + 0.5
 					and IWin:IsBuffActive("player", "Arcane Eclipse")
 					and IWin:GetBuffRemaining("target", spell, "player") < 8
 				)

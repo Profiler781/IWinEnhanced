@@ -179,7 +179,8 @@ function IWin:ExorcismRanged(manaPercent)
 				IWin:IsCreatureType("Undead")
 				or IWin:IsCreatureType("Demon")
 			)
-		and not IWin:IsInRange("Holy Strike") then
+		and not IWin:IsInRange("Holy Strike")
+		and IWin:IsInRange(spell) then
 			IWin:Cast(spell)
 	end
 end
@@ -213,17 +214,27 @@ end
 function IWin:HammerOfWrath(manaPercent)
 	local spell = "Hammer of Wrath"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if not IWin:IsMoving()
+	if IWin:IsExecutePhase()
 		and (
 				(
 					IWin:IsElite()
+					and IWin:GetTimeToDie() > IWin:GetCastTime(spell) + IWin_TravelTime[spell]
 					and not IWin:IsTanking()
 					and IWin:GetPowerPercent("player") > manaPercent
 				)
 				or IWin:IsPVP("target")
 			)
-		and IWin:IsExecutePhase() then
+		and not IWin:IsMoving() then
 			IWin:Cast(spell)
+	end
+end
+
+function IWin:HammerOfWrathRanged(manaPercent)
+	local spell = "Hammer of Wrath"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if not IWin:IsInRange("Holy Strike")
+		and IWin:IsInRange(spell) then
+			IWin:HammerOfWrath(manaPercent)
 	end
 end
 
@@ -356,25 +367,27 @@ end
 function IWin:JudgementReact()
 	local spell = "Judgement"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if 		(
-				IWin:IsBuffActive("player","Seal of Wisdom")
-				or IWin:IsBuffActive("player","Seal of Light")
-				or IWin:IsBuffActive("player","Seal of the Crusader")
-				or IWin:IsBuffActive("player","Seal of Justice")
-			)
+	if (
+			IWin:IsBuffActive("player","Seal of Wisdom")
+			or IWin:IsBuffActive("player","Seal of Light")
+			or IWin:IsBuffActive("player","Seal of the Crusader")
+			or IWin:IsBuffActive("player","Seal of Justice")
+		)
 		and (
 				not IWin:IsJudgementOverwrite("Judgement of Wisdom","Seal of Wisdom")
 				or IWin:GetPowerPercent("player") > 60
-			) then
+			)
+		and IWin:IsInRange(spell) then
 				IWin:Cast(spell, false)
 	end
 end
 
-function IWin:JudgementRanged(manaPercent,queueTime)
+function IWin:JudgementRanged(manaPercent, queueTime)
 	local spell = "Judgement"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if not IWin:IsInRange("Holy Strike") then
-		IWin:Judgement(manaPercent,queueTime)
+	if not IWin:IsInRange("Holy Strike")
+		and IWin:IsInRange(spell) then
+			IWin:Judgement(manaPercent, queueTime)
 	end
 end
 
@@ -451,7 +464,8 @@ function IWin:SealOfCommand(manaPercent)
 				not IWin:IsSealActive()
 				or IWin:IsHiddenSealUsed()
 				or IWin:GetPowerPercent("player") > 95
-			) then
+			)
+		and IWin:IsExists("target") then
 				IWin:Cast(spell)
 	end
 end
@@ -463,7 +477,8 @@ function IWin:SealOfJustice()
 		and (
 				not IWin:IsBuffActive("player", spell)
 				or IWin:IsHiddenSealUsed("Seal of Justice")
-			) then
+			)
+		and IWin:IsExists("target") then
 				IWin:Cast(spell)
 	end
 end
@@ -471,20 +486,23 @@ end
 function IWin:SealOfJusticeElite()
 	local spell = "Seal of Justice"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if 		(
-				not IWin:IsBuffActive("player", spell)
-				or IWin:IsHiddenSealUsed("Seal of Justice")
-			)
+	if (
+			not IWin:IsBuffActive("player", spell)
+			or IWin:IsHiddenSealUsed("Seal of Justice")
+		)
 		and not IWin:IsBuffActive("target","Judgement of Justice")
 		and IWin:IsJudgementTarget("justice")
 		and IWin:GetCooldownRemaining("Judgement") <= IWin_Settings["GCD"]
-		and ((
-				IWin.hasPallyPower
-				and PallyPower_SealAssignments[IWin:GetName("player", false)] == 3
-			) or (
-				not IWin.hasPallyPower
-				and IWin_Settings["judgement"] == "justice"
-			)) then
+		and (
+				(
+					IWin.hasPallyPower
+					and PallyPower_SealAssignments[IWin:GetName("player", false)] == 3
+				) or (
+					not IWin.hasPallyPower
+					and IWin_Settings["judgement"] == "justice"
+				)
+			)
+		and IWin:IsExists("target") then
 				IWin:Cast(spell)
 	end
 end
@@ -492,10 +510,10 @@ end
 function IWin:SealOfLightElite()
 	local spell = "Seal of Light"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if 		(
-				not IWin:IsBuffActive("player", spell)
-				or IWin:IsHiddenSealUsed("Seal of Light")
-			)
+	if (
+			not IWin:IsBuffActive("player", spell)
+			or IWin:IsHiddenSealUsed("Seal of Light")
+		)
 		and not IWin:IsBuffActive("target","Judgement of Light")
 		and IWin:IsJudgementTarget("light")
 		and IWin:GetCooldownRemaining("Judgement") <= IWin_Settings["GCD"]
@@ -507,7 +525,8 @@ function IWin:SealOfLightElite()
 					not IWin.hasPallyPower
 					and IWin_Settings["judgement"] == "light"
 				)
-			) then
+			)
+		and IWin:IsExists("target") then
 				IWin:Cast(spell)
 	end
 end
@@ -531,7 +550,8 @@ function IWin:SealOfRighteousness(manaPercent)
 								or IWin:IsHiddenSealUsed("Seal of Wisdom")
 							)
 					)
-			) then
+			)
+		and IWin:IsExists("target") then
 				IWin:Cast(spell)
 	end
 end
@@ -539,20 +559,23 @@ end
 function IWin:SealOfTheCrusaderElite()
 	local spell = "Seal of the Crusader"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if 		(
-				not IWin:IsBuffActive("player", spell)
-				or IWin:IsHiddenSealUsed("Seal of the Crusader")
-			)
+	if (
+			not IWin:IsBuffActive("player", spell)
+			or IWin:IsHiddenSealUsed("Seal of the Crusader")
+		)
 		and not IWin:IsBuffActive("target","Judgement of the Crusader")
 		and IWin:IsJudgementTarget("crusader")
 		and IWin:GetCooldownRemaining("Judgement") <= IWin_Settings["GCD"]
-		and ((
-				IWin.hasPallyPower
-				and PallyPower_SealAssignments[IWin:GetName("player", false)] == 1
-			) or (
-				not IWin.hasPallyPower
-				and IWin_Settings["judgement"] == "crusader"
-			)) then
+		and (
+				(
+					IWin.hasPallyPower
+					and PallyPower_SealAssignments[IWin:GetName("player", false)] == 1
+				) or (
+					not IWin.hasPallyPower
+					and IWin_Settings["judgement"] == "crusader"
+				)
+			)
+		and IWin:IsExists("target") then
 				IWin:Cast(spell)
 	end
 end
@@ -560,10 +583,10 @@ end
 function IWin:SealOfWisdom(manaPercent)
 	local spell = "Seal of Wisdom"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if 		(
-				not IWin:IsSealActive()
-				or IWin:IsHiddenSealUsed()
-			)
+	if (
+			not IWin:IsSealActive()
+			or IWin:IsHiddenSealUsed()
+		)
 		and (
 				IWin:GetPowerPercent("player") < manaPercent
 				or (
@@ -577,7 +600,8 @@ function IWin:SealOfWisdom(manaPercent)
 						and not IWin:IsElite()
 						and not IWin:IsAffectingCombat("player")
 					)
-			) then
+			)
+		and IWin:IsExists("target") then
 				IWin:Cast(spell)
 	end
 end
@@ -585,10 +609,10 @@ end
 function IWin:SealOfWisdomElite()
 	local spell = "Seal of Wisdom"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if 		(
-				not IWin:IsBuffActive("player", spell)
-				or IWin:IsHiddenSealUsed("Seal of Wisdom")
-			)
+	if (
+			not IWin:IsBuffActive("player", spell)
+			or IWin:IsHiddenSealUsed("Seal of Wisdom")
+		)
 		and not IWin:IsBuffActive("target","Judgement of Wisdom")
 		and IWin:IsJudgementTarget("wisdom")
 		and IWin:GetCooldownRemaining("Judgement") <= IWin_Settings["GCD"]
@@ -600,7 +624,8 @@ function IWin:SealOfWisdomElite()
 					not IWin.hasPallyPower
 					and IWin_Settings["judgement"] == "wisdom"
 				)
-			) then
+			)
+		and IWin:IsExists("target") then
 				IWin:Cast(spell)
 	end
 end
@@ -608,8 +633,11 @@ end
 function IWin:SealOfWisdomEco()
 	local spell = "Seal of Wisdom"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if not IWin:IsSealActive()
-		or IWin:IsHiddenSealUsed() then
+	if (
+			not IWin:IsSealActive()
+			or IWin:IsHiddenSealUsed()
+		)
+		and IWin:IsExists("target") then
 			IWin:Cast(spell)
 	end
 end

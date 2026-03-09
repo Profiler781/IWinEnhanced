@@ -20,6 +20,7 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["soc"] == nil then IWin_Settings["soc"] = "auto" end
 		--init
 		IWin_CombatVar["weaponAttackSpeed"] = UnitAttackSpeed("player")
+		IWin.hasPallyPower = PallyPower_SealAssignments and true or false
 	elseif event == "ADDON_LOADED" and arg1 == "PallyPowerTW" then
 		IWin.hasPallyPower = PallyPower_SealAssignments and true or false
 	end

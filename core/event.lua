@@ -12,8 +12,38 @@ IWin_core:SetScript("OnEvent", function()
 		if IWin_Settings["debug"] == nil then IWin_Settings["debug"] = "off" end
 		if IWin_Settings["GCD"] == nil then IWin_Settings["GCD"] = 1.5 end
 		if IWin_Settings["GCDEnergy"] == nil then IWin_Settings["GCDEnergy"] = 1 end
+
 		IWin.hasSuperwow = SetAutoloot and true or false
 		IWin.hasUnitXP = pcall(UnitXP, "nop", "nop") and true or false
+
+		IWin_CastTime = {}--combat var
+		IWin_CombatVar = {
+			["affectingCombat"] = {},
+			["dead"] = {},
+			["enemyInRange"] = {},
+			["energyPerSecondPrediction"] = 0,
+			["GCD"] = 0,
+			["level"] = {},
+			["queueGCD"] = true,
+			["reservedEnergy"] = 0,
+			["reservedRage"] = 0,
+			["startAttackThrottle"] = 0,
+			["swingAttackQueued"] = false,
+		}
+		IWin_Inventory = {}
+		IWin_Mana = {}
+		IWin_RotationVar = {
+			["startAttackThrottle"] = 0,
+		}
+		IWin_Spellbook = {
+			["talent"] = {},
+		}
+		IWin_Stance = {}--rotation var
+		IWin_Target = {
+			["exists"] = {},
+			["name"] = {},
+			["pvp"] = {},
+		}
 	elseif event == "ADDON_LOADED" and (arg1 == "SuperCleveRoidMacros" or arg1 == "IWinEnhanced") then
 		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
 	elseif event == "PLAYER_TARGET_CHANGED" then

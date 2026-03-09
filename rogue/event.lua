@@ -17,6 +17,9 @@ IWin:SetScript("OnEvent", function()
 		--energy
 		if IWin_Settings["energyTimeToReserveBuffer"] == nil then IWin_Settings["energyTimeToReserveBuffer"] = 0 end
 		if IWin_Settings["energyPerSecondPrediction"] == nil then IWin_Settings["energyPerSecondPrediction"] = 10 end
+		--init
+		IWin_RotationVar["riposteAvailable"] = 0
+		IWin_RotationVar["surpriseAttackAvailable"] = 0
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES" then
 		if string_find(arg1,"parry") then
 			IWin_RotationVar["riposteAvailable"] = IWin:GetTime(false) + 4

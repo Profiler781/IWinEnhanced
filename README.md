@@ -8,14 +8,17 @@ Contributor: Vlad/Goodnice - Tel'Abim
 
 ## Latest features
 
-Debug mod
+Implementing condition to count enemies in range. The purpose is to have a single rotation for both single target and multi target. The condition will use spells available for maximum dps.
+/idps for warrior is the first rotation to handle enemy count.
+/idpsfocus for warrior has been added to run the single target rotation regardless enemy count to focus on a priority target.
+/icleave for warrior is unchanged but will be removed soon.
 
 ## Mods Dependencies
 
 Mandatory Mods:
 * [SuperWoW](https://github.com/balakethelock/SuperWoW), A mod made for fixing client bugs and expanding the lua-based API used by user interface addons. Used for debuff tracking.
-* [UnitXP](https://codeberg.org/konaka/UnitXP_SP3), Advanced macro conditions and syntax.
-* [Nampower](https://github.com/pepopo978/nampower), Increase cast efficiency on the 1.12.1 client. Used for range checks.
+* [UnitXP](https://codeberg.org/konaka/UnitXP_SP3/releases), Advanced macro conditions and syntax.
+* [Nampower](https://gitea.com/avitasia/nampower/releases), Increase cast efficiency on the 1.12.1 client. Used for range checks.
 
 ## Addons Dependencies
 
@@ -32,7 +35,7 @@ Optionnal Addons:
 
 # Druid Module
 
-## Commands
+## Macros
 
     /iblast         Single target caster rotation
     /iruetoo        Single target cat rotation
@@ -55,7 +58,7 @@ Example: /iwin frontshred on
 
 # Paladin Module
 
-## Commands
+## Macros
 
     /idps           Single target DPS rotation
     /icleave        Multi target DPS rotation
@@ -90,9 +93,10 @@ Example: /iwin judgement wisdom
 
 # Warrior Module
 
-## Commands
+## Macros
 
-    /idps           Single target DPS rotation
+    /idps           DPS rotation for both single target and multi target
+    /idpsfocus      Single target DPS rotation
     /icleave        Multi target DPS rotation
     /itank          Single target threat rotation
     /ihodor         Multi target threat rotation
@@ -116,6 +120,7 @@ Example: /iwin judgement wisdom
     /iwin ragebuffer <number>         Setup to save 100% required rage for spells X seconds before the spells are used.
     /iwin ragegain <number>           Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used.
     /iwin jousting <toggle>           Setup for jousting solo DPS.
+    /iwin thunderclap <toggle>        Setup to allow Thunder Clap.
 
 partySize possible values: raid, group, solo, targetincombat, off.
 

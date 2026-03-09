@@ -29,6 +29,18 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["dtDefensive"] == nil then IWin_Settings["dtDefensive"] = "on" end
 		if IWin_Settings["dtBerserker"] == nil then IWin_Settings["dtBerserker"] = "off" end
 		if IWin_Settings["jousting"] == nil then IWin_Settings["jousting"] = "off" end
+		if IWin_Settings["thunderclap"] == nil then IWin_Settings["thunderclap"] = "on" end
+		--init
+		IWin_CombatVar["slamQueued"] = false
+		IWin_RotationVar["overpowerAvailable"] = 0
+		IWin_RotationVar["revengeAvailable"] = 0
+		IWin_RotationVar["reservedRageStance"] = nil
+		IWin_RotationVar["reservedRageStanceLast"] = 0
+		IWin_RotationVar["charge"] = 0
+		IWin_RotationVar["slamCasting"] = 0
+		IWin_RotationVar["slamGCDAllowed"] = 0
+		IWin_RotationVar["slamClipAllowedMax"] = 0
+		IWin_RotationVar["slamClipAllowedMin"] = 0
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS" then
 		if string_find(arg1,"blocked") then
 			IWin_RotationVar["revengeAvailable"] = IWin:GetTime(false) + 4

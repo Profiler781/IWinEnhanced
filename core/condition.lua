@@ -735,9 +735,21 @@ function IWin:IsInRange(spell, distance, unit, debugmsg)
 	end
 end
 
---todo
-function IWin:GetEnemyInRange(range)
-	-- body
+-- range values: static number, meleeAutoAttack
+function IWin:GetEnemyInRange(range, debugmsg)
+	if type(range) == "number" then return range end
+	local cached = IWin_CombatVar["enemyInRange"][range]
+	if cached ~= nil then
+		IWin:Debug("Enemies in "..range.." range: "..tostring(cached), debugmsg)
+		return cached
+	end
+    local result = CleveRoids.CountEnemiesMatching(function(unit)
+        local distance = UnitXP("distanceBetween", "player", unit, range)
+        return distance and distance <= 5
+    end)
+    IWin_CombatVar["enemyInRange"][range] = result
+	IWin:Debug("Enemies in "..range.." range: "..tostring(result), debugmsg)
+	return result
 end
 
 -- Target #######################################################################################################################################

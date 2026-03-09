@@ -18,6 +18,9 @@ IWin:SetScript("OnEvent", function()
 		--setup
 		if IWin_Settings["frontShred"] == nil then IWin_Settings["frontShred"] = "off" end
 		if IWin_Settings["berserkCat"] == nil then IWin_Settings["berserkCat"] = "on" end
+		--init
+		IWin_RotationVar["lastMoonkinSpell"] = "Starfire"
+		IWin_RotationVar["lastMoonkinSpellTime"] = 0
 	elseif event == "SPELLCAST_START" and (arg1 == "Wrath" or arg1 == "Starfire") then
 		IWin_RotationVar["lastMoonkinSpell"] = arg1
 		IWin_RotationVar["lastMoonkinSpellTime"] = IWin:GetTime(false) + (arg2 / 1000)

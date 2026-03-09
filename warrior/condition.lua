@@ -2,16 +2,16 @@ if UnitClass("player") ~= "Warrior" then return end
 
 local UnitAttackPower = UnitAttackPower
 
-function IWin:IsOverpowerAvailable(debugmsg)
-	local overpowerRemaining = IWin_RotationVar["overpowerAvailable"] - IWin:GetTime(false) - 0.2
- 	local result = overpowerRemaining > IWin:GetGCDRemaining(false)
+function IWin:IsOverpowerAvailable(timeBuffer, debugmsg)
+	local overpowerRemaining = IWin_RotationVar["overpowerAvailable"] - IWin:GetTime(false)
+ 	local result = overpowerRemaining - timeBuffer > IWin:GetGCDRemaining(false)
  	IWin:Debug("Overpower available: "..tostring(result), debugmsg)
  	return result
 end
 
-function IWin:IsRevengeAvailable(debugmsg)
+function IWin:IsRevengeAvailable(timeBuffer, debugmsg)
 	local revengeRemaining = IWin_RotationVar["revengeAvailable"] - IWin:GetTime(false)
- 	local result = revengeRemaining > IWin:GetGCDRemaining(false)
+ 	local result = revengeRemaining - timeBuffer > IWin:GetGCDRemaining(false)
  	IWin:Debug("Revenge available: "..tostring(result), debugmsg)
  	return result
 end
@@ -130,5 +130,4 @@ function IWin:IsHighAP(debugmsg)
 	local result = (APbase + APpos - APneg) * 0.35 + 200
 	IWin:Debug("Attack power : "..tostring(result), debugmsg)
 	return result > 600 + 20 * 15
-
 end

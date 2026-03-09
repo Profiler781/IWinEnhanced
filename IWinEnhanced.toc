@@ -20,17 +20,6 @@ shaman\data.lua
 warlock\data.lua
 warrior\data.lua
 
-core\init.lua
-druid\init.lua
-hunter\init.lua
-mage\init.lua
-paladin\init.lua
-priest\init.lua
-rogue\init.lua
-shaman\init.lua
-warlock\init.lua
-warrior\init.lua
-
 core\condition.lua
 druid\condition.lua
 hunter\condition.lua

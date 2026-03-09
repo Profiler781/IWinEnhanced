@@ -87,6 +87,13 @@ function SlashCmdList.IWINWARRIOR(command)
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
+	elseif arguments[1] == "thunderclap" then
+		if arguments[2] ~= "on"
+			and arguments[2] ~= "off"
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
+				return
+		end
 	end
 
     if arguments[1] == "debug" then
@@ -122,6 +129,9 @@ function SlashCmdList.IWINWARRIOR(command)
 	elseif arguments[1] == "jousting" then
 	    IWin_Settings["jousting"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Jousting: |r" .. IWin_Settings["jousting"])
+	elseif arguments[1] == "thunderclap" then
+	    IWin_Settings["thunderclap"] = arguments[2]
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Thunder Clap: |r" .. IWin_Settings["thunderclap"])
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin:|r Current setup")
@@ -136,5 +146,6 @@ function SlashCmdList.IWINWARRIOR(command)
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin ragebuffer [|r" .. tostring(IWin_Settings["rageTimeToReserveBuffer"]) .. "|cff0066ff]:|r Setup to save 100% required rage for spells X seconds before the spells are used. 1.5 is the default parameter.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin ragegain [|r" .. tostring(IWin_Settings["ragePerSecondPrediction"]) .. "|cff0066ff]:|r Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used. 10 is the default parameter. Increase the value if rage is wasted.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin jousting [|r" .. IWin_Settings["jousting"] .. "|cff0066ff]:|r Setup for Jousting solo DPS")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin thunderclap [|r" .. IWin_Settings["thunderclap"] .. "|cff0066ff]:|r Setup to allow Thunder Clap")
     end
 end
