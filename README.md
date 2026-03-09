@@ -9,8 +9,11 @@ Contributor: Vlad/Goodnice - Tel'Abim
 ## Latest features
 
 Implementing condition to count enemies in range. The purpose is to have a single rotation for both single target and multi target. The condition will use spells available for maximum dps.
+
 /idps for warrior is the first rotation to handle enemy count.
+
 /idpsfocus for warrior has been added to run the single target rotation regardless enemy count to focus on a priority target.
+
 /icleave for warrior is unchanged but will be removed soon.
 
 ## Mods Dependencies
