@@ -73,12 +73,22 @@ end
 --todo
 function IWin:GetBuffRemaining(unit, spell, owner, debugmsg)
 	-- Debuff scan
-	for index = 1, 16 do
-	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = IWin.libdebuff:UnitDebuff(unit, index)
-	    if not effect then break end
-	    if effect and effect == spell and ((not owner) or (caster == owner)) then
-	    	IWin:Debug("Debuff remaining "..spell.." on "..unit..": "..tostring(timeLeft or 9999), debugmsg)
-	        return timeLeft or 9999
+	  if not owner then
+	    local targetGuid = CleveRoids.GetGUID(unit)
+	    if targetGuid then
+	    	local timeLeft = CleveRoids.FindAllCasterAuraByName(targetGuid, spell)
+	    	if timeLeft then
+	    		IWin:Debug("Debuff remaining "..spell.." on "..unit..": "..tostring(timeLeft), debugmsg)
+	    		return timeLeft
+	    	end
+	    end
+	end
+	for index = 1, 48 do
+	    local effect, _, _, _, _, _, timeLeft = IWin.libdebuff:UnitDebuff(unit, index, owner)
+	    if effect and effect == spell then
+	    	timeLeft = timeLeft or 9999
+	    	IWin:Debug("Debuff remaining "..spell.." on "..unit..": "..tostring(timeLeft), debugmsg)
+	        return timeLeft
 	    end
 	end
 	-- Buff scan only for player
@@ -132,6 +142,13 @@ end
 
 --todo
 function IWin:GetBuffStack(unit, spell, owner, debugmsg)
+	-- Nampower API
+	local _, _, stacks = IWin.API.FindUnitAuraInfo(unit, nil, string_lower(spell))
+	if stacks ~= nil then
+		stacks = stacks or 0
+		IWin:Debug("API Debuff "..spell.." stacks on "..unit..": "..tostring(stacks), debugmsg)
+	    return stacks
+	end
 	-- Debuff scan
 	for index = 1, 16 do
 	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = IWin.libdebuff:UnitDebuff(unit, index)

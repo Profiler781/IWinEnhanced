@@ -24,6 +24,7 @@ function IWin:InitializeRotationCore()
 	    	return 0
 	    end
 		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
+		IWin.API = CleveRoids and CleveRoids.NampowerAPI
 	end
 	IWin_CombatVar = {
 		["affectingCombat"] = {},
