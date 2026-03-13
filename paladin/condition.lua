@@ -73,10 +73,10 @@ end
 function IWin:IsHiddenSealUsed(seal, debugmsg) --fix for Doiteaura not removing used seal from hidden buff
 	local result
 	if seal then
-		result = IWin:IsBuffActive("player", seal, nil, false) and (not IWin:IsActionUsable("Judgement", false))
+		result = IWin:IsBuffActive("player", seal, nil, false) and (not IWin:IsActionUsable("Judgement", false)) and IWin:IsInRange("Judgement")
 		IWin:Debug("Player has used hidden "..seal..": "..tostring(result), debugmsg)
 	else
-		result = IWin:IsSealActive(false) and (not IWin:IsActionUsable("Judgement", false))
+		result = IWin:IsSealActive(false) and (not IWin:IsActionUsable("Judgement", false)) and IWin:IsInRange("Judgement")
 		IWin:Debug("Player has used hidden seal: "..tostring(result), debugmsg)
 	end
 	return result

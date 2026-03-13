@@ -30,24 +30,18 @@ local UnitMana = UnitMana
 local UnitManaMax = UnitManaMax
 local UnitName = UnitName
 
-local string_find = string.find
-local string_lower = string.lower
-local string_gsub = string.gsub
-local string_gfind = string.gfind
-local math_max = math.max
-
 -- Buff #######################################################################################################################################
 --helper
 function IWin:GetPlayerBuffIndex(spell)
 	local index = 0
-    spell = string_lower(string_gsub(spell, "_"," "))
+    spell = string.lower(string.gsub(spell, "_"," "))
 	while true do
 		local auraIndex = GetPlayerBuff(index,"HELPFUL")
 		index = index + 1
 		if auraIndex == -1 then break end
 		local buffIndex = GetPlayerBuffID(auraIndex)
 		buffIndex = (buffIndex < -1) and (buffIndex + 65536) or buffIndex
-		if string_lower(SpellInfo(buffIndex)) == spell then
+		if string.lower(SpellInfo(buffIndex)) == spell then
 			return auraIndex
 		end
 	end
@@ -62,7 +56,7 @@ function IWin:GetDebuffIndex(unit, spell)
 		IWin_T:ClearLines()
 		IWin_T:SetUnitDebuff(unit, index)
 		local tooltipText = IWin_TTextLeft1:GetText()
-		if spell and tooltipText and string_find(tooltipText, spell) then 
+		if spell and tooltipText and string.find(tooltipText, spell) then 
 			return index
 		end
 		index = index + 1
@@ -143,7 +137,7 @@ end
 --todo
 function IWin:GetBuffStack(unit, spell, owner, debugmsg)
 	-- Nampower API
-	local _, _, stacks = IWin.API.FindUnitAuraInfo(unit, nil, string_lower(spell))
+	local _, _, stacks = IWin.API.FindUnitAuraInfo(unit, nil, string.lower(spell))
 	if stacks ~= nil then
 		stacks = stacks or 0
 		IWin:Debug("API Debuff "..spell.." stacks on "..unit..": "..tostring(stacks), debugmsg)
@@ -530,7 +524,7 @@ function IWin:GetTimeToDie(debugmsg)
 		return cached
 	end
 	local ttd = 0
-	local numPartyMembers = math_max(2, GetNumPartyMembers(), GetNumRaidMembers())
+	local numPartyMembers = math.max(2, GetNumPartyMembers(), GetNumRaidMembers())
 	if type(TimeToKill) ~= "table" or type(TimeToKill.GetTTK) ~= "function" or TimeToKill.GetTTK() == nil or TimeToKill.GetTTK() == -1 then
 		ttd = IWin:GetHealth("target", false) / IWin:GetHealthMax("player", false) * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / numPartyMembers * 2
 	else
@@ -647,9 +641,9 @@ function IWin:GetRageToReserve(spell, trigger, unit, debugmsg)
 	if IWin_Settings["ragePerSecondPrediction"] > 0 then
 		reservedRageTime = IWin_CombatVar["reservedRage"] / IWin_Settings["ragePerSecondPrediction"]
 	end
-	local timeToReserveRage = math_max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
+	local timeToReserveRage = math.max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
 	if trigger == "partybuff" or IWin:IsSpellLearnt(spell, nil, false) then
-		local result = math_max(0, rageCost - IWin_Settings["ragePerSecondPrediction"] * timeToReserveRage)
+		local result = math.max(0, rageCost - IWin_Settings["ragePerSecondPrediction"] * timeToReserveRage)
 		IWin:Debug("Reserving rage for "..spell..": "..tostring(result), debugmsg)
 		return result
 	end
@@ -698,9 +692,9 @@ function IWin:GetEnergyToReserve(spell, trigger, unit, debugmsg)
 	if IWin_CombatVar["energyPerSecondPrediction"] > 0 then
 		reservedEnergyTime = IWin_CombatVar["reservedEnergy"] / IWin_CombatVar["energyPerSecondPrediction"]
 	end
-	local timeToReserveEnergy = math_max(0, spellTriggerTime - IWin_Settings["energyTimeToReserveBuffer"] - reservedEnergyTime)
+	local timeToReserveEnergy = math.max(0, spellTriggerTime - IWin_Settings["energyTimeToReserveBuffer"] - reservedEnergyTime)
 	if trigger == "partybuff" or IWin:IsSpellLearnt(spell, nil, false) then
-		local result = math_max(0, IWin_EnergyCost[spell] - IWin_CombatVar["energyPerSecondPrediction"] * timeToReserveEnergy)
+		local result = math.max(0, IWin_EnergyCost[spell] - IWin_CombatVar["energyPerSecondPrediction"] * timeToReserveEnergy)
 		IWin:Debug("Reserving energy for "..spell..": "..tostring(result), debugmsg)
 		return result
 	end
@@ -806,7 +800,7 @@ function IWin:IsTrainingDummy(debugmsg)
 		return cached
 	end
 	local name = IWin:GetName("target", false)
-	if name and string_find(name,"Training Dummy") then
+	if name and string.find(name,"Training Dummy") then
 		IWin_Target["trainingDummy"] = true
 		IWin:Debug("Target is Training Dummy: true", debugmsg)
 		return true
@@ -1053,7 +1047,7 @@ end
 -- Item #######################################################################################################################################
 --helper
 function IWin:GetItemID(itemLink)
-	for itemID in string_gfind(itemLink, "|c%x+|Hitem:(%d+):%d+:%d+:%d+|h%[(.-)%]|h|r$") do
+	for itemID in string.gfind(itemLink, "|c%x+|Hitem:(%d+):%d+:%d+:%d+|h%[(.-)%]|h|r$") do
 		return itemID
 	end
 end
@@ -1259,7 +1253,7 @@ end
 -- Group #######################################################################################################################################
 --todo
 function IWin:GetGroupSize(debugmsg)
-	local result = math_max(1, GetNumPartyMembers() + 1, GetNumRaidMembers())
+	local result = math.max(1, GetNumPartyMembers() + 1, GetNumRaidMembers())
 	IWin:Debug("Group size: "..tostring(result), debugmsg)
 	return result
 end

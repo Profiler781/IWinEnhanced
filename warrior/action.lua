@@ -962,7 +962,6 @@ function IWin:SunderArmorDPS()
 		and not IWin:IsBuffStack("target", spell, 5)
 		and not IWin:IsBuffActive("target", "Expose Armor")
 		and IWin:GetTimeToDie() > 5
-		and not IWin:IsGCDActive()
 		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
 			IWin:Cast(spell)
@@ -1015,12 +1014,12 @@ function IWin:SunderArmorElite()
 	end
 end
 
-function IWin:SunderArmorDPSRefresh()
+function IWin:SunderArmorDPSRefresh(timeLeft)
 	local spell = "Sunder Armor"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not (IWin_Settings["sunder"] == "off")
 		and IWin:IsBuffActive("target", spell)
-		and IWin:GetBuffRemaining("target", spell) < 6
+		and IWin:GetBuffRemaining("target", spell) < timeLeft
 		and IWin:GetBuffRemaining("target", spell) < IWin:GetTimeToDie()
 		and IWin:IsRageCostAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
