@@ -219,7 +219,7 @@ function IWin:HammerOfWrath(manaPercent)
 				(
 					IWin:IsElite()
 					and IWin:GetTimeToDie() > IWin:GetCastTime(spell) + IWin_TravelTime[spell]
-					--and not IWin:IsTanking()
+					and not IWin:IsTanking()
 					and IWin:GetPowerPercent("player") > manaPercent
 				)
 				or IWin:IsPVP("target")

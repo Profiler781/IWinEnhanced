@@ -402,7 +402,10 @@ end
 function IWin:HeroicStrike(range)
 	local spell = "Heroic Strike"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if IWin:GetEnemyInRange(range) <= 1
+	if (
+			IWin:GetEnemyInRange(range) <= 1
+			or not IWin:IsSpellLearnt("Cleave")
+		)
 		and (
 				IWin:IsRageAvailable(spell)
 				or (
@@ -422,8 +425,9 @@ end
 function IWin:SetReservedRageHeroicStrike(range)
 	local spell = "Heroic Strike"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if IWin:GetEnemyInRange(range, false) <= 1 then
-		IWin:SetReservedRage(spell, "nocooldown")
+	if IWin:GetEnemyInRange(range, false) <= 1
+		or not IWin:IsSpellLearnt("Cleave") then
+			IWin:SetReservedRage(spell, "nocooldown")
 	end
 end
 
