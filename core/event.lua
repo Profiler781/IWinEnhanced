@@ -20,6 +20,7 @@ IWin_core:SetScript("OnEvent", function()
 		IWin_CombatVar = {
 			["affectingCombat"] = {},
 			["dead"] = {},
+			["enemyInFront"] = {},
 			["enemyInRange"] = {},
 			["energyPerSecondPrediction"] = 0,
 			["GCD"] = 0,

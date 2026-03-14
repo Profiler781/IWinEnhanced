@@ -763,6 +763,24 @@ function IWin:GetEnemyInRange(range, debugmsg)
 	return result
 end
 
+-- range values: static number, meleeAutoAttack
+function IWin:GetEnemyInFront(range, debugmsg)
+	if staticReturn then return staticReturn end
+	local cached = IWin_CombatVar["enemyInFront"][range]
+	if cached ~= nil then
+		IWin:Debug("Enemies in front in "..tostring(range)..": "..tostring(cached), debugmsg)
+		return cached
+	end
+    local result = CleveRoids.CountEnemiesMatching(function(unit)
+    	local distance = UnitXP("distanceBetween", "player", unit, range)
+    	local facing = UnitXP("behind", unit, "player") ~= true
+        return distance and distance <= 5 and facing
+    end)
+    IWin_CombatVar["enemyInFront"][range] = result
+	IWin:Debug("Enemies in front in "..tostring(range)..": "..tostring(result), debugmsg)
+	return result
+end
+
 -- Target #######################################################################################################################################
 function IWin:IsTanking(debugmsg)
 	local cached = IWin_CombatVar["tanking"]

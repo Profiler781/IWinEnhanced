@@ -162,7 +162,7 @@ end
 function IWin:Cleave(range)
 	local spell = "Cleave"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if IWin:GetEnemyInRange(range) > 1
+	if IWin:GetEnemyInFront(range) > 1
 		and (
 				IWin:IsRageAvailable(spell)
 				or IWin:GetPower("player") > 75
@@ -491,6 +491,7 @@ function IWin:Intervene()
 		and not IWin:IsCharging()
 		and IWin:IsBehind()
 		and not IWin:IsTanking()
+		and not IWin:IsInRange()
 		and (
 				(
 					IWin:IsRageCostAvailable(spell)

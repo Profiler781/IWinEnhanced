@@ -29,6 +29,7 @@ function IWin:InitializeRotationCore()
 	IWin_CombatVar = {
 		["affectingCombat"] = {},
 		["dead"] = {},
+		["enemyInFront"] = {},
 		["enemyInRange"] = {},
 		["energyPerSecondPrediction"] = 0,
 		["GCD"] = 0,
