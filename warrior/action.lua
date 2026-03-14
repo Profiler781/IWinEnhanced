@@ -154,15 +154,8 @@ end
 function IWin:ChargePartySize()
 	local spell = "Charge"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:IsMaxGroupSize(IWin_Settings["charge"])
-		or (
-			IWin_Settings["charge"] == "targetincombat"
-			and IWin:IsAffectingCombat("target")
-		) or (
-			IWin_Settings["chargewl"] == "on"
-			and IWin:IsWhitelistCharge()
-		) then
-			IWin:Charge()
+	if IWin:IsChargeTargetAvailable() then
+		IWin:Charge()
 	end
 end
 
@@ -478,15 +471,8 @@ end
 function IWin:InterceptPartySize()
 	local spell = "Intercept"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:IsMaxGroupSize(IWin_Settings["charge"])
-		or (
-			IWin_Settings["charge"] == "targetincombat"
-			and IWin:IsAffectingCombat("target")
-		) or (
-			IWin_Settings["chargewl"] == "on"
-			and IWin:IsWhitelistCharge()
-		) then
-			IWin:Intercept()
+	if IWin:IsChargeTargetAvailable() then
+		IWin:Intercept()
 	end
 end
 
@@ -537,15 +523,8 @@ end
 function IWin:IntervenePartySize()
 	local spell = "Intervene"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:IsMaxGroupSize(IWin_Settings["charge"])
-		or (
-			IWin_Settings["charge"] == "targetincombat"
-			and IWin:IsAffectingCombat("target")
-		) or (
-			IWin_Settings["chargewl"] == "on"
-			and IWin:IsWhitelistCharge()
-		) then
-			IWin:Intervene()
+	if IWin:IsChargeTargetAvailable() then
+		IWin:Intervene()
 	end
 end
 

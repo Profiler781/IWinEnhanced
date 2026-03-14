@@ -69,15 +69,6 @@ IWin_UnitClassification = {
 	["trivial"] = false,
 }
 
-IWin_PartySize = {
-	["raid"] = 6,
-	["group"] = 5,
-	["duo"] = 2,
-	["solo"] = 1,
-	["targetincombat"] = 0,
-	["off"] = 0,
-}
-
 IWin_BlacklistAOEDebuff = {
 	["Vek'lor"] = true,
 	["Vek'nilash"] = true,

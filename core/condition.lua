@@ -1258,13 +1258,6 @@ function IWin:GetGroupSize(debugmsg)
 	return result
 end
 
---todo
-function IWin:IsMinGroupSize(size, debugmsg)
-	local result = IWin:GetGroupSize(false) >= IWin_PartySize[size]
-	IWin:Debug("Group minimum size is "..size..": "..tostring(result), debugmsg)
-	return result
-end
-
 -- System #######################################################################################################################################
 function IWin:GetTime(debugmsg)
 	local cached = IWin_CombatVar["time"]

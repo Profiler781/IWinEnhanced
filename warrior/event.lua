@@ -21,7 +21,8 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["rageTimeToReserveBuffer"] == nil then IWin_Settings["rageTimeToReserveBuffer"] = 1.5 end
 		if IWin_Settings["ragePerSecondPrediction"] == nil then IWin_Settings["ragePerSecondPrediction"] = 10 end
 		--setup
-		if IWin_Settings["charge"] == nil then IWin_Settings["charge"] = "solo" end
+		if IWin_Settings["chargepartysize"] == nil then IWin_Settings["chargepartysize"] = 1 end
+		if IWin_Settings["chargenocombat"] == nil then IWin_Settings["chargenocombat"] = "on" end
 		if IWin_Settings["chargewl"] == nil then IWin_Settings["chargewl"] = "off" end
 		if IWin_Settings["sunder"] == nil then IWin_Settings["sunder"] = "off" end
 		if IWin_Settings["demo"] == nil then IWin_Settings["demo"] = "off" end

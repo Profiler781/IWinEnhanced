@@ -15,14 +15,17 @@ function SlashCmdList.IWINWARRIOR(command)
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
-	elseif arguments[1] == "charge"then
-		if arguments[2] ~= "raid"
-			and arguments[2] ~= "group"
-			and arguments[2] ~= "solo"
-			and arguments[2] ~= "targetincombat"
+	elseif arguments[1] == "chargepartysize" then
+		if tonumber(arguments[2]) < 0
+			and arguments[2] ~= nil then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more. 1 is the default parameter.|r")
+				return
+		end
+	elseif arguments[1] == "chargenocombat"then
+		if arguments[2] ~= "on"
 			and arguments[2] ~= "off"
 			and arguments[2] ~= nil then
-				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: raid, group, solo, targetincombat, off.|r")
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
 	elseif arguments[1] == "chargewl"then
@@ -99,9 +102,12 @@ function SlashCmdList.IWINWARRIOR(command)
     if arguments[1] == "debug" then
         IWin_Settings["debug"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Debug: |r" .. IWin_Settings["debug"])
-	elseif arguments[1] == "charge" then
-        IWin_Settings["charge"] = arguments[2]
-	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Charge: |r" .. IWin_Settings["charge"])
+	elseif arguments[1] == "chargepartysize" then
+        IWin_Settings["chargepartysize"] = tonumber(arguments[2])
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Charge party size: |r" .. tostring(IWin_Settings["chargepartysize"]))
+	elseif arguments[1] == "chargenocombat" then
+        IWin_Settings["chargenocombat"] = arguments[2]
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Charge if target is not in combat: |r" .. IWin_Settings["chargenocombat"])
 	elseif arguments[1] == "chargewl" then
         IWin_Settings["chargewl"] = arguments[2]
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Charge whitelist: |r" .. IWin_Settings["chargewl"])
@@ -136,16 +142,17 @@ function SlashCmdList.IWINWARRIOR(command)
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin:|r Current setup")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin debug [|r" .. IWin_Settings["debug"] .. "|cff0066ff]:|r Enable/disable debug.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin charge [|r" .. IWin_Settings["charge"] .. "|cff0066ff]:|r Setup for Charge and Intercept")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin chargewl [|r" .. IWin_Settings["chargewl"] .. "|cff0066ff]:|r Setup for Charge and Intercept whitelist")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin sunder [|r" .. IWin_Settings["sunder"] .. "|cff0066ff]:|r Setup for Sunder Armor priority as DPS")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin demo [|r" .. IWin_Settings["demo"] .. "|cff0066ff]:|r Setup for Demoralizing Shout")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtbattle [|r" .. IWin_Settings["dtBattle"] .. "|cff0066ff]:|r Setup for Battle Stance with Defensive Tactics")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtdefensive [|r" .. IWin_Settings["dtDefensive"] .. "|cff0066ff]:|r Setup for Defensive Stance with Defensive Tactics")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtberserker [|r" .. IWin_Settings["dtBerserker"] .. "|cff0066ff]:|r Setup for Berserker Stance with Defensive Tactics")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin ragebuffer [|r" .. tostring(IWin_Settings["rageTimeToReserveBuffer"]) .. "|cff0066ff]:|r Setup to save 100% required rage for spells X seconds before the spells are used. 1.5 is the default parameter.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin ragegain [|r" .. tostring(IWin_Settings["ragePerSecondPrediction"]) .. "|cff0066ff]:|r Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used. 10 is the default parameter. Increase the value if rage is wasted.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin jousting [|r" .. IWin_Settings["jousting"] .. "|cff0066ff]:|r Setup for Jousting solo DPS")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin thunderclap [|r" .. IWin_Settings["thunderclap"] .. "|cff0066ff]:|r Setup to allow Thunder Clap")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin chargepartysize [|r" .. IWin_Settings["chargepartysize"] .. "|cff0066ff]:|r Use Charge, Intercept and Intervene if party member count is equal or below the setup value.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin chargenocombat [|r" .. IWin_Settings["chargenocombat"] .. "|cff0066ff]:|r Use Charge, Intercept and Intervene if the target is not in combat.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin chargewl [|r" .. IWin_Settings["chargewl"] .. "|cff0066ff]:|r Use Charge, Intercept and Intervene if the target is whitelisted.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin sunder [|r" .. IWin_Settings["sunder"] .. "|cff0066ff]:|r Use Sunder Armor priority as DPS.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin demo [|r" .. IWin_Settings["demo"] .. "|cff0066ff]:|r Use Demoralizing Shout.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtbattle [|r" .. IWin_Settings["dtBattle"] .. "|cff0066ff]:|r Use Battle stance with Defensive Tactics.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtdefensive [|r" .. IWin_Settings["dtDefensive"] .. "|cff0066ff]:|r Use Defensive stance with Defensive Tactics.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtberserker [|r" .. IWin_Settings["dtBerserker"] .. "|cff0066ff]:|r Use Berserker stance with Defensive Tactics.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin ragebuffer [|r" .. tostring(IWin_Settings["rageTimeToReserveBuffer"]) .. "|cff0066ff]:|r Save 100% required rage for spells X seconds before the spells are used. 1.5 is the default parameter.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin ragegain [|r" .. tostring(IWin_Settings["ragePerSecondPrediction"]) .. "|cff0066ff]:|r Anticipate rage gain per second. Required rage will be saved gradually before the spells are used. 10 is the default parameter. Increase the value if rage is wasted.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin jousting [|r" .. IWin_Settings["jousting"] .. "|cff0066ff]:|r Use Hamstring to joust with target in solo DPS.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin thunderclap [|r" .. IWin_Settings["thunderclap"] .. "|cff0066ff]:|r Use Thunder Clap.")
     end
 end

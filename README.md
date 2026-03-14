@@ -113,17 +113,18 @@ Example: /iwin judgement wisdom
 
     /iwin                             Current setup
     /iwin debug <toggle>              Enable/disable debug
-    /iwin charge <partySize>          Setup for Charge and Intercept.
-    /iwin chargewl <toggle>           Setup to allow Charge and Intercept on whitelist targets.
-    /iwin sunder <priority>           Setup for Sunder Armor priority as DPS.
-    /iwin demo <toggle>               Setup for Demoralizing Shout.
-    /iwin dtbattle <toggle>           Setup to allow Battle stance with Defensive Tactics.
-    /iwin dtdefensive <toggle>        Setup to allow Defensive stance with Defensive Tactics.
-    /iwin dtberserker <toggle>        Setup to allow Berserker stance with Defensive Tactics.
-    /iwin ragebuffer <number>         Setup to save 100% required rage for spells X seconds before the spells are used.
-    /iwin ragegain <number>           Setup to anticipate rage gain per second. Required rage will be saved gradually before the spells are used.
-    /iwin jousting <toggle>           Setup for jousting solo DPS.
-    /iwin thunderclap <toggle>        Setup to allow Thunder Clap.
+    /iwin chargepartysize <number>    Use Charge, Intercept and Intervene if party member count is equal or below the setup value.
+    /iwin chargenocombat <toggle>     Use Charge, Intercept and Intervene if the target is not in combat.
+    /iwin chargewl <toggle>           Use Charge, Intercept and Intervene if the target is whitelisted.
+    /iwin sunder <priority>           Use Sunder Armor priority as DPS.
+    /iwin demo <toggle>               Use Demoralizing Shout.
+    /iwin dtbattle <toggle>           Use Battle stance with Defensive Tactics.
+    /iwin dtdefensive <toggle>        Use Defensive stance with Defensive Tactics.
+    /iwin dtberserker <toggle>        Use Berserker stance with Defensive Tactics.
+    /iwin ragebuffer <number>         Save 100% required rage for spells X seconds before the spells are used.
+    /iwin ragegain <number>           Anticipate rage gain per second. Required rage will be saved gradually before the spells are used.
+    /iwin jousting <toggle>           Use Hamstring to joust with target in solo DPS.
+    /iwin thunderclap <toggle>        Use Thunder Clap.
 
 partySize possible values: raid, group, solo, targetincombat, off.
 

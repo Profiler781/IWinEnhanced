@@ -131,3 +131,21 @@ function IWin:IsHighAP(debugmsg)
 	IWin:Debug("Attack power : "..tostring(result), debugmsg)
 	return result > 600 + 20 * 15
 end
+
+function IWin:IsChargeTargetAvailable(debugmsg)
+	local result = (
+						IWin:GetGroupSize() <= IWin_Settings["chargepartysize"]
+						and (
+								IWin:IsAffectingCombat("target")
+								or (
+										IWin_Settings["chargenocombat"] == "on"
+										and not IWin:IsAffectingCombat("target", false)
+									)
+							)
+					) or (
+						IWin_Settings["chargewl"] == "on"
+						and IWin:IsWhitelistCharge()
+					)
+	IWin:Debug("Charge target is available : "..tostring(result), debugmsg)
+	return result
+end

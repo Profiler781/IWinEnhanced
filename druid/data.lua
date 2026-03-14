@@ -28,7 +28,7 @@ IWin_ManaCost = {
 }
 
 IWin_Bleed = {
-	"Pounce",
+	"Pounce Bleed",
 	"Rake",
 	"Rip",
 }
