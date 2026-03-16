@@ -315,7 +315,8 @@ end
 function IWin:ParseCastTimeFromText(text)
     if not text then return nil end
     -- Match patterns like "1.5 sec cast", "1.59 sec cast", "2 sec cast"
-    local castTime = string.match(text, "(%d+%.?%d*) sec cast")
+    --local castTime = string.match(text, "(%d+%.?%d*) sec cast")
+    local _, _, castTime = string.find(text, "(%d+%.?%d*) sec cast")
     if castTime then
         return tonumber(castTime)
     end
@@ -1181,7 +1182,8 @@ end
 function IWin:ParseWeaponSpeedFromText(text)
     if not text then return nil end
     -- Match patterns like "Speed 1.5", "Speed 1.59", "Speed 2"
-    local weaponSpeed = string.match(text, "Speed (%d+%.?%d*)")
+    --local weaponSpeed = string.match(text, "Speed (%d+%.?%d*)")
+    local _, _, weaponSpeed = string.find(text, "Speed (%d+%.?%d*)")
     if weaponSpeed then
         return tonumber(weaponSpeed)
     end
