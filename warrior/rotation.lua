@@ -299,5 +299,6 @@ SLASH_ISHOOTWARRIOR1 = "/ishoot"
 function SlashCmdList.ISHOOTWARRIOR()
 	IWin:InitializeRotation()
 	IWin:TargetEnemy()
-	IWin:Shoot()
+	IWin:RangedAttackAny()
+	IWin:MarkSkull()
 end

@@ -153,36 +153,17 @@ function IWin:UseDrinkItem()
 	end
 end
 
-function IWin:Shoot()
-	local spell = "Shoot"
+function IWin:RangedAttack(spell, rangedWeapon)
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:IsItemSubTypeEquipped("Wands") then
+	if IWin:IsItemSubTypeEquipped(rangedWeapon) then
 		IWin:Cast(spell)
-		return
 	end
-	local spell = "Shoot Bow"
-	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:IsItemSubTypeEquipped("Bows") then
-		IWin:Cast(spell)
-		return
-	end
-	local spell = "Shoot Gun"
-	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:IsItemSubTypeEquipped("Guns") then
-		IWin:Cast(spell)
-		return
-	end
-	local spell = "Shoot Crossbow"
-	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:IsItemSubTypeEquipped("Crossbows") then
-		IWin:Cast(spell)
-		return
-	end
-	local spell = "Throw"
-	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:IsItemSubTypeEquipped("Thrown") then
-		IWin:Cast(spell)
-		return
-	end
-	IWin:MarkSkull()
+end
+
+function IWin:RangedAttackAny()
+	IWin:RangedAttack("Shoot", "Wands")
+	IWin:RangedAttack("Shoot Bow", "Bows")
+	IWin:RangedAttack("Shoot Gun", "Guns")
+	IWin:RangedAttack("Shoot Crossbow", "Crossbows")
+	IWin:RangedAttack("Throw", "Thrown")
 end

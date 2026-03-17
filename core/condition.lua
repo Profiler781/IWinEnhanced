@@ -115,7 +115,7 @@ function IWin:GetBuffRemaining(unit, spell, owner, debugmsg)
     end
     -- Debuff scan overflow as buff
 	for index = 1, 64 do
-	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = IWin.libdebuff:UnitBuff(unit, index)
+	    local effect, _, _, _, _, _, timeLeft, caster = IWin.libdebuff:UnitBuff(unit, index)
 	    if not effect then break end
 	    if effect == spell and ((not owner) or (caster == owner)) then
 	    	IWin:Debug("Debuff overflow remaining "..spell.." on "..unit..": "..tostring(timeLeft or 9999), debugmsg)
