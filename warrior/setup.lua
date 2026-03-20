@@ -37,10 +37,11 @@ function SlashCmdList.IWINWARRIOR(command)
 		end
 	elseif arguments[1] == "sunder" then
 		if arguments[2] ~= "high"
+			and arguments[2] ~= "once"
 			and arguments[2] ~= "low"
 			and arguments[2] ~= "off"
 			and arguments[2] ~= nil then
-				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: high, low, off.|r")
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: high, once, low, off.|r")
 				return
 		end
 	elseif arguments[1] == "demo" then
