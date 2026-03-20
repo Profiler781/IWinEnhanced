@@ -6,6 +6,12 @@ IWin_HemorrhageCostReduction = {
 	[2] = 5,
 }
 
+IWin_RuptureDurationIncrease = {
+	[0] = 0,
+	[1] = 4,
+	[2] = 6,
+}
+
 function IWin:GetHemorrhageCostReduction()
 	local rank = IWin:GetTalentRank("Bloody Mess", false)
 	return IWin_HemorrhageCostReduction[rank]

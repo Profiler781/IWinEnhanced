@@ -361,7 +361,7 @@ function IWin:SurpriseAttack()
 	local spell = "Surprise Attack"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsSurpriseAttackAvailable()
-		and IWin:GetPower("player") < IWin:GetMaxEnergy() - IWin_CombatVar["energyPerSecondPrediction"] * 2
+		and IWin:GetPower("player") < IWin:GetPowerMax("player") - IWin_CombatVar["energyPerSecondPrediction"] * 2
 		and IWin:IsEnergyAvailable(spell) then
 			IWin:Cast(spell)
 	end

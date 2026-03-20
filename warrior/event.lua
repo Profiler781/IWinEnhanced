@@ -13,6 +13,8 @@ IWin:RegisterEvent("PLAYER_REGEN_ENABLED")
 IWin:RegisterEvent("PLAYER_REGEN_DISABLED")
 IWin:RegisterEvent("PLAYER_ENTERING_WORLD")
 IWin:RegisterEvent("SPELLCAST_START")
+IWin:RegisterEvent("SPELLS_CHANGED")
+IWin:RegisterEvent("UNIT_INVENTORY_CHANGED")
 IWin:RegisterEvent("UNIT_RAGE_GUID")
 
 IWin:SetScript("OnEvent", function()
@@ -54,8 +56,7 @@ IWin:SetScript("OnEvent", function()
 		IWin_RLS = nil
 		IWin_RLS_lastRage = nil
 		IWin_RLS_lastValue = nil
-		IWin_RLS_hasGuidEvent = false
-		IWin_RLS_updateTimer = 0
+		IWin:UpdateRageCosts()
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS" then
 		if string_find(arg1,"blocked") then
 			IWin_RotationVar["revengeAvailable"] = IWin:GetTime(false) + 4
@@ -81,14 +82,10 @@ IWin:SetScript("OnEvent", function()
 	elseif event == "PLAYER_REGEN_DISABLED" then
 		IWin:ResetRageRLS()
 		IWin_RLS_lastRage = UnitMana("player")
-		IWin_RLS_pendingEnergize = 0
 		IWin_RotationVar["combatStart"] = GetTime()
 	elseif event == "PLAYER_REGEN_ENABLED" then
-		if IWin_RLS then
-			IWin_RLS_lastValue = IWin_RLS["w1"]
-		end
+		IWin_RLS_lastValue = nil
 		IWin_RLS_lastRage = nil
-		IWin_RLS_pendingEnergize = 0
 	elseif event == "SPELLCAST_START" and arg1 == "Slam" then
 		IWin_RotationVar["slamCasting"] = IWin:GetTime(false) + (arg2 / 1000)
 		if st_timer and st_timer > UnitAttackSpeed("player") * 0.9 then
@@ -96,27 +93,28 @@ IWin:SetScript("OnEvent", function()
 			IWin_RotationVar["slamClipAllowedMax"] = IWin_RotationVar["slamGCDAllowed"] + IWin_Settings["GCD"]
 			IWin_RotationVar["slamClipAllowedMin"] = st_timer + IWin:GetTime(false)
 		end
+	elseif event == "SPELLS_CHANGED" then
+		IWin:UpdateRageCosts()
+	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" and not UnitAffectingCombat("player") then
+		IWin:UpdateRageCosts()
 	elseif event == "UNIT_RAGE_GUID" and arg2 == 1 and IWin_RLS_lastRage then
-		IWin_RLS_hasGuidEvent = true
 		local currentRage = UnitMana("player")
 		local delta = currentRage - IWin_RLS_lastRage
 		if delta > 0 then
-			IWin:UpdateRageRLS(delta)
+			IWin_RLS_pendingGain = (IWin_RLS_pendingGain or 0) + delta
 		end
 		IWin_RLS_lastRage = currentRage
 	end
 end)
 
 IWin:SetScript("OnUpdate", function()
-	if IWin_RLS_hasGuidEvent then return end
 	IWin_RLS_updateTimer = (IWin_RLS_updateTimer or 0) + arg1
-	if IWin_RLS_updateTimer < 0.05 then return end
+	if IWin_RLS_updateTimer < 0.5 then return end
 	IWin_RLS_updateTimer = 0
-	if not IWin_RLS_lastRage then return end
-	local currentRage = UnitMana("player")
-	local delta = currentRage - IWin_RLS_lastRage
-	if delta > 0 then
-		IWin:UpdateRageRLS(delta)
+	if not IWin_RLS then return end
+	local gain = IWin_RLS_pendingGain or 0
+	IWin_RLS_pendingGain = 0
+	if gain > 0 then
+		IWin:UpdateRageRLS(gain)
 	end
-	IWin_RLS_lastRage = currentRage
 end)

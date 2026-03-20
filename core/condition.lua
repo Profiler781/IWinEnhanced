@@ -124,6 +124,19 @@ function IWin:GetBuffRemaining(unit, spell, owner, debugmsg)
 		    end
 		end
     end
+    -- SCRM overflow buff scan
+		if CleveRoids and CleveRoids.OverflowBuffs then
+			for spellId, data in pairs(CleveRoids.OverflowBuffs) do
+				if SpellInfo(spellId) == spell then
+					local timeLeft = data.durationSec - (GetTime() - data.timestamp)
+					if timeLeft > 0 then
+						IWin:Debug("Overflow buff remaining "..spell.." on "..unit..": "..tostring(timeLeft), debugmsg)
+						IWin_CombatVar["buffRemaining"][cacheKey] = timeLeft
+						return timeLeft
+					end
+				end
+			end
+		end
     -- Debuff scan overflow as buff
 	for index = 1, 64 do
 	    local effect, _, _, _, _, _, timeLeft, caster = IWin.libdebuff:UnitBuff(unit, index)
@@ -190,6 +203,19 @@ function IWin:GetBuffStack(unit, spell, owner, debugmsg)
 			return result
 		end
 	end
+	-- SCRM overflow buff scan
+		if CleveRoids and CleveRoids.OverflowBuffs then
+			for spellId, data in pairs(CleveRoids.OverflowBuffs) do
+				if SpellInfo(spellId) == spell then
+					local timeLeft = data.durationSec - (GetTime() - data.timestamp)
+					if timeLeft > 0 then
+						IWin:Debug("Overflow buff "..spell.." on "..unit..": 1 stack", debugmsg)
+						IWin_CombatVar["buffStack"][cacheKey] = 1
+						return 1
+					end
+				end
+			end
+		end
 	-- Debuff scan overflow as buff
 	for index = 1, 64 do
 	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = IWin.libdebuff:UnitBuff(unit, index)
@@ -769,7 +795,7 @@ function IWin:ResetRageRLS()
 	IWin_RLS = {
 		["startTime"] = GetTime(),
 		["totalRage"] = 0,
-		["lambda"] = 0.95,
+		["lambda"] = 0.85,
 		-- P matrix initialized to large values (high uncertainty)
 		["p11"] = 1000,
 		["p12"] = 0,
@@ -1014,7 +1040,7 @@ function IWin:IsBlacklistCooldown(debugmsg)
 		IWin:Debug("Target is blacklisted for cooldowns: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if not IWin:IsExists("target", false)
+	if IWin:IsTrainingDummy(false)
 		or IWin_BlacklistCooldown[IWin:GetName("target", false)] then
 			IWin_Target["blacklistCooldown"] = true
 			IWin:Debug("Target is blacklisted for cooldowns: true", debugmsg)
@@ -1116,8 +1142,8 @@ function IWin:IsWhitelistBoss(debugmsg)
 		IWin:Debug("Target is considered Boss: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if not IWin:IsExists("target", false)
-		or IWin_WhitelistBoss[IWin:GetName("target", false)] then
+	if IWin:IsExists("target", false)
+		and IWin_WhitelistBoss[IWin:GetName("target", false)] then
 			IWin_Target["whitelistBoss"] = true
 			IWin:Debug("Target is considered Boss: true", debugmsg)
 			return true

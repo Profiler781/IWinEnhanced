@@ -200,7 +200,7 @@ function IWin:Cleave(range)
 	if IWin:GetEnemyInFront(range) > 1
 		and (
 				IWin:IsRageAvailable(spell)
-				or IWin:GetPower("player") > 100 - IWin:GetRagePerSecond(false) * IWin_Settings["GCD"]
+				or IWin:GetPower("player") > IWin:GetPowerMax("player") - IWin:GetRagePerSecond(false) * IWin_Settings["GCD"]
 			) then
 				IWin_CombatVar["swingAttackQueued"] = true
 				IWin_RotationVar["startAttackThrottle"] = IWin:GetTime(false) + 0.2
@@ -468,7 +468,7 @@ function IWin:HeroicStrike(range)
 		and (
 				IWin:IsRageAvailable(spell)
 				or (
-						IWin:GetPower("player") > 100 - IWin:GetRagePerSecond(false) * IWin_Settings["GCD"]
+						IWin:GetPower("player") > IWin:GetPowerMax("player") - IWin:GetRagePerSecond(false) * IWin_Settings["GCD"]
 						and (
 								not IWin:IsSpellLearnt("Whirlwind")
 								or IWin:GetCooldownRemaining("Whirlwind") > 0

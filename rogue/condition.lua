@@ -29,14 +29,8 @@ end
 
 function IWin:GetRuptureDuration(debugmsg)
 	local cpDuration = 6 + IWin:GetComboPoints(false) * 2
-	local tasteForBloodDuration = IWin:GetTalentRank("Taste for Blood", false) * 2
+	local tasteForBloodDuration = IWin_RuptureDurationIncrease[IWin:GetTalentRank("Taste for Blood", false)]
 	local result = cpDuration + tasteForBloodDuration
 	IWin:Debug("Rupture full duration: "..tostring(result), debugmsg)
-	return result
-end
-
-function IWin:GetMaxEnergy(debugmsg)
-	local result = 100 + IWin:GetTalentRank("Vigor", false) * 5
-	IWin:Debug("Max energy: "..tostring(result), debugmsg)
 	return result
 end

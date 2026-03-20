@@ -1,6 +1,7 @@
-# IWinEnhanced v2.2
+# IWinEnhanced v2.3
 
 1-button rotation macros for Turtle Druids, Paladins and Warriors.
+Updated for Turtle WoW 1.18.1
 
 Author: Agamemnoth - Ambershire
 
@@ -9,6 +10,7 @@ Contributors: Vlad/Goodnice - Tel'Abim, Torio/Jrc13245
 ## Latest features
 
 Amazing features from Torio <3
+
 Features will be developed further to not be specific to some items/cd.
 - Boss DPS cooldown management (Death Wish, Blood Fury) with TTK-based timing and save thresholds
 - Boss trinket auto-use (Badge of the Swarmguard, Slayer's Crest, Kiss of the Spider) with TTK windows
@@ -135,9 +137,7 @@ Example: /iwin wisdom boss
     /iwin berserkerrage <toggle>      Use Berserker Rage for rage generation.
     /iwin rend <toggle>               Use Rend.
 
-partySize possible values: raid, group, solo, targetincombat, off.
-
-priority possible values: high, low, off.
+priority possible values: high, once, low, off.
 
 toggle possible values: on, off.
 
