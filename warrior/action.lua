@@ -385,11 +385,11 @@ function IWin:ExecuteDefensiveTactics()
 		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
 			if IWin:IsStanceActive("Defensive Stance")
-				and IWin:IsDefensiveTacticsActive("Battle Stance") then
-					IWin:Cast("Battle Stance", false)
-			elseif IWin:IsStanceActive("Defensive Stance")
 				and IWin:IsDefensiveTacticsActive("Berserker Stance") then
 					IWin:Cast("Berserker Stance", false)
+			elseif IWin:IsStanceActive("Defensive Stance")
+				and IWin:IsDefensiveTacticsActive("Battle Stance") then
+					IWin:Cast("Battle Stance", false)
 			end
 			if IWin:IsStanceActive("Battle Stance")
 				or IWin:IsStanceActive("Berserker Stance") then
@@ -1291,6 +1291,31 @@ function IWin:UseTrinketBoss(name, ttdMin, ttdMax, saveThreshold)
 				return
 			end
 		end
+	end
+end
+
+function IWin:WhirlwindDefensiveTactics(queueTime, range)
+	local spell = "Whirlwind"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsAffectingCombat("player")
+		and IWin:GetEnemyInRange(range) > 1
+		and IWin:IsReservedRageStance("Berserker Stance")
+		and not IWin:IsBlacklistAOEDamage()
+		and not IWin_CombatVar["slamQueued"]
+		and IWin:IsTimeToReserveRage(spell, "cooldown") then
+			if not IWin:IsStanceActive("Berserker Stance") 
+				and IWin:IsDefensiveTacticsActive("Berserker Stance") then
+				IWin:SetReservedRageStance("Berserker Stance")
+				IWin:SetReservedRageStanceCast()
+				IWin:Cast("Berserker Stance", false)
+			end
+			if IWin:IsInRange("Rend")
+				and IWin:IsStanceActive("Berserker Stance") then
+					IWin:SetReservedRageStance("Berserker Stance")
+					if IWin:IsRageAvailable(spell) then
+						IWin:Cast(spell)
+					end
+			end
 	end
 end
 
