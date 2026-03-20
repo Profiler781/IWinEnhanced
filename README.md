@@ -4,17 +4,23 @@
 
 Author: Agamemnoth - Ambershire
 
-Contributor: Vlad/Goodnice - Tel'Abim
+Contributors: Vlad/Goodnice - Tel'Abim, Torio/Jrc13245
 
 ## Latest features
 
-Implementing condition to count enemies in range. The purpose is to have a single rotation for both single target and multi target. The condition will use spells available for maximum dps.
-
-/idps for warrior is the first rotation to handle enemy count.
-
-/idpsfocus for warrior has been added to run the single target rotation regardless enemy count to focus on a priority target.
-
-/icleave for warrior is unchanged but will be removed soon.
+Amazing features from Torio <3
+Features will be developed further to not be specific to some items/cd.
+- Boss DPS cooldown management (Death Wish, Blood Fury) with TTK-based timing and save thresholds
+- Boss trinket auto-use (Badge of the Swarmguard, Slayer's Crest, Kiss of the Spider) with TTK windows
+- Boss consumable auto-use (Juju Flurry, Mighty Rage Potion) when off cooldown
+- Zone-specific consumable (Elixir of Poison Resistance in Naxxramas Arachnid Quarter)
+- Cooldown blacklist for specific bosses (Feugen, Stalagg, Noth, Blue Owl, Red Owl)
+- Dynamic rage income tracking using RLS (Recursive Least Squares) with Nampower UNIT_RAGE_GUID and OnUpdate fallback
+- Per-rotation query caching for all core condition functions
+- Heroic Strike blocked during execute phase
+- Toggle settings for Overpower, Berserker Rage, Rend (default on)
+- Sunder Armor "Once" option: Sunder once per target
+- 10-second TTK stabilization delay before boss cooldown decisions
 
 ## Mods Dependencies
 
@@ -57,7 +63,7 @@ Optionnal Addons:
 toggle possible values: on, off.
 
 Example: /iwin frontshred on
-=> Will setup shred usable in rotations while in front of target. You must strafe through the mob and spam the command.
+=> Use shred while in front of the target. You must strafe through the mob and spam the macro.
 
 # Paladin Module
 
@@ -91,8 +97,8 @@ socOption possible values: auto, on, off.
 
 classification possible values: elite, boss.
 
-Example: /iwin judgement wisdom
-=> Will setup wisdom as the default judgement.
+Example: /iwin wisdom boss
+=> Judge wisdom on boss if it's the selected judgement debuff.
 
 # Warrior Module
 
@@ -122,9 +128,12 @@ Example: /iwin judgement wisdom
     /iwin dtdefensive <toggle>        Use Defensive stance with Defensive Tactics.
     /iwin dtberserker <toggle>        Use Berserker stance with Defensive Tactics.
     /iwin ragebuffer <number>         Save 100% required rage for spells X seconds before the spells are used.
-    /iwin ragegain <number>           Anticipate rage gain per second. Required rage will be saved gradually before the spells are used.
+    /iwin ragegain <number>           Initial rage per second estimate (seed for dynamic RLS tracking).
     /iwin jousting <toggle>           Use Hamstring to joust with target in solo DPS.
     /iwin thunderclap <toggle>        Use Thunder Clap.
+    /iwin overpower <toggle>          Use Overpower.
+    /iwin berserkerrage <toggle>      Use Berserker Rage for rage generation.
+    /iwin rend <toggle>               Use Rend.
 
 partySize possible values: raid, group, solo, targetincombat, off.
 
@@ -134,5 +143,5 @@ toggle possible values: on, off.
 
 number possible values: 0 or more.
 
-Example: /iwin charge group
-=> Will setup charge usable in rotations while in group or solo.
+Example: /iwin chargepartysize 5
+=> Allows charge if your party has 5 players or less.

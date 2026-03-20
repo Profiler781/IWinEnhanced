@@ -104,6 +104,14 @@ IWin_BlacklistKick = {
 	["Flamewaker Priest"] = true,
 }
 
+IWin_BlacklistCooldown = {
+	["Feugen"] = true,
+	["Stalagg"] = true,
+	["Noth the Plaguebringer"] = true,
+	["Blue Owl"] = true,
+	["Red Owl"] = true,
+}
+
 IWin_BlacklistFear = {
 	["Magmadar"] = true,
 	["Onyxia"] = true,

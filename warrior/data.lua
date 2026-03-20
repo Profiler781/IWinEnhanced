@@ -42,6 +42,7 @@ IWin_RageCost = {
 	["Charge"] = - 15 - IWin:GetTalentRank("Improved Charge") * 5,
 	["Cleave"] = 20,
 	["Concussion Blow"] = - 10,
+	["Death Wish"] = 10,
 	["Demoralizing Shout"] = 10,
 	["Disarm"] = 20,
 	["Execute"] = 15 - IWin:GetExecuteCostReduction(),

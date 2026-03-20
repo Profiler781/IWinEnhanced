@@ -30,7 +30,7 @@ function IWin:GetStanceSwapRageRetain(debugmsg)
 end
 
 function IWin:IsStanceSwapMaxRageLoss(maxRageLoss, spell, debugmsg)
-	if IWin_Settings["ragePerSecondPrediction"] > 29 then return true end
+	if IWin:GetRagePerSecond(false) > 29 then return true end
 	local spellCost = 0
 	if spell then
 		spellCost = IWin_RageCost[spell]
@@ -127,9 +127,11 @@ end
 
 function IWin:IsHighAP(debugmsg)
 	local APbase, APpos, APneg = UnitAttackPower("player")
-	local result = (APbase + APpos - APneg) * 0.35 + 200
-	IWin:Debug("Attack power : "..tostring(result), debugmsg)
-	return result > 600 + 20 * 15
+	local btDamage = (APbase + APpos - APneg) * 0.35 + 200
+	local executeDamage = 600 + (IWin_RageCost["Bloodthirst"] - IWin_RageCost["Execute"]) * 15
+	local result = btDamage > executeDamage
+	IWin:Debug("BT ("..tostring(btDamage)..") > Execute ("..tostring(executeDamage).."): "..tostring(result), debugmsg)
+	return result
 end
 
 function IWin:IsChargeTargetAvailable(debugmsg)
@@ -148,4 +150,19 @@ function IWin:IsChargeTargetAvailable(debugmsg)
 					)
 	IWin:Debug("Charge target is available : "..tostring(result), debugmsg)
 	return result
+end
+
+function IWin:GetPreAttackMinRage(spell)
+	local minRage = IWin_RageCost[spell]
+	if IWin:IsSpellLearnt("Sunder Armor", nil, false) and IWin_Settings["sunder"] ~= "off" then
+		minRage = minRage + IWin_RageCost["Sunder Armor"]
+	end
+	if IWin:IsSpellLearnt("Bloodthirst", nil, false) then
+		minRage = minRage + IWin_RageCost["Bloodthirst"]
+	end
+	if IWin:IsSpellLearnt("Whirlwind", nil, false) then
+		minRage = minRage + IWin_RageCost["Whirlwind"]
+	end
+	minRage = minRage - IWin:GetRagePerSecond(false) * IWin_Settings["GCD"] * 2
+	return math.max(minRage, IWin_RageCost[spell])
 end
