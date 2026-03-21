@@ -1298,7 +1298,7 @@ function IWin:WhirlwindDefensiveTactics(queueTime, range)
 	local spell = "Whirlwind"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsAffectingCombat("player")
-		and IWin:GetEnemyInRange(range) > 1
+		and IWin:GetEnemyInRange(range) >= 1
 		and IWin:IsReservedRageStance("Berserker Stance")
 		and not IWin:IsBlacklistAOEDamage()
 		and not IWin_CombatVar["slamQueued"]
@@ -1323,7 +1323,7 @@ function IWin:Whirlwind(queueTime, range)
 	local spell = "Whirlwind"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsAffectingCombat("player")
-		and IWin:GetEnemyInRange(range) > 1
+		and IWin:GetEnemyInRange(range) >= 1
 		and IWin:IsReservedRageStance("Berserker Stance")
 		and not IWin:IsBlacklistAOEDamage()
 		and not IWin_CombatVar["slamQueued"]
