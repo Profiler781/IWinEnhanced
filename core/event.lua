@@ -1,4 +1,6 @@
 IWin_core:RegisterEvent("ADDON_LOADED")
+IWin_core:RegisterEvent("PLAYER_REGEN_DISABLED")
+IWin_core:RegisterEvent("PLAYER_ENTERING_WORLD")
 IWin_core:RegisterEvent("PLAYER_TARGET_CHANGED")
 IWin_core:RegisterEvent("SPELLS_CHANGED")
 IWin_core:RegisterEvent("UNIT_INVENTORY_CHANGED")
@@ -7,15 +9,17 @@ IWin_core:RegisterEvent("UNIT_MAXMANA")
 
 IWin_core:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
-		--DEFAULT_CHAT_FRAME:AddMessage("")
+		--setup
 		if IWin_Settings == nil then IWin_Settings = {} end
 		if IWin_Settings["debug"] == nil then IWin_Settings["debug"] = "off" end
+		if IWin_Settings["consumable"] == nil then IWin_Settings["consumable"] = "boss" end
+		if IWin_Settings["trinket"] == nil then IWin_Settings["trinket"] = "boss" end
 		if IWin_Settings["GCD"] == nil then IWin_Settings["GCD"] = 1.5 end
 		if IWin_Settings["GCDEnergy"] == nil then IWin_Settings["GCDEnergy"] = 1 end
-
+		--api
 		IWin.hasSuperwow = SetAutoloot and true or false
 		IWin.hasUnitXP = pcall(UnitXP, "nop", "nop") and true or false
-
+		--init
 		IWin_CastTime = {}--combat var
 		IWin_CombatVar = {
 			["affectingCombat"] = {},
@@ -46,6 +50,7 @@ IWin_core:SetScript("OnEvent", function()
 		IWin_Inventory = {}
 		IWin_Mana = {}
 		IWin_RotationVar = {
+			["combatStart"] = IWin:GetTime(false),
 			["startAttackThrottle"] = 0,
 		}
 		IWin_Spellbook = {
@@ -60,6 +65,12 @@ IWin_core:SetScript("OnEvent", function()
 	elseif event == "ADDON_LOADED" and (arg1 == "SuperCleveRoidMacros" or arg1 == "IWinEnhanced") then
 		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
 		IWin.API = CleveRoids and CleveRoids.NampowerAPI
+	elseif event == "PLAYER_ENTERING_WORLD" then
+		if UnitAffectingCombat("player") then
+			IWin_RotationVar["combatStart"] = GetTime()
+		end
+	elseif event == "PLAYER_REGEN_DISABLED" then
+		IWin_RotationVar["combatStart"] = GetTime()
 	elseif event == "PLAYER_TARGET_CHANGED" then
 		IWin_Target = {
 			["exists"] = {},

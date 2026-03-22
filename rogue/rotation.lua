@@ -4,18 +4,10 @@ SLASH_IDPSROGUE1 = "/idps"
 function SlashCmdList.IDPSROGUE()
 	IWin:InitializeRotation()
 	IWin:TargetEnemy()
-
-	--openers
 	IWin:PickPocket()
 	IWin:Ambush()
 	IWin:Garrote()
 	IWin:CheapShot()
-
-	--cooldowns
-	--IWin:AdrenalineRush()
-	--IWin:BladeFlurry()
-
-	--finishers
 	IWin:Envenom()
 	IWin:SetReservedEnergyEnvenom()
 	IWin:SliceAndDice()
@@ -28,13 +20,9 @@ function SlashCmdList.IDPSROGUE()
 	IWin:SetReservedEnergyRupture()
 	IWin:Eviscerate()
 	IWin:SetReservedEnergyEviscerate()
-
-	--utilities
 	IWin:Riposte()
 	IWin:Gouge()
 	IWin:SetReservedEnergyGouge()
-
-	--combo builders
 	IWin:SurpriseAttack()
 	IWin:SetReservedEnergy("Surprise Attack", "cooldown")
 	IWin:NoxiousAssault()
@@ -44,7 +32,6 @@ function SlashCmdList.IDPSROGUE()
 	IWin:Backstab()
 	IWin:SetReservedEnergyBackstab()
 	IWin:SinisterStrike()
-
 	IWin:StartAttack()
 end
 
@@ -52,9 +39,7 @@ SLASH_IKICKROGUE1 = "/ikick"
 function SlashCmdList.IKICKROGUE()
 	IWin:InitializeRotation()
 	IWin:TargetEnemy()
-
 	IWin:Kick()
 	IWin:DeadlyThrow()
-
 	IWin:StartAttack()
 end

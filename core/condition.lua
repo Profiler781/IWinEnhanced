@@ -605,6 +605,24 @@ function IWin:GetTimeToDie(debugmsg)
 	return ttd
 end
 
+function IWin:GetTimeToExecute(debugmsg)
+	local cached = IWin_CombatVar["timeToExecute"]
+	if cached ~= nil then
+		IWin:Debug("Target time to execute: "..tostring(cached), debugmsg)
+		return cached
+	end
+	local tte = 0
+	local numPartyMembers = math.max(2, GetNumPartyMembers(), GetNumRaidMembers())
+	if type(TimeToKill) ~= "table" or type(TimeToKill.GetTTE) ~= "function" or TimeToKill.GetTTE() == nil or TimeToKill.GetTTE() == -1 then
+		tte = (IWin:GetHealth("target", false) - 0.2 * IWin:GetHealthMax("target", false)) / IWin:GetHealthMax("player", false) * IWin_Settings["playerToNPCHealthRatio"] * IWin_Settings["outOfRaidCombatLength"] / numPartyMembers * 2
+	else
+		tte = TimeToKill.GetTTE() - 1
+	end
+	IWin_CombatVar["timeToExecute"] = tte
+	IWin:Debug("Target time to execute: "..tostring(ttd), debugmsg)
+	return tte
+end
+
 -- Power #######################################################################################################################################
 function IWin:GetPowerType(unit, debugmsg)
 	local cached = IWin_CombatVar["powerType"][unit]
@@ -696,10 +714,10 @@ end
 -- Rage #######################################################################################################################################
 function IWin:IsRageAvailable(spell, debugmsg)
 	local rageRequired = IWin_RageCost[spell] + IWin_CombatVar["reservedRage"]
-	--[[ Replacing auto attack will prevent getting rage from next swing, so rage cost is higher.
+	-- Replacing auto attack will prevent getting rage from next swing, so rage cost is higher.
 	if spell == "Heroic Strike" or spell == "Cleave" then
 		rageRequired = rageRequired + 20 --fix before rework
-	end]]
+	end
 	local result = IWin:GetPower("player", false) >= rageRequired or IWin:IsBuffActive("player", "Clearcasting", nil, false)
 	IWin:Debug("Rage available for "..spell..": "..tostring(result), debugmsg)
 	return result
@@ -714,10 +732,10 @@ end
 function IWin:GetRageToReserve(spell, trigger, unit, debugmsg)
 	local spellTriggerTime = 0
 	local rageCost = IWin_RageCost[spell]
-	--[[ Replacing auto attack will prevent getting rage from next swing, so rage cost is higher.
+	-- Replacing auto attack will prevent getting rage from next swing, so rage cost is higher.
 	if spell == "Heroic Strike" or spell == "Cleave" then
 		rageCost = rageCost + 20 --fix before rework
-	end]]
+	end
 	if trigger == "nocooldown" and IWin:IsSpellLearnt(spell, nil, false) then
 		IWin:Debug("Reserving rage for "..spell..": "..tostring(rageCost), debugmsg)
 		return rageCost
@@ -1040,11 +1058,10 @@ function IWin:IsBlacklistCooldown(debugmsg)
 		IWin:Debug("Target is blacklisted for cooldowns: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if IWin:IsTrainingDummy(false)
-		or IWin_BlacklistCooldown[IWin:GetName("target", false)] then
-			IWin_Target["blacklistCooldown"] = true
-			IWin:Debug("Target is blacklisted for cooldowns: true", debugmsg)
-			return true
+	if IWin_BlacklistCooldown[IWin:GetName("target", false)] then
+		IWin_Target["blacklistCooldown"] = true
+		IWin:Debug("Target is blacklisted for cooldowns: true", debugmsg)
+		return true
 	end
 	IWin_Target["blacklistCooldown"] = false
 	IWin:Debug("Target is blacklisted for cooldowns: false", debugmsg)
@@ -1356,6 +1373,27 @@ function IWin:GetItemCountInBag(item, debugmsg)
 	end
 	IWin:Debug(item.." count in inventory: "..itemCount, debugmsg)
 	return itemCount
+end
+
+function IWin:IsItemConsumableTarget()
+	local consumableSetting = IWin_Settings["consumable"]
+	if consumableSetting == "off" then return false end
+	if consumableSetting == "boss" and not IWin:IsBoss() then return false end
+	if consumableSetting == "elite" and not IWin:IsElite() then return false end
+	if IWin:IsBlacklistCooldown()
+		or IWin:IsTrainingDummy() then
+			return false
+	end
+	return true
+end
+
+function IWin:IsItemTrinketTarget()
+	local trinketSetting = IWin_Settings["trinket"]
+	if trinketSetting == "off" then return false end
+	if trinketSetting == "boss" and not IWin:IsBoss() then return false end
+	if trinketSetting == "elite" and not IWin:IsElite() then return false end
+	if IWin:IsBlacklistCooldown() then return false end
+	return true
 end
 
 --helper

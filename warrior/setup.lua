@@ -9,10 +9,28 @@ function SlashCmdList.IWINWARRIOR(command)
 	end
 
 	if arguments[1] == "debug" then
-		if arguments[2] ~= "on"
-			and arguments[2] ~= "off"
-			and arguments[2] ~= nil then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "on"
+			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
+				return
+		end
+	elseif arguments[1] == "consumable" then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "boss"
+			and arguments[2] ~= "elite"
+			and arguments[2] ~= "all"
+			and arguments[2] ~= "off" then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: boss, elite, all, off.|r")
+				return
+		end
+	elseif arguments[1] == "trinket" then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "boss"
+			and arguments[2] ~= "elite"
+			and arguments[2] ~= "all"
+			and arguments[2] ~= "off" then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: boss, elite, all, off.|r")
 				return
 		end
 	elseif arguments[1] == "chargepartysize" then
@@ -22,53 +40,53 @@ function SlashCmdList.IWINWARRIOR(command)
 				return
 		end
 	elseif arguments[1] == "chargenocombat"then
-		if arguments[2] ~= "on"
-			and arguments[2] ~= "off"
-			and arguments[2] ~= nil then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "on"
+			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
 	elseif arguments[1] == "chargewl"then
-		if arguments[2] ~= "on"
-			and arguments[2] ~= "off"
-			and arguments[2] ~= nil then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "on"
+			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
 	elseif arguments[1] == "sunder" then
-		if arguments[2] ~= "high"
+		if arguments[2] ~= nil
+			and arguments[2] ~= "high"
 			and arguments[2] ~= "once"
 			and arguments[2] ~= "low"
-			and arguments[2] ~= "off"
-			and arguments[2] ~= nil then
+			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: high, once, low, off.|r")
 				return
 		end
 	elseif arguments[1] == "demo" then
-		if arguments[2] ~= "on"
-			and arguments[2] ~= "off"
-			and arguments[2] ~= nil then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "on"
+			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
 	elseif arguments[1] == "dtbattle" then
-		if arguments[2] ~= "on"
-			and arguments[2] ~= "off"
-			and arguments[2] ~= nil then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "on"
+			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
 	elseif arguments[1] == "dtdefensive" then
-		if arguments[2] ~= "on"
-			and arguments[2] ~= "off"
-			and arguments[2] ~= nil then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "on"
+			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
 	elseif arguments[1] == "dtberserker" then
-		if arguments[2] ~= "on"
-			and arguments[2] ~= "off"
-			and arguments[2] ~= nil then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "on"
+			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
@@ -85,16 +103,16 @@ function SlashCmdList.IWINWARRIOR(command)
 				return
 		end
 	elseif arguments[1] == "jousting" then
-		if arguments[2] ~= "on"
-			and arguments[2] ~= "off"
-			and arguments[2] ~= nil then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "on"
+			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
 	elseif arguments[1] == "thunderclap" then
-		if arguments[2] ~= "on"
-			and arguments[2] ~= "off"
-			and arguments[2] ~= nil then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "on"
+			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
 		end
@@ -103,6 +121,12 @@ function SlashCmdList.IWINWARRIOR(command)
     if arguments[1] == "debug" then
         if arguments[2] then IWin_Settings["debug"] = arguments[2] end
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Debug: |r" .. IWin_Settings["debug"])
+	elseif arguments[1] == "consumable" then
+        if arguments[2] then IWin_Settings["consumable"] = arguments[2] end
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Consumables target: |r" .. IWin_Settings["consumable"])
+	elseif arguments[1] == "trinket" then
+        if arguments[2] then IWin_Settings["trinket"] = arguments[2] end
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Trinkets target: |r" .. IWin_Settings["trinket"])
 	elseif arguments[1] == "chargepartysize" then
         if arguments[2] then IWin_Settings["chargepartysize"] = tonumber(arguments[2]) end
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Charge party size: |r" .. tostring(IWin_Settings["chargepartysize"]))
@@ -153,10 +177,12 @@ function SlashCmdList.IWINWARRIOR(command)
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin:|r Current setup")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin debug [|r" .. IWin_Settings["debug"] .. "|cff0066ff]:|r Enable/disable debug.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin consumable [|r" .. IWin_Settings["consumable"] .. "|cff0066ff]:|r Use consumables on target.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin trinket [|r" .. IWin_Settings["trinket"] .. "|cff0066ff]:|r Use trinkets on target.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin chargepartysize [|r" .. IWin_Settings["chargepartysize"] .. "|cff0066ff]:|r Use Charge, Intercept and Intervene if party member count is equal or below the setup value.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin chargenocombat [|r" .. IWin_Settings["chargenocombat"] .. "|cff0066ff]:|r Use Charge, Intercept and Intervene if the target is not in combat.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin chargewl [|r" .. IWin_Settings["chargewl"] .. "|cff0066ff]:|r Use Charge, Intercept and Intervene if the target is whitelisted.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin sunder [|r" .. IWin_Settings["sunder"] .. "|cff0066ff]:|r Use Sunder Armor priority as DPS.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin sunder [|r" .. IWin_Settings["sunder"] .. "|cff0066ff]:|r Use Sunder Armor priority as DPS. Possible values: high, once, low, off.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin demo [|r" .. IWin_Settings["demo"] .. "|cff0066ff]:|r Use Demoralizing Shout.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtbattle [|r" .. IWin_Settings["dtBattle"] .. "|cff0066ff]:|r Use Battle stance with Defensive Tactics.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtdefensive [|r" .. IWin_Settings["dtDefensive"] .. "|cff0066ff]:|r Use Defensive stance with Defensive Tactics.")

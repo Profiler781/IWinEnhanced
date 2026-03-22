@@ -149,6 +149,7 @@ end
 function IWin:BloodthirstHighAP(queueTime)
 	local spell = "Bloodthirst"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsBoss() and IWin:GetTimeToDie() < IWin_Settings["GCD"] then return end
 	if IWin:IsHighAP()
 		and IWin:GetPower("player") < 60
 		and IWin:IsRageAvailable(spell)
@@ -160,6 +161,7 @@ end
 function IWin:SetReservedRageBloodthirstHighAP()
 	local spell = "Bloodthirst"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:IsBoss() and IWin:GetTimeToDie() < IWin_Settings["GCD"] then return end
 	if IWin:IsHighAP(false) then 
 		IWin:SetReservedRage(spell, "cooldown")
 	end
@@ -1244,54 +1246,27 @@ function IWin:ThunderClapDPS(range)
 	end
 end
 
-function IWin:UseConsumableBoss(name)
-	if not IWin:IsBoss() or IWin:IsBlacklistCooldown() or IWin:IsTrainingDummy() then return end
-	if IWin:GetTime() - IWin_RotationVar["combatStart"] <= 10 then return end
-	for bag = 0, 4 do
-		for slot = 1, GetContainerNumSlots(bag) do
-			local itemName = GetContainerItemLink(bag, slot)
-			if itemName and strfind(itemName, name) then
-				local start, duration = GetContainerItemCooldown(bag, slot)
-				if start == 0 or duration == 0 then
-					UseContainerItem(bag, slot)
-					return
-				end
-			end
-		end
-	end
+function IWin:UseItemConsumableNoGCDDPS()
+	if not IWin:IsItemConsumableTarget() then return end
+	IWin:UseItemConsumableDPS("Juju Flurry")
+	IWin:UseItemConsumableDPS("Mighty Rage Potion")
+	IWin:UseItemConsumableDPS("Potion of Quickness")
 end
 
-
-function IWin:UseConsumableZone(name, subzone)
-	if not string.find(GetSubZoneText() or "", subzone) then return end
-	for bag = 0, 4 do
-		for slot = 1, GetContainerNumSlots(bag) do
-			local itemName = GetContainerItemLink(bag, slot)
-			if itemName and strfind(itemName, name) then
-				local start, duration = GetContainerItemCooldown(bag, slot)
-				if start == 0 or duration == 0 then
-					UseContainerItem(bag, slot)
-					return
-				end
-			end
-		end
-	end
+function IWin:UseItemTrinketGCDDPS()
+	if not IWin:IsItemTrinketTarget() or not IWin_CombatVar["queueGCD"] then return end
+	IWin:UseItemTrinketDPS("Diamond Flask", true)
 end
 
-function IWin:UseTrinketBoss(name, ttdMin, ttdMax, saveThreshold)
-	if not IWin:IsBoss() or IWin:IsBlacklistCooldown() then return end
-	if IWin:GetTime() - IWin_RotationVar["combatStart"] <= 10 then return end
-	local ttd = IWin:GetTimeToDie()
-	if not ((ttd >= ttdMin and ttd <= ttdMax) or ttd > saveThreshold) then return end
-	for _, slot in ipairs({13, 14}) do
-		if IWin:IsItemEquipped(slot, name, false) then
-			local start, duration = GetInventoryItemCooldown("player", slot)
-			if start == 0 or duration == 0 then
-				UseInventoryItem(slot)
-				return
-			end
-		end
-	end
+function IWin:UseItemTrinketNoGCDDPS()
+	if not IWin:IsItemTrinketTarget() then return end
+	IWin:UseItemTrinketDPS("Badge of the Swarmguard")
+	IWin:UseItemTrinketDPS("Earthstrike")
+	IWin:UseItemTrinketDPS("Jom Gabbar")
+	IWin:UseItemTrinketDPS("Kiss of the Spider")
+	IWin:UseItemTrinketDPS("Molten Emberstone")
+	IWin:UseItemTrinketDPS("Slayer's Crest")
+	IWin:UseItemTrinketDPS("Zandalarian Hero Medallion")
 end
 
 function IWin:WhirlwindDefensiveTactics(queueTime, range)
