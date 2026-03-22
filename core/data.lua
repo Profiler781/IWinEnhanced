@@ -178,3 +178,35 @@ IWin_PowerType = {
 	[1] = "rage",
 	[3] = "energy",
 }
+
+IWin_ItemCooldownDuration = {
+	-- consumables
+	["Juju Flurry"] = 60,
+	["Mighty Rage Potion"] = 120,
+	["Potion of Quickness"] = 120,
+	-- trinkets
+	["Badge of the Swarmguard"] = 180,
+	["Diamond Flask"] = 240,
+	["Earthstrike"] = 120,
+	["Jom Gabbar"] = 120,
+	["Kiss of the Spider"] = 120,
+	["Molten Emberstone"] = 120,
+	["Slayer's Crest"] = 120,
+	["Zandalarian Hero Medallion"] = 120,
+}
+
+IWin_ItemBuffDuration = {
+	-- consumables
+	["Juju Flurry"] = 20,
+	["Mighty Rage Potion"] = 20,
+	["Potion of Quickness"] = 30,
+	-- trinkets
+	["Badge of the Swarmguard"] = 30,
+	["Diamond Flask"] = 60,
+	["Earthstrike"] = 20,
+	["Jom Gabbar"] = 20,
+	["Kiss of the Spider"] = 15,
+	["Molten Emberstone"] = 20,
+	["Slayer's Crest"] = 20,
+	["Zandalarian Hero Medallion"] = 20,
+}

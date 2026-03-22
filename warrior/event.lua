@@ -27,6 +27,9 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["rageTimeToReserveBuffer"] == nil then IWin_Settings["rageTimeToReserveBuffer"] = 1.5 end
 		if IWin_Settings["ragePerSecondPrediction"] == nil then IWin_Settings["ragePerSecondPrediction"] = 10 end
 		--setup
+		if IWin_Settings["debug"] == nil then IWin_Settings["debug"] = "off" end
+		if IWin_Settings["consumable"] == nil then IWin_Settings["consumable"] = "boss" end
+		if IWin_Settings["trinket"] == nil then IWin_Settings["trinket"] = "boss" end
 		if IWin_Settings["chargepartysize"] == nil then IWin_Settings["chargepartysize"] = 1 end
 		if IWin_Settings["chargenocombat"] == nil then IWin_Settings["chargenocombat"] = "on" end
 		if IWin_Settings["chargewl"] == nil then IWin_Settings["chargewl"] = "off" end

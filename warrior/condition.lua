@@ -2,6 +2,18 @@ if UnitClass("player") ~= "Warrior" then return end
 
 local UnitAttackPower = UnitAttackPower
 
+function IWin:IsDPSWindow(cooldown)
+	if not IWin:IsInRange() then return false end
+	if not IWin:IsBuffStack("target", "Sunder Armor", 5, nil, false) and not IWin:IsBuffActive("target", "Expose Armor", nil, false) then return false end
+	if IWin:GetTime() - IWin_RotationVar["combatStart"] <= 10 then return false end
+	local ttd = IWin:GetTimeToDie()
+	local savePeriodStart = IWin_ItemCooldownDuration[cooldown] + IWin_ItemBuffDuration[cooldown] + IWin_Settings["GCD"]
+	local savePeriodEnd = IWin_ItemBuffDuration[cooldown] + IWin_Settings["GCD"]
+	local minBuffLenght = IWin_ItemBuffDuration[cooldown] * 0.5
+	if ttd <= savePeriodStart and ttd >= savePeriodEnd or ttd < minBuffLenght then return false end
+	return true
+end
+
 function IWin:IsOverpowerAvailable(timeBuffer, debugmsg)
 	local overpowerRemaining = IWin_RotationVar["overpowerAvailable"] - IWin:GetTime(false)
  	local result = overpowerRemaining - timeBuffer > IWin:GetGCDRemaining(false)

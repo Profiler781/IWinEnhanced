@@ -143,13 +143,17 @@ function IWin:UseItem(item)
 		for slot = 1, GetContainerNumSlots(bag) do
 			local itemName = GetContainerItemLink(bag, slot)
 			if itemName and strfind(itemName,item) then
-				UseContainerItem(bag, slot)
+				local start, duration = GetContainerItemCooldown(bag, slot)
+				if start == 0 or duration == 0 then
+					UseContainerItem(bag, slot)
+					return
+				end
 			end
 		end
 	end
 end
 
-function IWin:UseDrinkItem()
+function IWin:UseItemDrink()
 	local playerLevel = IWin:GetLevel("player")
 	for drinkItem in IWin_DrinkConjured do
 		if IWin:IsBuffActive("player", "Drink", nil, false) then break end
@@ -163,6 +167,33 @@ function IWin:UseDrinkItem()
 			IWin:UseItem(drinkItem)
 		end
 	end
+end
+
+function IWin:UseItemConsumableDPS(item)
+	if not IWin:IsDPSWindow(item) then return end
+	IWin:UseItem(item)
+end
+
+function IWin:UseItemZone(item, subzone)
+	if not string.find(GetSubZoneText() or "", subzone) then return end
+	IWin:UseItem(item)
+end
+
+function IWin:UseItemTrinket(item)
+	for _, slot in ipairs({13, 14}) do
+		if IWin:IsItemEquipped(slot, item, false) then
+			local start, duration = GetInventoryItemCooldown("player", slot)
+			if start == 0 or duration == 0 then
+				UseInventoryItem(slot)
+				return
+			end
+		end
+	end
+end
+
+function IWin:UseItemTrinketDPS(item)
+	if not IWin:IsDPSWindow(item) then return end
+	IWin:UseItemTrinket(item)
 end
 
 function IWin:RangedAttack(spell, rangedWeapon)
