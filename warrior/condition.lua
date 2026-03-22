@@ -4,13 +4,19 @@ local UnitAttackPower = UnitAttackPower
 
 function IWin:IsDPSWindow(cooldown)
 	if not IWin:IsInRange() then return false end
-	if not IWin:IsBuffStack("target", "Sunder Armor", 5, nil, false) and not IWin:IsBuffActive("target", "Expose Armor", nil, false) then return false end
-	if IWin:GetTime() - IWin_RotationVar["combatStart"] <= 10 then return false end
 	local ttd = IWin:GetTimeToDie()
-	local savePeriodStart = IWin_ItemCooldownDuration[cooldown] + IWin_ItemBuffDuration[cooldown] + IWin_Settings["GCD"]
-	local savePeriodEnd = IWin_ItemBuffDuration[cooldown] + IWin_Settings["GCD"]
-	local minBuffLenght = IWin_ItemBuffDuration[cooldown] * 0.5
-	if ttd <= savePeriodStart and ttd >= savePeriodEnd or ttd < minBuffLenght then return false end
+	--prevent waste
+	local minBuffLenght = IWin_ItemBuffDuration[cooldown] * 0.3
+	if ttd < minBuffLenght then return false end
+	--burst short fight
+	local lastDPSWindow = IWin_ItemBuffDuration[cooldown] + IWin_Settings["GCD"] * 2
+	if ttd < lastDPSWindow then return true end
+	--wait max output
+	if not IWin:IsBuffStack("target", "Sunder Armor", 5, nil, false) and not IWin:IsBuffActive("target", "Expose Armor", nil, false) then return false end
+	--save for execute
+	local savePeriodStart = IWin_ItemCooldownDuration[cooldown] + IWin_ItemBuffDuration[cooldown] + IWin_Settings["GCD"] * 2
+	if ttd < savePeriodStart then return false end
+	--go
 	return true
 end
 

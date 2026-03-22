@@ -1253,10 +1253,14 @@ function IWin:UseItemConsumableNoGCDDPS()
 	IWin:UseItemConsumableDPS("Potion of Quickness")
 end
 
+function IWin:UseItemTrinketGCDDPS()
+	if not IWin:IsItemTrinketTarget() or not IWin_CombatVar["queueGCD"] then return end
+	IWin:UseItemTrinketDPS("Diamond Flask", true)
+end
+
 function IWin:UseItemTrinketNoGCDDPS()
 	if not IWin:IsItemTrinketTarget() then return end
 	IWin:UseItemTrinketDPS("Badge of the Swarmguard")
-	IWin:UseItemTrinketDPS("Diamond Flask")
 	IWin:UseItemTrinketDPS("Earthstrike")
 	IWin:UseItemTrinketDPS("Jom Gabbar")
 	IWin:UseItemTrinketDPS("Kiss of the Spider")

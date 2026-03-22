@@ -1,6 +1,5 @@
 if UnitClass("player") ~= "Warrior" then return end
 
-local string_find = string.find
 local UnitAttackSpeed = UnitAttackSpeed
 
 IWin:RegisterEvent("ADDON_LOADED")
@@ -27,9 +26,6 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["rageTimeToReserveBuffer"] == nil then IWin_Settings["rageTimeToReserveBuffer"] = 1.5 end
 		if IWin_Settings["ragePerSecondPrediction"] == nil then IWin_Settings["ragePerSecondPrediction"] = 10 end
 		--setup
-		if IWin_Settings["debug"] == nil then IWin_Settings["debug"] = "off" end
-		if IWin_Settings["consumable"] == nil then IWin_Settings["consumable"] = "boss" end
-		if IWin_Settings["trinket"] == nil then IWin_Settings["trinket"] = "boss" end
 		if IWin_Settings["chargepartysize"] == nil then IWin_Settings["chargepartysize"] = 1 end
 		if IWin_Settings["chargenocombat"] == nil then IWin_Settings["chargenocombat"] = "on" end
 		if IWin_Settings["chargewl"] == nil then IWin_Settings["chargewl"] = "off" end
@@ -55,37 +51,34 @@ IWin:SetScript("OnEvent", function()
 		IWin_RotationVar["slamGCDAllowed"] = 0
 		IWin_RotationVar["slamClipAllowedMax"] = 0
 		IWin_RotationVar["slamClipAllowedMin"] = 0
-		IWin_RotationVar["combatStart"] = GetTime()
 		IWin_RLS = nil
 		IWin_RLS_lastRage = nil
 		IWin_RLS_lastValue = nil
 		IWin:UpdateRageCosts()
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS" then
-		if string_find(arg1,"blocked") then
+		if string.find(arg1,"blocked") then
 			IWin_RotationVar["revengeAvailable"] = IWin:GetTime(false) + 4
 		end
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES" then
-		if string_find(arg1,"dodge") or string.find(arg1,"parry") then
+		if string.find(arg1,"dodge") or string.find(arg1,"parry") then
 			IWin_RotationVar["revengeAvailable"] = IWin:GetTime(false) + 4
 		end
 	elseif event == "CHAT_MSG_COMBAT_SELF_MISSES" or event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF" then
-		if string_find(arg1,"dodge") then
+		if string.find(arg1,"dodge") then
 			IWin_RotationVar["overpowerAvailable"] = IWin:GetTime(false) + 4
 		end
 	elseif event == "CHAT_MSG_SPELL_SELF_DAMAGE" then
-		if string_find(arg1,"dodged") then
+		if string.find(arg1,"dodged") then
 			IWin_RotationVar["overpowerAvailable"] = IWin:GetTime(false) + 4
 		end
 	elseif event == "PLAYER_ENTERING_WORLD" then
 		if UnitAffectingCombat("player") then
 			IWin:ResetRageRLS()
 			IWin_RLS_lastRage = UnitMana("player")
-			IWin_RotationVar["combatStart"] = GetTime()
 		end
 	elseif event == "PLAYER_REGEN_DISABLED" then
 		IWin:ResetRageRLS()
 		IWin_RLS_lastRage = UnitMana("player")
-		IWin_RotationVar["combatStart"] = GetTime()
 	elseif event == "PLAYER_REGEN_ENABLED" then
 		IWin_RLS_lastValue = nil
 		IWin_RLS_lastRage = nil

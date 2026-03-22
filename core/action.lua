@@ -174,16 +174,17 @@ function IWin:UseItemConsumableDPS(item)
 	IWin:UseItem(item)
 end
 
-function IWin:UseItemZone(item, subzone)
+function IWin:UseItemConsumableDefensive(item, subzone)
 	if not string.find(GetSubZoneText() or "", subzone) then return end
 	IWin:UseItem(item)
 end
 
-function IWin:UseItemTrinket(item)
+function IWin:UseItemTrinket(item, gcd)
 	for _, slot in ipairs({13, 14}) do
 		if IWin:IsItemEquipped(slot, item, false) then
 			local start, duration = GetInventoryItemCooldown("player", slot)
-			if start == 0 or duration == 0 then
+			if start == 0 or duration == 0 or duration == 1.5 then
+				if gcd then IWin_CombatVar["queueGCD"] = false end
 				UseInventoryItem(slot)
 				return
 			end
@@ -191,9 +192,9 @@ function IWin:UseItemTrinket(item)
 	end
 end
 
-function IWin:UseItemTrinketDPS(item)
+function IWin:UseItemTrinketDPS(item, gcd)
 	if not IWin:IsDPSWindow(item) then return end
-	IWin:UseItemTrinket(item)
+	IWin:UseItemTrinket(item, gcd)
 end
 
 function IWin:RangedAttack(spell, rangedWeapon)

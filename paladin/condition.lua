@@ -1,13 +1,30 @@
 if UnitClass("player") ~= "Paladin" then return end
 
+function IWin:IsDPSWindow(cooldown)
+	if not IWin:IsInRange() then return false end
+	local ttd = IWin:GetTimeToDie()
+	--prevent waste
+	local minBuffLenght = IWin_ItemBuffDuration[cooldown] * 0.3
+	if ttd < minBuffLenght then return false end
+	--burst short fight
+	local lastDPSWindow = IWin_ItemBuffDuration[cooldown] + IWin_Settings["GCD"] * 2
+	if ttd <= lastDPSWindow then return true end
+	--wait max output
+	if not IWin:IsBuffStack("player", "Vengeance", 3, nil, false) and IWin:GetTalentRank("Vengeance", false) then return false end
+	if not IWin:IsBuffStack("player", "Zeal", 3, nil, false) and IWin:GetTalentRank("Vengeful Strikes", false) then return false end
+	--go
+	return true
+end
+
 function IWin:IsJudgementTarget(judgement, debugmsg)
+	local targetClassification = IWin_Settings[judgement]
 	if (
-			IWin_Settings[judgement] == "elite"
+			targetClassification == "elite"
 			and IWin:IsElite()
 		) or (
-			IWin_Settings[judgement] == "boss"
+			targetClassification == "boss"
 			and IWin:IsBoss()
-		) then
+		) or targetClassification == "all" then
 			IWin:Debug("Target classification for assigned judgement: true", debugmsg)
 			return true
 	end

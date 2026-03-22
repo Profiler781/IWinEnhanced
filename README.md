@@ -1,7 +1,8 @@
 # IWinEnhanced v2.3
 
 1-button rotation macros for Turtle Druids, Paladins and Warriors.
-Updated for Turtle WoW 1.18.1
+
+Updated for Turtle WoW 1.18.1.
 
 Author: Agamemnoth - Ambershire
 
@@ -73,19 +74,21 @@ Example: /iwin frontshred on
 ## Setup commands
 
     /iwin                                   Current setup
-    /iwin debug <toggle>                    Enable/disable debug
-    /iwin judgement <judgementName>         Setup for Judgement on elites and worldbosses
-    /iwin wisdom <classification>           Setup for Seal of Wisdom target classification
-    /iwin crusader <classification>         Setup for Seal of the Crusader target classification
-    /iwin light <classification>            Setup for Seal of Light target classification
-    /iwin justice <classification>          Setup for Seal of Justice target classification
-    /iwin soc <socOption>                   Setup for Seal of Command
+    /iwin debug <toggle>                    Enable/disable debug.
+    /iwin consumable <classification>       Use consumables on target.
+    /iwin trinket <classification>          Use trinkets on target.
+    /iwin judgement <judgementName>         Use the Judgement to debuff target.
+    /iwin wisdom <classification>           Use Seal of Wisdom debuff on target.
+    /iwin crusader <classification>         Use Seal of the Crusader debuff on target.
+    /iwin light <classification>            Use Seal of Light debuff on target.
+    /iwin justice <classification>          Use Seal of Justice debuff on target.
+    /iwin soc <socOption>                   Use Seal of Command over Seal of Righteousness.
 
 judgementName possible values: wisdom, light, crusader, justice, off.
 
 socOption possible values: auto, on, off.
 
-classification possible values: boss, elite.
+classification possible values: boss, elite, all, off.
 
 Example: /iwin wisdom boss
 => Judge wisdom on boss if it's the selected judgement debuff.
