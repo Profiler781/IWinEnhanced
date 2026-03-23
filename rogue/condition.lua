@@ -1,5 +1,19 @@
 if UnitClass("player") ~= "Rogue" then return end
 
+function IWin:IsDPSWindow(cooldown)
+	local ttd = IWin:GetTimeToDie()
+	--prevent waste
+	local minBuffLenght = IWin_ItemBuffDuration[cooldown] * 0.3
+	if ttd < minBuffLenght then return false end
+	--burst short fight
+	local lastDPSWindow = IWin_ItemBuffDuration[cooldown] + IWin_Settings["GCD"] * 2
+	if ttd < lastDPSWindow then return true end
+	--wait max output
+	if not IWin:IsMaxComboPoints(false) then return false end
+	--go
+	return true
+end
+
 function IWin:IsSurpriseAttackAvailable(debugmsg)
 	local surpriseAttackRemaining = IWin_RotationVar["surpriseAttackAvailable"] - GetTime()
  	local result = surpriseAttackRemaining > IWin:GetGCDRemaining(false)

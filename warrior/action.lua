@@ -72,11 +72,11 @@ end
 
 function IWin:BloodFuryDPS()
 	local spell = "Blood Fury"
-	if not IWin:IsBoss(false) or IWin:IsBlacklistCooldown(false) then return end
+	if not IWin:IsBoss() or IWin:IsBlacklistCooldownMelee() then return end
 	if UnitRace("player") ~= "Orc" then return end
 	if IWin:GetTime(false) - IWin_RotationVar["combatStart"] <= 10 then return end
 	if IWin:IsSpellSkip(spell, nil, true, IWin_Settings["GCD"], true) then return end
-	local ttd = IWin:GetTimeToDie(false)
+	local ttd = IWin:GetTimeToDie()
 	if ttd <= 15 then
 		IWin:Cast(spell)
 	elseif ttd > 120 then
@@ -113,10 +113,10 @@ end
 function IWin:BloodrageDPS()
 	local spell = "Bloodrage"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if IWin:IsBoss(false) and not IWin:IsBlacklistCooldown(false) then
+	if IWin:IsBoss() and not IWin:IsBlacklistCooldownMelee() then
 		if IWin:GetTime(false) - IWin_RotationVar["combatStart"] <= 10 then return end
-		local ttd = IWin:GetTimeToDie(false)
-		if ttd <= 11 and IWin:IsExecutePhase(false) then
+		local ttd = IWin:GetTimeToDie()
+		if ttd <= 11 and IWin:IsExecutePhase() then
 			IWin:Cast(spell, false)
 			return
 		elseif ttd <= 8 then
@@ -243,11 +243,11 @@ end
 
 function IWin:DeathWishDPS()
 	local spell = "Death Wish"
-	if not IWin:IsBoss(false) or IWin:IsBlacklistCooldown(false) then return end
+	if not IWin:IsBoss() or IWin:IsBlacklistCooldownMelee() then return end
 	if IWin:GetTime(false) - IWin_RotationVar["combatStart"] <= 10 then return end
 	if IWin:IsSpellSkip(spell, nil, true, IWin_Settings["GCD"], true) then return end
 	if not IWin:IsRageAvailable(spell) then return end
-	local ttd = IWin:GetTimeToDie(false)
+	local ttd = IWin:GetTimeToDie()
 	if ttd <= 30 then
 		IWin:Cast(spell)
 	elseif ttd > 180 then
@@ -1246,27 +1246,30 @@ function IWin:ThunderClapDPS(range)
 	end
 end
 
-function IWin:UseItemConsumableNoGCDDPS()
-	if not IWin:IsItemConsumableTarget() then return end
-	IWin:UseItemConsumableDPS("Juju Flurry")
-	IWin:UseItemConsumableDPS("Mighty Rage Potion")
-	IWin:UseItemConsumableDPS("Potion of Quickness")
+function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Consumable Offensive NoGCD")
+	if not skipTargetControl and not IWin:IsItemConsumableTarget(true) then return end
+	IWin:UseItemConsumableOffensive("Juju Flurry", skipWindowControl)
+	IWin:UseItemConsumableOffensive("Mighty Rage Potion", skipWindowControl)
+	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
 
-function IWin:UseItemTrinketGCDDPS()
-	if not IWin:IsItemTrinketTarget() or not IWin_CombatVar["queueGCD"] then return end
-	IWin:UseItemTrinketDPS("Diamond Flask", true)
+function IWin:UseItemTrinketOffensiveGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Trinket Offensive GCD")
+	if not skipTargetControl and not IWin:IsItemTrinketTarget(true) or not IWin_CombatVar["queueGCD"] then return end
+	IWin:UseItemTrinketOffensive("Diamond Flask", skipWindowControl, true)
 end
 
-function IWin:UseItemTrinketNoGCDDPS()
-	if not IWin:IsItemTrinketTarget() then return end
-	IWin:UseItemTrinketDPS("Badge of the Swarmguard")
-	IWin:UseItemTrinketDPS("Earthstrike")
-	IWin:UseItemTrinketDPS("Jom Gabbar")
-	IWin:UseItemTrinketDPS("Kiss of the Spider")
-	IWin:UseItemTrinketDPS("Molten Emberstone")
-	IWin:UseItemTrinketDPS("Slayer's Crest")
-	IWin:UseItemTrinketDPS("Zandalarian Hero Medallion")
+function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Trinket Offensive NoGCD")
+	if not skipTargetControl and not IWin:IsItemTrinketTarget(true) then return end
+	IWin:UseItemTrinketOffensive("Badge of the Swarmguard", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Earthstrike", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Jom Gabbar", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Kiss of the Spider", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Molten Emberstone", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Slayer's Crest", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Zandalarian Hero Medallion", skipWindowControl)
 end
 
 function IWin:Whirlwind(queueTime, range)

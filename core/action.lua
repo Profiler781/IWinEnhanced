@@ -145,6 +145,7 @@ function IWin:UseItem(item)
 			if itemName and strfind(itemName,item) then
 				local start, duration = GetContainerItemCooldown(bag, slot)
 				if start == 0 or duration == 0 then
+					IWin:Debug("=> Using: "..item)
 					UseContainerItem(bag, slot)
 					return
 				end
@@ -169,8 +170,8 @@ function IWin:UseItemDrink()
 	end
 end
 
-function IWin:UseItemConsumableDPS(item)
-	if not IWin:IsDPSWindow(item) then return end
+function IWin:UseItemConsumableOffensive(item, skipWindowControl)
+	if not skipWindowControl and not IWin:IsDPSWindow(item) then return end
 	IWin:UseItem(item)
 end
 
@@ -185,6 +186,7 @@ function IWin:UseItemTrinket(item, gcd)
 			local start, duration = GetInventoryItemCooldown("player", slot)
 			if start == 0 or duration == 0 or duration == 1.5 then
 				if gcd then IWin_CombatVar["queueGCD"] = false end
+				IWin:Debug("=> Using: "..item)
 				UseInventoryItem(slot)
 				return
 			end
@@ -192,8 +194,8 @@ function IWin:UseItemTrinket(item, gcd)
 	end
 end
 
-function IWin:UseItemTrinketDPS(item, gcd)
-	if not IWin:IsDPSWindow(item) then return end
+function IWin:UseItemTrinketOffensive(item, skipWindowControl, gcd)
+	if not skipWindowControl and not IWin:IsDPSWindow(item) then return end
 	IWin:UseItemTrinket(item, gcd)
 end
 

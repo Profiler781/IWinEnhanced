@@ -1052,19 +1052,35 @@ function IWin:IsBoss(debugmsg)
 	return false
 end
 
-function IWin:IsBlacklistCooldown(debugmsg)
-	local cached = IWin_Target["blacklistCooldown"]
+function IWin:IsBlacklistCooldownMelee(debugmsg)
+	local cached = IWin_Target["blacklistCooldownMelee"]
 	if cached ~= nil then
-		IWin:Debug("Target is blacklisted for cooldowns: "..tostring(cached), debugmsg)
+		IWin:Debug("Target is blacklisted for melee cooldowns: "..tostring(cached), debugmsg)
 		return cached
 	end
-	if IWin_BlacklistCooldown[IWin:GetName("target", false)] then
-		IWin_Target["blacklistCooldown"] = true
-		IWin:Debug("Target is blacklisted for cooldowns: true", debugmsg)
+	if IWin_BlacklistCooldownMelee[IWin:GetName("target", false)] then
+		IWin_Target["blacklistCooldownMelee"] = true
+		IWin:Debug("Target is blacklisted for melee cooldowns: true", debugmsg)
 		return true
 	end
-	IWin_Target["blacklistCooldown"] = false
-	IWin:Debug("Target is blacklisted for cooldowns: false", debugmsg)
+	IWin_Target["blacklistCooldownMelee"] = false
+	IWin:Debug("Target is blacklisted for melee cooldowns: false", debugmsg)
+	return false
+end
+
+function IWin:IsBlacklistCooldownRanged(debugmsg)
+	local cached = IWin_Target["blacklistCooldownRanged"]
+	if cached ~= nil then
+		IWin:Debug("Target is blacklisted for ranged cooldowns: "..tostring(cached), debugmsg)
+		return cached
+	end
+	if IWin_BlacklistCooldownRanged[IWin:GetName("target", false)] then
+		IWin_Target["blacklistCooldownRanged"] = true
+		IWin:Debug("Target is blacklisted for ranged cooldowns: true", debugmsg)
+		return true
+	end
+	IWin_Target["blacklistCooldownRanged"] = false
+	IWin:Debug("Target is blacklisted for ranged cooldowns: false", debugmsg)
 	return false
 end
 
@@ -1375,24 +1391,24 @@ function IWin:GetItemCountInBag(item, debugmsg)
 	return itemCount
 end
 
-function IWin:IsItemConsumableTarget()
+function IWin:IsItemConsumableTarget(melee)
+	if melee and (not IWin:IsInRange() or IWin:IsBlacklistCooldownMelee()) then return false end
+	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
 	local consumableSetting = IWin_Settings["consumable"]
 	if consumableSetting == "off" then return false end
 	if consumableSetting == "boss" and not IWin:IsBoss() then return false end
 	if consumableSetting == "elite" and not IWin:IsElite() then return false end
-	if IWin:IsBlacklistCooldown()
-		or IWin:IsTrainingDummy() then
-			return false
-	end
+	if IWin:IsTrainingDummy() then return false end
 	return true
 end
 
-function IWin:IsItemTrinketTarget()
+function IWin:IsItemTrinketTarget(melee)
+	if melee and (not IWin:IsInRange() or IWin:IsBlacklistCooldownMelee()) then return false end
+	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
 	local trinketSetting = IWin_Settings["trinket"]
 	if trinketSetting == "off" then return false end
 	if trinketSetting == "boss" and not IWin:IsBoss() then return false end
 	if trinketSetting == "elite" and not IWin:IsElite() then return false end
-	if IWin:IsBlacklistCooldown() then return false end
 	return true
 end
 

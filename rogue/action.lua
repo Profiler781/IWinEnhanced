@@ -366,3 +366,26 @@ function IWin:SurpriseAttack()
 			IWin:Cast(spell)
 	end
 end
+
+function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Consumable Offensive NoGCD")
+	if not skipTargetControl and not IWin:IsItemConsumableTarget(true) then return end
+	IWin:UseItemConsumableOffensive("Juju Flurry", skipWindowControl)
+	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
+end
+
+function IWin:UseItemTrinketOffensiveGCD(skipWindowControl, skipTargetControl)
+	--none
+end
+
+function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Trinket Offensive NoGCD")
+	if not skipTargetControl and not IWin:IsItemTrinketTarget(true) then return end
+	IWin:UseItemTrinketOffensive("Badge of the Swarmguard", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Earthstrike", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Jom Gabbar", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Kiss of the Spider", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Molten Emberstone", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Slayer's Crest", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Zandalarian Hero Medallion", skipWindowControl)
+end

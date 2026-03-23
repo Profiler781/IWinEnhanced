@@ -104,7 +104,7 @@ IWin_BlacklistKick = {
 	["Flamewaker Priest"] = true,
 }
 
-IWin_BlacklistCooldown = {
+IWin_BlacklistCooldownMelee = {
 	-- Karazhan
 	["Mephistroth"] = true,
 	["Blue Owl"] = true,
@@ -113,6 +113,48 @@ IWin_BlacklistCooldown = {
 	["Feugen"] = true,
 	["Stalagg"] = true,
 	["Noth the Plaguebringer"] = true,
+	["Heigan the Unclean"] = true,
+	["Loatheb"] = true,
+	["Gothik the Harvester"] = true,
+	["Thane Korth'azz"] = true,
+	["Lady Blaumeux"] = true,
+	["Highlord Mograine"] = true,
+	["Sir Zeliek"] = true,
+	["Sapphiron"] = true,
+	-- Ahn'Qiraj
+	["Emperor Vek'lor"] = true,
+	["Emperor Vek'nilash"] = true,
+	-- Blackwing Lair
+	["Firemaw"] = true,
+	["Chromaggus"] = true,
+	-- Molten Core
+	["Baron Geddon"] = true,
+	["Ragnaros"] = true,
+}
+
+IWin_BlacklistCooldownRanged = {
+	-- Karazhan
+	["Mephistroth"] = true,
+	["Blue Owl"] = true,
+	["Red Owl"] = true,
+	-- Naxxramas
+	["Feugen"] = true,
+	["Stalagg"] = true,
+	["Noth the Plaguebringer"] = true,
+	["Heigan the Unclean"] = true,
+	["Gothik the Harvester"] = true,
+	["Thane Korth'azz"] = true,
+	["Lady Blaumeux"] = true,
+	["Highlord Mograine"] = true,
+	["Sir Zeliek"] = true,
+	["Sapphiron"] = true,
+	-- Ahn'Qiraj
+	["Emperor Vek'lor"] = true,
+	["Emperor Vek'nilash"] = true,
+	-- Blackwing Lair
+	["Firemaw"] = true,
+	["Chromaggus"] = true,
+	-- Molten Core
 }
 
 IWin_BlacklistFear = {
@@ -187,11 +229,15 @@ IWin_ItemCooldownDuration = {
 	-- trinkets
 	["Badge of the Swarmguard"] = 180,
 	["Diamond Flask"] = 240,
+	["Draconic Infused Emblem"] = 75,
 	["Earthstrike"] = 120,
 	["Jom Gabbar"] = 120,
 	["Kiss of the Spider"] = 120,
 	["Molten Emberstone"] = 120,
+	["Scrolls of Blinding Light"] = 300,
 	["Slayer's Crest"] = 120,
+	["Talisman of Ephemeral Power"] = 90,
+	["Zandalarian Hero Charm"] = 120,
 	["Zandalarian Hero Medallion"] = 120,
 }
 
@@ -203,10 +249,14 @@ IWin_ItemBuffDuration = {
 	-- trinkets
 	["Badge of the Swarmguard"] = 30,
 	["Diamond Flask"] = 60,
+	["Draconic Infused Emblem"] = 15,
 	["Earthstrike"] = 20,
 	["Jom Gabbar"] = 20,
 	["Kiss of the Spider"] = 15,
 	["Molten Emberstone"] = 20,
+	["Scrolls of Blinding Light"] = 20,
 	["Slayer's Crest"] = 20,
+	["Talisman of Ephemeral Power"] = 15,
+	["Zandalarian Hero Charm"] = 20,
 	["Zandalarian Hero Medallion"] = 20,
 }

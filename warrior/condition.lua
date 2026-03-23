@@ -3,7 +3,6 @@ if UnitClass("player") ~= "Warrior" then return end
 local UnitAttackPower = UnitAttackPower
 
 function IWin:IsDPSWindow(cooldown)
-	if not IWin:IsInRange() then return false end
 	local ttd = IWin:GetTimeToDie()
 	--prevent waste
 	local minBuffLenght = IWin_ItemBuffDuration[cooldown] * 0.3

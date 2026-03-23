@@ -10,8 +10,10 @@ Contributors: Vlad/Goodnice - Tel'Abim, Jrc13245/Torio
 
 ## Latest features
 
-- Trinkets auto-use with TTK windows for warriors. Setup command.
-- Consumables auto-use with TTK windows for warriors. Setup command.
+- /inuke macro to use trinkets and offensive consumables.
+
+- Trinkets auto-use with TTK windows for all classes with a rotation. Setup command.
+- Consumables auto-use with TTK windows for all classes with a rotation. Setup command.
 
 ## Mods Dependencies
 
@@ -43,13 +45,14 @@ Optionnal Addons:
     /ihodor         Multi target bear rotation
     /itaunt         Growl if the target is not under another taunt effect
     /ihydrate       Use conjured or vendor water
+    /inuke          Use offensive trinkets and consumables
 
 ## Setup commands
 
     /iwin                             Current setup
-    /iwin debug <toggle>              Enable/disable debug
-    /iwin frontshred <toggle>         Setup for Front Shredding
-    /iwin berserkcat <toggle>         Setup for Berserk in Cat Form
+    /iwin debug <toggle>              Enable/disable debug.
+    /iwin frontshred <toggle>         Attempt Front Shredding.
+    /iwin berserkcat <toggle>         Use Berserk in Cat Form.
 
 toggle possible values: on, off.
 
@@ -70,6 +73,7 @@ Example: /iwin frontshred on
     /itaunt         Hand of Reckoning if the target is not under another taunt effect
     /ibubblehearth  Divine Shield and Hearthstone. Shame!
     /ihydrate       Use conjured or vendor water
+    /inuke          Use offensive trinkets and consumables
 
 ## Setup commands
 
@@ -107,6 +111,7 @@ Example: /iwin wisdom boss
     /ifeardance     Use Berserker Rage if available
     /itaunt         Taunt or Mocking Blow if the target is not under another taunt effect
     /ishoot         Shoot with bow, crossbow, gun or throw
+    /inuke          Use offensive trinkets and consumables
 
 ## Setup commands
 
