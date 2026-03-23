@@ -254,16 +254,14 @@ function IWin:Rupture()
 	local spell = "Rupture"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsMaxComboPoints()
+		and IWin:GetTalentRank("Taste for Blood") ~= 0
 		and (
 					(
 						not IWin:IsImmune("target", "bleed")
 						and IWin:GetTimeToDie() > IWin:GetRuptureDuration()
 						and IWin:GetBuffRemaining("target", "Rupture", "player") < 3
 					)
-				or (
-						IWin:GetBuffRemaining("player", "Taste for Blood") < 3
-						and IWin:GetTalentRank("Taste for Blood") ~= 0
-					)
+				or IWin:GetBuffRemaining("player", "Taste for Blood") < 3
 			)
 		and IWin:IsEnergyAvailable(spell) then
 			IWin:Cast(spell)
