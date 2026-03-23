@@ -1,4 +1,4 @@
-# IWinEnhanced v2.3
+# IWinEnhanced v2.4
 
 1-button rotation macros for Turtle Druids, Paladins and Warriors.
 
@@ -10,10 +10,8 @@ Contributors: Vlad/Goodnice - Tel'Abim, Jrc13245/Torio
 
 ## Latest features
 
-- /inuke macro to use trinkets and offensive consumables.
-
-- Trinkets auto-use with TTK windows for all classes with a rotation. Setup command.
-- Consumables auto-use with TTK windows for all classes with a rotation. Setup command.
+- /inuke macro to use Cooldowns, Trinkets and Consumables.
+- All rotations are using Cooldowns, Trinkets and Consumables auto-use with TTK windows. Setup command.
 
 ## Mods Dependencies
 
@@ -45,16 +43,21 @@ Optionnal Addons:
     /ihodor         Multi target bear rotation
     /itaunt         Growl if the target is not under another taunt effect
     /ihydrate       Use conjured or vendor water
-    /inuke          Use offensive trinkets and consumables
+    /inuke          Use cooldowns, trinkets and consumables
 
 ## Setup commands
 
-    /iwin                             Current setup
-    /iwin debug <toggle>              Enable/disable debug.
-    /iwin frontshred <toggle>         Attempt Front Shredding.
-    /iwin berserkcat <toggle>         Use Berserk in Cat Form.
+    /iwin                                       Current setup
+    /iwin debug <toggle>                        Enable/disable debug.
+    /iwin consumableoffensive <classification>  Use offensive consumables on target.
+    /iwin trinketoffensive <classification>     Use offensive trinkets on target.
+    /iwin cdshortoffensive <classification>     Use short offensive CDs on target.
+    /iwin cdlongoffensive <classification>      Use long offensive CDs on target.
+    /iwin frontshred <toggle>                   Attempt Front Shredding.
 
 toggle possible values: on, off.
+
+classification possible values: boss, elite, all, off.
 
 Example: /iwin frontshred on
 => Use shred while in front of the target. You must strafe through the mob and spam the macro.
@@ -73,20 +76,22 @@ Example: /iwin frontshred on
     /itaunt         Hand of Reckoning if the target is not under another taunt effect
     /ibubblehearth  Divine Shield and Hearthstone. Shame!
     /ihydrate       Use conjured or vendor water
-    /inuke          Use offensive trinkets and consumables
+    /inuke          Use cooldowns, trinkets and consumables
 
 ## Setup commands
 
-    /iwin                                   Current setup
-    /iwin debug <toggle>                    Enable/disable debug.
-    /iwin consumable <classification>       Use consumables on target.
-    /iwin trinket <classification>          Use trinkets on target.
-    /iwin judgement <judgementName>         Use the Judgement to debuff target.
-    /iwin wisdom <classification>           Use Seal of Wisdom debuff on target.
-    /iwin crusader <classification>         Use Seal of the Crusader debuff on target.
-    /iwin light <classification>            Use Seal of Light debuff on target.
-    /iwin justice <classification>          Use Seal of Justice debuff on target.
-    /iwin soc <socOption>                   Use Seal of Command over Seal of Righteousness.
+    /iwin                                       Current setup
+    /iwin debug <toggle>                        Enable/disable debug.
+    /iwin consumableoffensive <classification>  Use offensive consumables on target.
+    /iwin trinketoffensive <classification>     Use offensive trinkets on target.
+    /iwin cdshortoffensive <classification>     Use short offensive CDs on target.
+    /iwin cdlongoffensive <classification>      Use long offensive CDs on target.
+    /iwin judgement <judgementName>             Use the Judgement to debuff target.
+    /iwin wisdom <classification>               Use Seal of Wisdom debuff on target.
+    /iwin crusader <classification>             Use Seal of the Crusader debuff on target.
+    /iwin light <classification>                Use Seal of Light debuff on target.
+    /iwin justice <classification>              Use Seal of Justice debuff on target.
+    /iwin soc <socOption>                       Use Seal of Command over Seal of Righteousness.
 
 judgementName possible values: wisdom, light, crusader, justice, off.
 
@@ -111,29 +116,31 @@ Example: /iwin wisdom boss
     /ifeardance     Use Berserker Rage if available
     /itaunt         Taunt or Mocking Blow if the target is not under another taunt effect
     /ishoot         Shoot with bow, crossbow, gun or throw
-    /inuke          Use offensive trinkets and consumables
+    /inuke          Use cooldowns, trinkets and consumables
 
 ## Setup commands
 
-    /iwin                             Current setup
-    /iwin debug <toggle>              Enable/disable debug.
-    /iwin consumable <classification> Use consumables on target.
-    /iwin trinket <classification>    Use trinkets on target.
-    /iwin chargepartysize <number>    Use Charge, Intercept and Intervene if party member count is equal or below the setup value.
-    /iwin chargenocombat <toggle>     Use Charge, Intercept and Intervene if the target is not in combat.
-    /iwin chargewl <toggle>           Use Charge, Intercept and Intervene if the target is whitelisted.
-    /iwin sunder <priority>           Use Sunder Armor priority as DPS.
-    /iwin demo <toggle>               Use Demoralizing Shout.
-    /iwin dtbattle <toggle>           Use Battle stance with Defensive Tactics.
-    /iwin dtdefensive <toggle>        Use Defensive stance with Defensive Tactics.
-    /iwin dtberserker <toggle>        Use Berserker stance with Defensive Tactics.
-    /iwin ragebuffer <number>         Save 100% required rage for spells X seconds before the spells are used.
-    /iwin ragegain <number>           Initial rage per second estimate (seed for dynamic RLS tracking).
-    /iwin jousting <toggle>           Use Hamstring to joust with target in solo DPS.
-    /iwin thunderclap <toggle>        Use Thunder Clap.
-    /iwin overpower <toggle>          Use Overpower.
-    /iwin berserkerrage <toggle>      Use Berserker Rage for rage generation.
-    /iwin rend <toggle>               Use Rend.
+    /iwin                                       Current setup
+    /iwin debug <toggle>                        Enable/disable debug.
+    /iwin consumableoffensive <classification>  Use offensive consumables on target.
+    /iwin trinketoffensive <classification>     Use offensive trinkets on target.
+    /iwin cdshortoffensive <classification>     Use short offensive CDs on target.
+    /iwin cdlongoffensive <classification>      Use long offensive CDs on target.
+    /iwin chargepartysize <number>              Use Charge, Intercept and Intervene if party member count is equal or below the setup value.
+    /iwin chargenocombat <toggle>               Use Charge, Intercept and Intervene if the target is not in combat.
+    /iwin chargewl <toggle>                     Use Charge, Intercept and Intervene if the target is whitelisted.
+    /iwin sunder <priority>                     Use Sunder Armor priority as DPS.
+    /iwin demo <toggle>                         Use Demoralizing Shout.
+    /iwin dtbattle <toggle>                     Use Battle stance with Defensive Tactics.
+    /iwin dtdefensive <toggle>                  Use Defensive stance with Defensive Tactics.
+    /iwin dtberserker <toggle>                  Use Berserker stance with Defensive Tactics.
+    /iwin ragebuffer <number>                   Save 100% required rage for spells X seconds before the spells are used.
+    /iwin ragegain <number>                     Initial rage per second estimate (seed for dynamic RLS tracking).
+    /iwin jousting <toggle>                     Use Hamstring to joust with target in solo DPS.
+    /iwin thunderclap <toggle>                  Use Thunder Clap.
+    /iwin overpower <toggle>                    Use Overpower.
+    /iwin berserkerrage <toggle>                Use Berserker Rage for rage generation.
+    /iwin rend <toggle>                         Use Rend.
 
 priority possible values: high, once, low, off.
 

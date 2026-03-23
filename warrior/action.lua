@@ -70,65 +70,6 @@ function IWin:BerserkerRageImmune()
 	end
 end
 
-function IWin:BloodFuryDPS()
-	local spell = "Blood Fury"
-	if not IWin:IsBoss() or IWin:IsBlacklistCooldownMelee() then return end
-	if UnitRace("player") ~= "Orc" then return end
-	if IWin:GetTime(false) - IWin_RotationVar["combatStart"] <= 10 then return end
-	if IWin:IsSpellSkip(spell, nil, true, IWin_Settings["GCD"], true) then return end
-	local ttd = IWin:GetTimeToDie()
-	if ttd <= 15 then
-		IWin:Cast(spell)
-	elseif ttd > 120 then
-		IWin:Cast(spell)
-	end
-end
-
-function IWin:Bloodrage()
-	local spell = "Bloodrage"
-	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if not IWin:IsBuffActive("player", "Enrage")
-		and IWin:GetPower("player") < 70
-		and IWin:GetHealthPercent("player") > 25
-		and (
-					(
-						IWin:IsStanceActive("Defensive Stance")
-						and not IWin:IsInRange("Charge", "ranged")
-					)
-				or (
-					IWin:IsAffectingCombat("player")
-					and (
-							IWin:IsSpellLearnt("Mortal Strike")
-							or IWin:IsSpellLearnt("Bloodthirst")
-							or IWin:IsSpellLearnt("Shield Slam")
-							or IWin:GetTalentRank("Enrage") ~= 0
-							or IWin:GetGroupSize() > 1
-						)
-					)
-			) then
-				IWin:Cast(spell, false)
-	end
-end
-
-function IWin:BloodrageDPS()
-	local spell = "Bloodrage"
-	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if IWin:IsBoss() and not IWin:IsBlacklistCooldownMelee() then
-		if IWin:GetTime(false) - IWin_RotationVar["combatStart"] <= 10 then return end
-		local ttd = IWin:GetTimeToDie()
-		if ttd <= 11 and IWin:IsExecutePhase() then
-			IWin:Cast(spell, false)
-			return
-		elseif ttd <= 8 then
-			IWin:Cast(spell, false)
-			return
-		elseif ttd <= 60 then
-			return
-		end
-	end
-	IWin:Bloodrage()
-end
-
 function IWin:Bloodthirst(queueTime)
 	local spell = "Bloodthirst"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
@@ -164,6 +105,80 @@ function IWin:SetReservedRageBloodthirstHighAP()
 	if IWin:IsBoss() and IWin:GetTimeToDie() < IWin_Settings["GCD"] then return end
 	if IWin:IsHighAP(false) then 
 		IWin:SetReservedRage(spell, "cooldown")
+	end
+end
+
+function IWin:CastCDShortOffensiveGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Short Offensive CD with GCD")
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) or not IWin_CombatVar["queueGCD"] then return end
+	if (
+			IWin:IsExecutePhase()
+			or (
+					(
+						not IWin:IsSpellLearnt("Bloodthirst")
+						or IWin:GetCooldownRemaining("Bloodthirst") <= IWin_Settings["GCD"] * 2 + 0.5
+					) and (
+						not IWin:IsSpellLearnt("Mortal Strike")
+						or IWin:GetCooldownRemaining("Mortal Strike") <= IWin_Settings["GCD"] * 2 + 0.5
+					) and (
+						not IWin:IsSpellLearnt("Shield Slam")
+						or IWin:GetCooldownRemaining("Shield Slam") <= IWin_Settings["GCD"] * 2 + 0.5
+					)
+				)
+		) then
+			IWin:CastCDOffensive("Death Wish", skipWindowControl, true)
+	end
+	if not IWin:IsBuffActive("player", "Recklessness", nil, false) then IWin:CastCDOffensive("Perception", skipWindowControl, true) end
+end
+
+function IWin:CastCDShortOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Short Offensive CD with no GCD")
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) then return end
+	if not IWin:IsBuffActive("player", "Enrage")
+		and IWin:GetPower("player") < 50
+		and IWin:GetHealthPercent("player") > 25
+		and (
+					(
+						IWin:IsStanceActive("Defensive Stance")
+						and not IWin:IsInRange("Charge", "ranged")
+					)
+				or (
+					IWin:IsAffectingCombat("player")
+					and (
+							IWin:IsSpellLearnt("Mortal Strike")
+							or IWin:IsSpellLearnt("Bloodthirst")
+							or IWin:IsSpellLearnt("Shield Slam")
+							or IWin:GetTalentRank("Enrage") ~= 0
+							or IWin:GetGroupSize() > 1
+						)
+					)
+			) then
+				IWin:CastCDOffensive("Bloodrage", skipWindowControl)
+	end
+	IWin:CastCDOffensive("Blood Fury", skipWindowControl)
+	IWin:CastCDOffensive("Berserking", skipWindowControl)
+end
+
+function IWin:CastCDLongOffensiveGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Long Offensive CD with GCD")
+	if not skipTargetControl and not IWin:IsCDLongOffensiveTarget(true) or not IWin_CombatVar["queueGCD"] then return end
+	if IWin:GetHealthPercent("player") > 25
+		and (
+				IWin:IsExecutePhase()
+				or (
+						(
+							not IWin:IsSpellLearnt("Bloodthirst")
+							or IWin:GetCooldownRemaining("Bloodthirst") <= IWin_Settings["GCD"] + 0.5
+						) and (
+							not IWin:IsSpellLearnt("Mortal Strike")
+							or IWin:GetCooldownRemaining("Mortal Strike") <= IWin_Settings["GCD"] + 0.5
+						) and (
+							not IWin:IsSpellLearnt("Shield Slam")
+							or IWin:GetCooldownRemaining("Shield Slam") <= IWin_Settings["GCD"] + 0.5
+						)
+					)
+			) then
+				IWin:CastCDOffensive("Recklessness", skipWindowControl, true)
 	end
 end
 
@@ -237,20 +252,6 @@ function IWin:ConcussionBlow()
 	local spell = "Concussion Blow"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin_CombatVar["slamQueued"] then
-		IWin:Cast(spell)
-	end
-end
-
-function IWin:DeathWishDPS()
-	local spell = "Death Wish"
-	if not IWin:IsBoss() or IWin:IsBlacklistCooldownMelee() then return end
-	if IWin:GetTime(false) - IWin_RotationVar["combatStart"] <= 10 then return end
-	if IWin:IsSpellSkip(spell, nil, true, IWin_Settings["GCD"], true) then return end
-	if not IWin:IsRageAvailable(spell) then return end
-	local ttd = IWin:GetTimeToDie()
-	if ttd <= 30 then
-		IWin:Cast(spell)
-	elseif ttd > 180 then
 		IWin:Cast(spell)
 	end
 end
@@ -1247,22 +1248,22 @@ function IWin:ThunderClapDPS(range)
 end
 
 function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetControl)
-	IWin:Debug("+++ checking conditions: Consumable Offensive NoGCD")
-	if not skipTargetControl and not IWin:IsItemConsumableTarget(true) then return end
+	IWin:Debug("+++ checking conditions: Offensive Consumable with no GCD")
+	if not skipTargetControl and not IWin:IsItemConsumableOffensiveTarget(true) then return end
 	IWin:UseItemConsumableOffensive("Juju Flurry", skipWindowControl)
 	IWin:UseItemConsumableOffensive("Mighty Rage Potion", skipWindowControl)
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
 
 function IWin:UseItemTrinketOffensiveGCD(skipWindowControl, skipTargetControl)
-	IWin:Debug("+++ checking conditions: Trinket Offensive GCD")
-	if not skipTargetControl and not IWin:IsItemTrinketTarget(true) or not IWin_CombatVar["queueGCD"] then return end
+	IWin:Debug("+++ checking conditions: Offensive Trinket with GCD")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true) or not IWin_CombatVar["queueGCD"] then return end
 	IWin:UseItemTrinketOffensive("Diamond Flask", skipWindowControl, true)
 end
 
 function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
-	IWin:Debug("+++ checking conditions: Trinket Offensive NoGCD")
-	if not skipTargetControl and not IWin:IsItemTrinketTarget(true) then return end
+	IWin:Debug("+++ checking conditions: Offensive Trinket with no GCD")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true) then return end
 	IWin:UseItemTrinketOffensive("Badge of the Swarmguard", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Earthstrike", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Jom Gabbar", skipWindowControl)

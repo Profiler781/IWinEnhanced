@@ -116,16 +116,6 @@ function IWin:MarkSkull()
 	end
 end
 
-function IWin:Perception()
-	local spell = "Perception"
-	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if IWin:IsAffectingCombat("player", false)
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsGCDActive(false) then
-			IWin:Cast(spell)
-	end
-end
-
 function IWin:CancelPlayerBuff(spell)
 	local index = IWin:GetPlayerBuffIndex(spell)
 	if index then
@@ -136,6 +126,12 @@ end
 function IWin:CancelSalvation()
 	IWin:CancelPlayerBuff("Blessing of Salvation")
 	IWin:CancelPlayerBuff("Greater Blessing of Salvation")
+end
+
+function IWin:CastCDOffensive(spell, skipWindowControl, gcd)
+	if IWin:IsSpellSkip(spell, nil, gcd, queueTime, false) then return end
+	if not skipWindowControl and not IWin:IsDPSWindow(spell) then return end
+	IWin:Cast(spell, gcd)
 end
 
 function IWin:UseItem(item)

@@ -127,6 +127,8 @@ IWin_BlacklistCooldownMelee = {
 	-- Blackwing Lair
 	["Firemaw"] = true,
 	["Chromaggus"] = true,
+	-- Emerald Sanctum
+	["Solnius the Awakener"] = true,
 	-- Molten Core
 	["Baron Geddon"] = true,
 	["Ragnaros"] = true,
@@ -154,6 +156,8 @@ IWin_BlacklistCooldownRanged = {
 	-- Blackwing Lair
 	["Firemaw"] = true,
 	["Chromaggus"] = true,
+	-- Emerald Sanctum
+	["Solnius the Awakener"] = true,
 	-- Molten Core
 }
 
@@ -221,7 +225,7 @@ IWin_PowerType = {
 	[3] = "energy",
 }
 
-IWin_ItemCooldownDuration = {
+IWin_CooldownDuration = {
 	-- consumables
 	["Juju Flurry"] = 60,
 	["Mighty Rage Potion"] = 120,
@@ -239,9 +243,23 @@ IWin_ItemCooldownDuration = {
 	["Talisman of Ephemeral Power"] = 90,
 	["Zandalarian Hero Charm"] = 120,
 	["Zandalarian Hero Medallion"] = 120,
+	-- racials
+	["Berserking"] = 180,
+	["Blood Fury"] = 120,
+	["Perception"] = 180,
+	-- druid
+	["Berserk"] = 300,
+	-- rogue
+	["Adrenaline Rush"] = 180,
+	-- warrior
+	["Bloodrage"] = 60,
+	["Death Wish"] = 180,
+	["Recklessness"] = 1800,
+	["Retaliation"] = 1800,
+	["Shield Wall"] = 1800 - IWin:GetTalentRank("Shield Wall", false) * 300,
 }
 
-IWin_ItemBuffDuration = {
+IWin_BuffDuration = {
 	-- consumables
 	["Juju Flurry"] = 20,
 	["Mighty Rage Potion"] = 20,
@@ -259,4 +277,18 @@ IWin_ItemBuffDuration = {
 	["Talisman of Ephemeral Power"] = 15,
 	["Zandalarian Hero Charm"] = 20,
 	["Zandalarian Hero Medallion"] = 20,
+	-- racials
+	["Berserking"] = 10,
+	["Blood Fury"] = 15,
+	["Perception"] = 20,
+	-- druid
+	["Berserk"] = 20,
+	-- rogue
+	["Adrenaline Rush"] = 15,
+	-- warrior
+	["Bloodrage"] = 8,--enrage buff
+	["Death Wish"] = 30,
+	["Recklessness"] = 15,
+	["Retaliation"] = 15,
+	["Shield Wall"] = 10 + IWin:GetTalentRank("Shield Wall", false),
 }

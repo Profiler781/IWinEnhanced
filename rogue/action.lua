@@ -8,14 +8,6 @@ function IWin:InitializeRotation()
 	end
 end
 
-function IWin:AdrenalineRush()
-	local spell = "Adrenaline Rush"
-	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetPower("player") <= 60 then
-		IWin:Cast(spell)
-	end
-end
-
 function IWin:Ambush()
 	local spell = "Ambush"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
@@ -48,6 +40,24 @@ end
 
 function IWin:BladeFlurry()
 
+end
+
+function IWin:CastCDShortOffensiveGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Short Offensive CD with GCD")
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) or not IWin_CombatVar["queueGCD"] then return end
+	if IWin:GetPower("player") <= 60 then IWin:CastCDOffensive("Adrenaline Rush", skipWindowControl, true) end
+	IWin:CastCDOffensive("Perception", skipWindowControl, true)
+end
+
+function IWin:CastCDShortOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Short Offensive CD with no GCD")
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) then return end
+	IWin:CastCDOffensive("Blood Fury", skipWindowControl)
+	IWin:CastCDOffensive("Berserking", skipWindowControl)
+end
+
+function IWin:CastCDLongOffensiveGCD(skipWindowControl, skipTargetControl)
+	--none
 end
 
 function IWin:CheapShot()
@@ -367,7 +377,7 @@ end
 
 function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Consumable Offensive NoGCD")
-	if not skipTargetControl and not IWin:IsItemConsumableTarget(true) then return end
+	if not skipTargetControl and not IWin:IsItemConsumableOffensiveTarget(true) then return end
 	IWin:UseItemConsumableOffensive("Juju Flurry", skipWindowControl)
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
@@ -378,7 +388,7 @@ end
 
 function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Trinket Offensive NoGCD")
-	if not skipTargetControl and not IWin:IsItemTrinketTarget(true) then return end
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true) then return end
 	IWin:UseItemTrinketOffensive("Badge of the Swarmguard", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Earthstrike", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Jom Gabbar", skipWindowControl)

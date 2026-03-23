@@ -21,7 +21,6 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["energyPerSecondPrediction"] == nil then IWin_Settings["energyPerSecondPrediction"] = 10 end
 		--setup
 		if IWin_Settings["frontShred"] == nil then IWin_Settings["frontShred"] = "off" end
-		if IWin_Settings["berserkCat"] == nil then IWin_Settings["berserkCat"] = "on" end
 		--init
 		IWin_RotationVar["lastMoonkinSpell"] = "Starfire"
 		IWin_RotationVar["lastMoonkinSpellTime"] = 0

@@ -1391,24 +1391,44 @@ function IWin:GetItemCountInBag(item, debugmsg)
 	return itemCount
 end
 
-function IWin:IsItemConsumableTarget(melee)
+function IWin:IsCDShortOffensiveTarget(melee)
 	if melee and (not IWin:IsInRange() or IWin:IsBlacklistCooldownMelee()) then return false end
 	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
-	local consumableSetting = IWin_Settings["consumable"]
-	if consumableSetting == "off" then return false end
-	if consumableSetting == "boss" and not IWin:IsBoss() then return false end
-	if consumableSetting == "elite" and not IWin:IsElite() then return false end
+	local CDShortOffensiveSetting = IWin_Settings["CDShortOffensive"]
+	if CDShortOffensiveSetting == "off" then return false end
+	if CDShortOffensiveSetting == "boss" and not IWin:IsBoss() then return false end
+	if CDShortOffensiveSetting == "elite" and not IWin:IsElite() then return false end
+	return true
+end
+
+function IWin:IsCDLongOffensiveTarget(melee)
+	if melee and (not IWin:IsInRange() or IWin:IsBlacklistCooldownMelee()) then return false end
+	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
+	local CDLongOffensiveSetting = IWin_Settings["CDLongOffensive"]
+	if CDLongOffensiveSetting == "off" then return false end
+	if CDLongOffensiveSetting == "boss" and not IWin:IsBoss() then return false end
+	if CDLongOffensiveSetting == "elite" and not IWin:IsElite() then return false end
+	return true
+end
+
+function IWin:IsItemConsumableOffensiveTarget(melee)
+	if melee and (not IWin:IsInRange() or IWin:IsBlacklistCooldownMelee()) then return false end
+	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
+	local consumableOffensiveSetting = IWin_Settings["consumableOffensive"]
+	if consumableOffensiveSetting == "off" then return false end
+	if consumableOffensiveSetting == "boss" and not IWin:IsBoss() then return false end
+	if consumableOffensiveSetting == "elite" and not IWin:IsElite() then return false end
 	if IWin:IsTrainingDummy() then return false end
 	return true
 end
 
-function IWin:IsItemTrinketTarget(melee)
+function IWin:IsItemTrinketOffensiveTarget(melee)
 	if melee and (not IWin:IsInRange() or IWin:IsBlacklistCooldownMelee()) then return false end
 	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
-	local trinketSetting = IWin_Settings["trinket"]
-	if trinketSetting == "off" then return false end
-	if trinketSetting == "boss" and not IWin:IsBoss() then return false end
-	if trinketSetting == "elite" and not IWin:IsElite() then return false end
+	local trinketOffensiveSetting = IWin_Settings["trinketOffensive"]
+	if trinketOffensiveSetting == "off" then return false end
+	if trinketOffensiveSetting == "boss" and not IWin:IsBoss() then return false end
+	if trinketOffensiveSetting == "elite" and not IWin:IsElite() then return false end
 	return true
 end
 

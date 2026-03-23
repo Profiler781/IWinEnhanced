@@ -91,6 +91,24 @@ function IWin:CancelSnareReact()
 	end
 end
 
+function IWin:CastCDShortOffensiveGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Short Offensive CD with GCD")
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) or not IWin_CombatVar["queueGCD"] then return end
+	if IWin:IsStanceActive("Cat Form")
+		and IWin:GetPower("player") <= 50
+		and not IWin:IsBlacklistFear() then
+			IWin:CastCDOffensive("Berserk", skipWindowControl, true)
+	end
+end
+
+function IWin:CastCDShortOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	--none
+end
+
+function IWin:CastCDLongOffensiveGCD(skipWindowControl, skipTargetControl)
+	--none
+end
+
 function IWin:MarkOfTheWild()
 	local spell = "Mark of the Wild"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
@@ -141,7 +159,7 @@ end
 
 function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Consumable Offensive NoGCD")
-	if not skipTargetControl and not IWin:IsItemConsumableTarget(true) then return end
+	if not skipTargetControl and not IWin:IsItemConsumableOffensiveTarget(true) then return end
 	IWin:UseItemConsumableOffensive("Juju Flurry", skipWindowControl)
 	if IWin:GetPowerType("player") == "rage" then IWin:UseItemConsumableOffensive("Mighty Rage Potion", skipWindowControl) end
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
@@ -153,7 +171,7 @@ end
 
 function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Trinket Offensive NoGCD")
-	if not skipTargetControl and not IWin:IsItemTrinketTarget(true) then return end
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true) then return end
 	IWin:UseItemTrinketOffensive("Badge of the Swarmguard", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Earthstrike", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Jom Gabbar", skipWindowControl)
@@ -165,7 +183,7 @@ end
 
 function IWin:UseItemConsumableOffensiveNoGCDRanged(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Consumable Offensive NoGCD Ranged")
-	if not skipTargetControl and not IWin:IsItemConsumableTarget() then return end
+	if not skipTargetControl and not IWin:IsItemConsumableOffensiveTarget() then return end
 	IWin:UseItemConsumableOffensive("Juju Flurry", skipWindowControl)
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
@@ -176,7 +194,7 @@ end
 
 function IWin:UseItemTrinketOffensiveNoGCDRanged(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Trinket Offensive NoGCD Ranged")
-	if not skipTargetControl and  not IWin:IsItemTrinketTarget() then return end
+	if not skipTargetControl and  not IWin:IsItemTrinketOffensiveTarget() then return end
 	IWin:UseItemTrinketOffensive("Draconic Infused Emblem", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Talisman of Ephemeral Power", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Zandalarian Hero Charm", skipWindowControl)
@@ -342,17 +360,6 @@ function IWin:Swipe()
 end
 
 ---- Cat Actions ----
-function IWin:BerserkCat()
-	local spell = "Berserk"
-	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin_Settings["berserkCat"] == "on"
-		and IWin:IsAffectingCombat("player")
-		and IWin:GetPower("player") <= 50
-		and not IWin:IsBlacklistFear() then
-			IWin:Cast(spell)
-	end
-end
-
 function IWin:CatForm()
 	local spell = "Cat Form"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end

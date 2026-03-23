@@ -94,6 +94,20 @@ function IWin:BlessingOfWisdom()
 	end
 end
 
+function IWin:CastCDShortOffensiveGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Short Offensive CD with GCD")
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) or not IWin_CombatVar["queueGCD"] then return end
+	IWin:CastCDOffensive("Perception", skipWindowControl, true)
+end
+
+function IWin:CastCDShortOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	--none
+end
+
+function IWin:CastCDLongOffensiveGCD(skipWindowControl, skipTargetControl)
+	--none
+end
+
 function IWin:Cleanse()
 	local spell = "Cleanse"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
@@ -663,7 +677,7 @@ end
 
 function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Consumable Offensive NoGCD")
-	if not skipTargetControl and not IWin:IsItemConsumableTarget(true) then return end
+	if not skipTargetControl and not IWin:IsItemConsumableOffensiveTarget(true) then return end
 	IWin:UseItemConsumableOffensive("Juju Flurry", skipWindowControl)
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
@@ -674,7 +688,7 @@ end
 
 function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Trinket Offensive NoGCD")
-	if not skipTargetControl and not IWin:IsItemTrinketTarget(true) then return end
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true) then return end
 	IWin:UseItemTrinketOffensive("Badge of the Swarmguard", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Draconic Infused Emblem", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Earthstrike", skipWindowControl)
