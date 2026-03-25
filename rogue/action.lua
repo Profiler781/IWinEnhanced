@@ -8,14 +8,6 @@ function IWin:InitializeRotation()
 	end
 end
 
-function IWin:AdrenalineRush()
-	local spell = "Adrenaline Rush"
-	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetPower("player") <= 60 then
-		IWin:Cast(spell)
-	end
-end
-
 function IWin:Ambush()
 	local spell = "Ambush"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
@@ -48,6 +40,24 @@ end
 
 function IWin:BladeFlurry()
 
+end
+
+function IWin:CastCDShortOffensiveGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Short Offensive CD with GCD")
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) or not IWin_CombatVar["queueGCD"] then return end
+	if IWin:GetPower("player") <= 60 then IWin:CastCDOffensive("Adrenaline Rush", skipWindowControl, true) end
+	IWin:CastCDOffensive("Perception", skipWindowControl, true)
+end
+
+function IWin:CastCDShortOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Short Offensive CD with no GCD")
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) then return end
+	IWin:CastCDOffensive("Blood Fury", skipWindowControl)
+	IWin:CastCDOffensive("Berserking", skipWindowControl)
+end
+
+function IWin:CastCDLongOffensiveGCD(skipWindowControl, skipTargetControl)
+	--none
 end
 
 function IWin:CheapShot()
@@ -254,16 +264,14 @@ function IWin:Rupture()
 	local spell = "Rupture"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsMaxComboPoints()
+		and IWin:GetTalentRank("Taste for Blood") ~= 0
 		and (
 					(
 						not IWin:IsImmune("target", "bleed")
 						and IWin:GetTimeToDie() > IWin:GetRuptureDuration()
 						and IWin:GetBuffRemaining("target", "Rupture", "player") < 3
 					)
-				or (
-						IWin:GetBuffRemaining("player", "Taste for Blood") < 3
-						and IWin:GetTalentRank("Taste for Blood") ~= 0
-					)
+				or IWin:GetBuffRemaining("player", "Taste for Blood") < 3
 			)
 		and IWin:IsEnergyAvailable(spell) then
 			IWin:Cast(spell)
@@ -365,4 +373,27 @@ function IWin:SurpriseAttack()
 		and IWin:IsEnergyAvailable(spell) then
 			IWin:Cast(spell)
 	end
+end
+
+function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Consumable Offensive NoGCD")
+	if not skipTargetControl and not IWin:IsItemConsumableOffensiveTarget(true) then return end
+	IWin:UseItemConsumableOffensive("Juju Flurry", skipWindowControl)
+	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
+end
+
+function IWin:UseItemTrinketOffensiveGCD(skipWindowControl, skipTargetControl)
+	--none
+end
+
+function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Trinket Offensive NoGCD")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true) then return end
+	IWin:UseItemTrinketOffensive("Badge of the Swarmguard", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Earthstrike", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Jom Gabbar", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Kiss of the Spider", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Molten Emberstone", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Slayer's Crest", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Zandalarian Hero Medallion", skipWindowControl)
 end

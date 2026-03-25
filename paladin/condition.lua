@@ -1,17 +1,17 @@
 if UnitClass("player") ~= "Paladin" then return end
 
 function IWin:IsDPSWindow(cooldown)
-	if not IWin:IsInRange() then return false end
 	local ttd = IWin:GetTimeToDie()
+	local buffDuration = IWin_BuffDuration[cooldown]
 	--prevent waste
-	local minBuffLenght = IWin_ItemBuffDuration[cooldown] * 0.3
+	local minBuffLenght = buffDuration * 0.3
 	if ttd < minBuffLenght then return false end
 	--burst short fight
-	local lastDPSWindow = IWin_ItemBuffDuration[cooldown] + IWin_Settings["GCD"] * 2
+	local lastDPSWindow = buffDuration + IWin_Settings["GCD"] * 2
 	if ttd <= lastDPSWindow then return true end
 	--wait max output
-	if not IWin:IsBuffStack("player", "Vengeance", 3, nil, false) and IWin:GetTalentRank("Vengeance", false) then return false end
-	if not IWin:IsBuffStack("player", "Zeal", 3, nil, false) and IWin:GetTalentRank("Vengeful Strikes", false) then return false end
+	if not IWin:IsBuffStack("player", "Vengeance", 3, nil, false) and IWin:GetTalentRank("Vengeance", false) ~= 0 then return false end
+	if not IWin:IsBuffStack("player", "Zeal", 3, nil, false) and IWin:GetTalentRank("Vengeful Strikes", false) ~= 0 then return false end
 	--go
 	return true
 end

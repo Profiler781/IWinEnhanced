@@ -104,7 +104,7 @@ IWin_BlacklistKick = {
 	["Flamewaker Priest"] = true,
 }
 
-IWin_BlacklistCooldown = {
+IWin_BlacklistCooldownMelee = {
 	-- Karazhan
 	["Mephistroth"] = true,
 	["Blue Owl"] = true,
@@ -113,6 +113,52 @@ IWin_BlacklistCooldown = {
 	["Feugen"] = true,
 	["Stalagg"] = true,
 	["Noth the Plaguebringer"] = true,
+	["Heigan the Unclean"] = true,
+	["Loatheb"] = true,
+	["Gothik the Harvester"] = true,
+	["Thane Korth'azz"] = true,
+	["Lady Blaumeux"] = true,
+	["Highlord Mograine"] = true,
+	["Sir Zeliek"] = true,
+	["Sapphiron"] = true,
+	-- Ahn'Qiraj
+	["Emperor Vek'lor"] = true,
+	["Emperor Vek'nilash"] = true,
+	-- Blackwing Lair
+	["Firemaw"] = true,
+	["Chromaggus"] = true,
+	-- Emerald Sanctum
+	["Solnius the Awakener"] = true,
+	-- Molten Core
+	["Baron Geddon"] = true,
+	["Ragnaros"] = true,
+}
+
+IWin_BlacklistCooldownRanged = {
+	-- Karazhan
+	["Mephistroth"] = true,
+	["Blue Owl"] = true,
+	["Red Owl"] = true,
+	-- Naxxramas
+	["Feugen"] = true,
+	["Stalagg"] = true,
+	["Noth the Plaguebringer"] = true,
+	["Heigan the Unclean"] = true,
+	["Gothik the Harvester"] = true,
+	["Thane Korth'azz"] = true,
+	["Lady Blaumeux"] = true,
+	["Highlord Mograine"] = true,
+	["Sir Zeliek"] = true,
+	["Sapphiron"] = true,
+	-- Ahn'Qiraj
+	["Emperor Vek'lor"] = true,
+	["Emperor Vek'nilash"] = true,
+	-- Blackwing Lair
+	["Firemaw"] = true,
+	["Chromaggus"] = true,
+	-- Emerald Sanctum
+	["Solnius the Awakener"] = true,
+	-- Molten Core
 }
 
 IWin_BlacklistFear = {
@@ -179,7 +225,7 @@ IWin_PowerType = {
 	[3] = "energy",
 }
 
-IWin_ItemCooldownDuration = {
+IWin_CooldownDuration = {
 	-- consumables
 	["Juju Flurry"] = 60,
 	["Mighty Rage Potion"] = 120,
@@ -187,15 +233,33 @@ IWin_ItemCooldownDuration = {
 	-- trinkets
 	["Badge of the Swarmguard"] = 180,
 	["Diamond Flask"] = 240,
+	["Draconic Infused Emblem"] = 75,
 	["Earthstrike"] = 120,
 	["Jom Gabbar"] = 120,
 	["Kiss of the Spider"] = 120,
 	["Molten Emberstone"] = 120,
+	["Scrolls of Blinding Light"] = 300,
 	["Slayer's Crest"] = 120,
+	["Talisman of Ephemeral Power"] = 90,
+	["Zandalarian Hero Charm"] = 120,
 	["Zandalarian Hero Medallion"] = 120,
+	-- racials
+	["Berserking"] = 180,
+	["Blood Fury"] = 120,
+	["Perception"] = 180,
+	-- druid
+	["Berserk"] = 300,
+	-- rogue
+	["Adrenaline Rush"] = 180,
+	-- warrior
+	["Bloodrage"] = 60,
+	["Death Wish"] = 180,
+	["Recklessness"] = 1800,
+	["Retaliation"] = 1800,
+	["Shield Wall"] = 1800 - IWin:GetTalentRank("Shield Wall", false) * 300,
 }
 
-IWin_ItemBuffDuration = {
+IWin_BuffDuration = {
 	-- consumables
 	["Juju Flurry"] = 20,
 	["Mighty Rage Potion"] = 20,
@@ -203,10 +267,28 @@ IWin_ItemBuffDuration = {
 	-- trinkets
 	["Badge of the Swarmguard"] = 30,
 	["Diamond Flask"] = 60,
+	["Draconic Infused Emblem"] = 15,
 	["Earthstrike"] = 20,
 	["Jom Gabbar"] = 20,
 	["Kiss of the Spider"] = 15,
 	["Molten Emberstone"] = 20,
+	["Scrolls of Blinding Light"] = 20,
 	["Slayer's Crest"] = 20,
+	["Talisman of Ephemeral Power"] = 15,
+	["Zandalarian Hero Charm"] = 20,
 	["Zandalarian Hero Medallion"] = 20,
+	-- racials
+	["Berserking"] = 10,
+	["Blood Fury"] = 15,
+	["Perception"] = 20,
+	-- druid
+	["Berserk"] = 20,
+	-- rogue
+	["Adrenaline Rush"] = 15,
+	-- warrior
+	["Bloodrage"] = 8,--enrage buff
+	["Death Wish"] = 30,
+	["Recklessness"] = 15,
+	["Retaliation"] = 15,
+	["Shield Wall"] = 10 + IWin:GetTalentRank("Shield Wall", false),
 }

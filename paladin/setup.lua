@@ -33,6 +33,24 @@ function SlashCmdList.IWINPALADIN(command)
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: boss, elite, all, off.|r")
 				return
 		end
+	elseif arguments[1] == "cdshortoffensive" then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "boss"
+			and arguments[2] ~= "elite"
+			and arguments[2] ~= "all"
+			and arguments[2] ~= "off" then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: boss, elite, all, off.|r")
+				return
+		end
+	elseif arguments[1] == "cdlongoffensive" then
+		if arguments[2] ~= nil
+			and arguments[2] ~= "boss"
+			and arguments[2] ~= "elite"
+			and arguments[2] ~= "all"
+			and arguments[2] ~= "off" then
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: boss, elite, all, off.|r")
+				return
+		end
 	elseif arguments[1] == "judgement"then
 		if IWin.hasPallyPower then
 			DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Judgements are managed by your Pally Power.|r")
@@ -101,6 +119,12 @@ function SlashCmdList.IWINPALADIN(command)
 	elseif arguments[1] == "trinket" then
         if arguments[2] then IWin_Settings["trinket"] = arguments[2] end
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Trinkets target: |r" .. IWin_Settings["trinket"])
+	elseif arguments[1] == "cdshortoffensive" then
+        if arguments[2] then IWin_Settings["CDShortOffensive"] = arguments[2] end
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Short Offensive CDs target: |r" .. IWin_Settings["CDShortOffensive"])
+	elseif arguments[1] == "cdlongoffensive" then
+        if arguments[2] then IWin_Settings["CDLongOffensive"] = arguments[2] end
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Long Offensive CDs target: |r" .. IWin_Settings["CDLongOffensive"])
     elseif arguments[1] == "judgement" then
         if arguments[2] then IWin_Settings["judgement"] = arguments[2] end
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Judgement: |r" .. IWin_Settings["judgement"])
@@ -121,19 +145,21 @@ function SlashCmdList.IWINPALADIN(command)
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Seal of Command: |r" .. IWin_Settings["soc"])
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin : Current setup|r")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin:|r Current setup")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin debug [|r" .. IWin_Settings["debug"] .. "|cff0066ff]:|r Enable/disable debug.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin consumable [|r" .. IWin_Settings["consumable"] .. "|cff0066ff]:|r Use consumables on target.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin trinket [|r" .. IWin_Settings["trinket"] .. "|cff0066ff]:|r Use trinkets on target.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin cdshortoffensive [|r" .. IWin_Settings["CDShortOffensive"] .. "|cff0066ff]:|r Use short offensive CDs on target.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin cdlongoffensive [|r" .. IWin_Settings["CDLongOffensive"] .. "|cff0066ff]:|r Use long offensive CDs on target.")
 		if IWin.hasPallyPower then
 			DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Judgements managed by PallyPowerTW|r")
 		else
-			DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin judgement [" .. IWin_Settings["judgement"] .. "] : |r Use the Judgement to debuff target.")
+			DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin judgement [|r" .. IWin_Settings["judgement"] .. "|cff0066ff]:|r Use the Judgement to debuff target.")
 		end
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin wisdom [" .. IWin_Settings["wisdom"] .. "] : |r Use Seal of Wisdom debuff on target.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin crusader [" .. IWin_Settings["crusader"] .. "] : |r Use Seal of the Crusader debuff on target.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin light [" .. IWin_Settings["light"] .. "] : |r Use Seal of Light debuff on target.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin justice [" .. IWin_Settings["justice"] .. "] : |r Use Seal of Justice debuff on target.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin soc [" .. IWin_Settings["soc"] .. "] : |r Use Seal of Command over Seal of Righteousness.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin wisdom [|r" .. IWin_Settings["wisdom"] .. "|cff0066ff]:|r Use Seal of Wisdom debuff on target.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin crusader [|r" .. IWin_Settings["crusader"] .. "|cff0066ff]:|r Use Seal of the Crusader debuff on target.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin light [|r" .. IWin_Settings["light"] .. "|cff0066ff]:|r Use Seal of Light debuff on target.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin justice [|r" .. IWin_Settings["justice"] .. "|cff0066ff]:|r Use Seal of Justice debuff on target.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin soc [|r" .. IWin_Settings["soc"] .. "|cff0066ff]:|r Use Seal of Command over Seal of Righteousness.")
     end
 end

@@ -94,6 +94,20 @@ function IWin:BlessingOfWisdom()
 	end
 end
 
+function IWin:CastCDShortOffensiveGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Short Offensive CD with GCD")
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) or not IWin_CombatVar["queueGCD"] then return end
+	IWin:CastCDOffensive("Perception", skipWindowControl, true)
+end
+
+function IWin:CastCDShortOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	--none
+end
+
+function IWin:CastCDLongOffensiveGCD(skipWindowControl, skipTargetControl)
+	--none
+end
+
 function IWin:Cleanse()
 	local spell = "Cleanse"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
@@ -233,8 +247,17 @@ function IWin:HammerOfWrathRanged(manaPercent)
 	local spell = "Hammer of Wrath"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsInRange("Holy Strike")
-		and IWin:IsInRange(spell) then
-			IWin:HammerOfWrath(manaPercent)
+		and IWin:IsInRange(spell)
+		and IWin:IsExecutePhase()
+		and (
+				(
+					IWin:IsElite()
+					and IWin:GetPowerPercent("player") > manaPercent
+				)
+				or IWin:IsPVP("target")
+			)
+		and not IWin:IsMoving() then
+			IWin:Cast(spell)
 	end
 end
 
@@ -650,4 +673,31 @@ function IWin:ShadowResistanceAura()
 		and PallyPower_AuraAssignments[IWin:GetName("player", false)] == 3 then
 			IWin:Cast(spell)
 	end
+end
+
+function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Consumable Offensive NoGCD")
+	if not skipTargetControl and not IWin:IsItemConsumableOffensiveTarget(true) then return end
+	IWin:UseItemConsumableOffensive("Juju Flurry", skipWindowControl)
+	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
+end
+
+function IWin:UseItemTrinketOffensiveGCD(skipWindowControl, skipTargetControl)
+	--none
+end
+
+function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Trinket Offensive NoGCD")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true) then return end
+	IWin:UseItemTrinketOffensive("Badge of the Swarmguard", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Draconic Infused Emblem", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Earthstrike", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Jom Gabbar", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Kiss of the Spider", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Molten Emberstone", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Scrolls of Blinding Light", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Slayer's Crest", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Talisman of Ephemeral Power", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Zandalarian Hero Charm", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Zandalarian Hero Medallion", skipWindowControl)
 end

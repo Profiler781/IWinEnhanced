@@ -116,16 +116,6 @@ function IWin:MarkSkull()
 	end
 end
 
-function IWin:Perception()
-	local spell = "Perception"
-	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
-	if IWin:IsAffectingCombat("player", false)
-		and IWin_CombatVar["queueGCD"]
-		and not IWin:IsGCDActive(false) then
-			IWin:Cast(spell)
-	end
-end
-
 function IWin:CancelPlayerBuff(spell)
 	local index = IWin:GetPlayerBuffIndex(spell)
 	if index then
@@ -138,6 +128,12 @@ function IWin:CancelSalvation()
 	IWin:CancelPlayerBuff("Greater Blessing of Salvation")
 end
 
+function IWin:CastCDOffensive(spell, skipWindowControl, gcd)
+	if IWin:IsSpellSkip(spell, nil, gcd, queueTime, false) then return end
+	if not skipWindowControl and not IWin:IsDPSWindow(spell) then return end
+	IWin:Cast(spell, gcd)
+end
+
 function IWin:UseItem(item)
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
@@ -145,6 +141,7 @@ function IWin:UseItem(item)
 			if itemName and strfind(itemName,item) then
 				local start, duration = GetContainerItemCooldown(bag, slot)
 				if start == 0 or duration == 0 then
+					IWin:Debug("=> Using: "..item)
 					UseContainerItem(bag, slot)
 					return
 				end
@@ -169,8 +166,8 @@ function IWin:UseItemDrink()
 	end
 end
 
-function IWin:UseItemConsumableDPS(item)
-	if not IWin:IsDPSWindow(item) then return end
+function IWin:UseItemConsumableOffensive(item, skipWindowControl)
+	if not skipWindowControl and not IWin:IsDPSWindow(item) then return end
 	IWin:UseItem(item)
 end
 
@@ -185,6 +182,7 @@ function IWin:UseItemTrinket(item, gcd)
 			local start, duration = GetInventoryItemCooldown("player", slot)
 			if start == 0 or duration == 0 or duration == 1.5 then
 				if gcd then IWin_CombatVar["queueGCD"] = false end
+				IWin:Debug("=> Using: "..item)
 				UseInventoryItem(slot)
 				return
 			end
@@ -192,8 +190,8 @@ function IWin:UseItemTrinket(item, gcd)
 	end
 end
 
-function IWin:UseItemTrinketDPS(item, gcd)
-	if not IWin:IsDPSWindow(item) then return end
+function IWin:UseItemTrinketOffensive(item, skipWindowControl, gcd)
+	if not skipWindowControl and not IWin:IsDPSWindow(item) then return end
 	IWin:UseItemTrinket(item, gcd)
 end
 
