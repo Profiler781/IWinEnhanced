@@ -5,6 +5,8 @@ IWin:RegisterEvent("PLAYER_REGEN_ENABLED")
 IWin:RegisterEvent("PLAYER_REGEN_DISABLED")
 IWin:RegisterEvent("PLAYER_ENTERING_WORLD")
 IWin:RegisterEvent("SPELLCAST_START")
+IWin:RegisterEvent("SPELLS_CHANGED")
+IWin:RegisterEvent("UNIT_INVENTORY_CHANGED")
 IWin:RegisterEvent("UNIT_RAGE_GUID")
 
 IWin:SetScript("OnEvent", function()
@@ -27,6 +29,7 @@ IWin:SetScript("OnEvent", function()
 		IWin_RLS = nil
 		IWin_RLS_lastRage = nil
 		IWin_RLS_lastValue = nil
+		IWin:UpdateSpellCost()
 	elseif event == "PLAYER_ENTERING_WORLD" then
 		if UnitAffectingCombat("player") then
 			IWin:ResetRageRLS()
@@ -43,6 +46,10 @@ IWin:SetScript("OnEvent", function()
 	elseif event == "SPELLCAST_START" and (arg1 == "Wrath" or arg1 == "Starfire") then
 		IWin_RotationVar["lastMoonkinSpell"] = arg1
 		IWin_RotationVar["lastMoonkinSpellTime"] = IWin:GetTime(false) + (arg2 / 1000)
+	elseif event == "SPELLS_CHANGED" then
+		IWin:UpdateSpellCost()
+	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" and not UnitAffectingCombat("player") then
+		IWin:UpdateSpellCost()
 	elseif event == "UNIT_RAGE_GUID" and arg2 == 1 and IWin_RLS_lastRage then
 		local currentRage = UnitMana("player")
 		local delta = currentRage - IWin_RLS_lastRage

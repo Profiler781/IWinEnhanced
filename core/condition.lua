@@ -339,12 +339,40 @@ end
 function IWin:GetGCDRemaining(debugmsg)
 	local cached = IWin_CombatVar["GCD"]
 	if cached ~= nil then return cached end
-	local info = GetCastInfo()
+    -- Get GCD remaining in seconds
+    local gcdRemaining = 0
+
+    -- Try Nampower API first (most accurate)
+    if CleveRoids.NampowerAPI and CleveRoids.NampowerAPI.GetGCDRemainingMs then
+        local gcdMs = CleveRoids.NampowerAPI.GetGCDRemainingMs()
+        if gcdMs and gcdMs > 0 then
+            gcdRemaining = gcdMs / 1000
+        end
+    else
+        -- Fallback: check the first spell in spellbook for GCD
+        -- GCD shows as cooldown <= 1.5s on any GCD-triggering spell
+        for i = 1, 200 do
+            local spellName = GetSpellName(i, BOOKTYPE_SPELL)
+            if not spellName then break end
+            local start, duration = GetSpellCooldown(i, BOOKTYPE_SPELL)
+            if start and duration and duration > 0 and duration <= 1.5 then
+                gcdRemaining = (start + duration) - GetTime()
+                if gcdRemaining < 0 then gcdRemaining = 0 end
+                break
+            end
+        end
+    end
+    if gcdRemaining ~= 0 then
+    	IWin_CombatVar["GCD"] = gcdRemaining
+		IWin:Debug("GCD remaining: "..tostring(gcdRemaining), debugmsg)
+		return gcdRemaining
+	end
+	--[[local info = GetCastInfo()
 	if info and info.gcdRemainingMs then
 		IWin_CombatVar["GCD"] = info.gcdRemainingMs
 		IWin:Debug("GCD remaining: "..tostring(IWin_CombatVar["GCD"]), debugmsg)
 		return IWin_CombatVar["GCD"]
-	end
+	end]]
 	IWin:Debug("GCD ready", debugmsg)
 	IWin_CombatVar["GCD"] = 0
 	return 0
@@ -749,7 +777,9 @@ function IWin:GetRageToReserve(spell, trigger, unit, debugmsg)
 	if ragePerSecond > 0 then
 		reservedRageTime = IWin_CombatVar["reservedRage"] / ragePerSecond
 	end
-	local timeToReserveRage = math.max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
+	local dynamicBuffer = ragePerSecond > 0 and (rageCost / ragePerSecond) or IWin_Settings["rageTimeToReserveBuffer"]
+	local timeToReserveRage = math.max(0, spellTriggerTime - dynamicBuffer - reservedRageTime)
+	--local timeToReserveRage = math.max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
 	if trigger == "partybuff" or IWin:IsSpellLearnt(spell, nil, false) then
 		local result = math.max(0, rageCost - ragePerSecond * timeToReserveRage)
 		IWin:Debug("Reserving rage for "..spell..": "..tostring(result), debugmsg)
@@ -813,7 +843,8 @@ function IWin:ResetRageRLS()
 	IWin_RLS = {
 		["startTime"] = GetTime(),
 		["totalRage"] = 0,
-		["lambda"] = 0.85,
+		["lambda"] = 0.8,
+		--["lambda"] = 0.85,
 		-- P matrix initialized to large values (high uncertainty)
 		["p11"] = 1000,
 		["p12"] = 0,
@@ -924,10 +955,18 @@ function IWin:IsInRange(spell, distance, unit, debugmsg)
 				return result
         	end
 	else
-		local result = IsSpellInRange(spell, unit) == 1
-		IWin:Debug("In range for "..unit.." with "..spell..": "..tostring(result), debugmsg)
-		IWin_CombatVar["inRange"][cacheKey] = result
-		return result
+		local spellId = GetSpellIdForName and GetSpellIdForName(spell)
+		if spellId and spellId ~= 0 then
+			local result = IsSpellInRange(spellId, unit) == 1
+			IWin:Debug("In range for "..unit.." with "..spell.." (id:"..spellId.."): "..tostring(result), debugmsg)
+			IWin_CombatVar["inRange"][cacheKey] = result
+			return result
+		else
+			local result = CheckInteractDistance(unit, 3) ~= nil
+			IWin:Debug("Fallback range for "..unit..": "..tostring(result), debugmsg)
+			IWin_CombatVar["inRange"][cacheKey] = result
+			return result
+		end
 	end
 end
 

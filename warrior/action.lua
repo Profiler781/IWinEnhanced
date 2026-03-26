@@ -234,20 +234,6 @@ function IWin:SetReservedRageCleave(range)
 end
 
 
-function IWin:CleavePreAttack(range)
-	local spell = "Cleave"
-	if IWin_Settings["preattack"] == "off" then return end
-	if IWin:IsBoss(false) then return end
-	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if IWin_CombatVar["swingAttackQueued"] then return end
-	if IWin:GetEnemyInFront(range) > 1
-		and IWin:GetPower("player", false) >= IWin:GetPreAttackMinRage(spell) then
-			IWin_CombatVar["swingAttackQueued"] = true
-			IWin_RotationVar["startAttackThrottle"] = IWin:GetTime(false) + 0.2
-			IWin:Cast(spell, false)
-	end
-end
-
 function IWin:ConcussionBlow()
 	local spell = "Concussion Blow"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
@@ -493,24 +479,6 @@ function IWin:SetReservedRageHeroicStrike(range)
 	end
 end
 
-function IWin:HeroicStrikePreAttack(range)
-	local spell = "Heroic Strike"
-	if IWin_Settings["preattack"] == "off" then return end
-	if IWin:IsBoss(false) then return end
-	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if IWin:IsExecutePhase(false) then return end
-	if IWin_CombatVar["swingAttackQueued"] then return end
-	if (
-			IWin:GetEnemyInRange(range) <= 1
-			or not IWin:IsSpellLearnt("Cleave")
-		)
-		and IWin:GetPower("player", false) >= IWin:GetPreAttackMinRage(spell) then
-			IWin_CombatVar["swingAttackQueued"] = true
-			IWin_RotationVar["startAttackThrottle"] = IWin:GetTime(false) + 0.2
-			IWin:Cast(spell, false)
-	end
-end
-
 function IWin:Intercept()
 	local spell = "Intercept"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
@@ -694,7 +662,7 @@ function IWin:Overpower()
 				and not IWin:IsStanceActive("Battle Stance")
 				and (
 						(
-							IWin:IsStanceSwapMaxRageLoss(25)
+							IWin:IsStanceSwapMaxRageLoss(25 + (IWin:IsWrathDPS3P() and 25 or 0))
 							and IWin:GetStanceSwapRageRetain() >= IWin_RageCost[spell]
 						)
 						or IWin:IsPVP("target")
@@ -1113,7 +1081,10 @@ end
 function IWin:SunderArmorDPSRefresh(timeLeft)
 	local spell = "Sunder Armor"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if not (IWin_Settings["sunder"] == "off")
+	if (
+			IWin_Settings["sunder"] == "low"
+			or IWin_Settings["sunder"] == "high"
+		)
 		and IWin:IsBuffActive("target", spell)
 		and IWin:GetBuffRemaining("target", spell) < timeLeft
 		and IWin:GetBuffRemaining("target", spell) < IWin:GetTimeToDie()
