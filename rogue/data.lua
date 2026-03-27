@@ -17,25 +17,46 @@ function IWin:GetHemorrhageCostReduction()
 	return IWin_HemorrhageCostReduction[rank]
 end
 
-IWin_EnergyCost = {
-	["Adrenaline Rush"] = 0,
-	["Ambush"] = 60,
-	["Backstab"] = 60,
-	["Blade Flurry"] = 25,
-	["Cheap Shot"] = 60 - IWin:GetTalentRank("Dirty Deeds", false) * 10,
-	["Deadly Throw"] = 40,
-	["Envenom"] = 20,
-	["Eviscerate"] = 30,
-	["Expose Armor"] = 20,
-	["Garrote"] = 50 - IWin:GetTalentRank("Dirty Deeds", false) * 10,
-	["Gouge"] = 45,
-	["Hemorrhage"] = 40 - IWin:GetHemorrhageCostReduction(),
-	["Kick"] = 25,
-	["Noxious Assault"] = 45,
-	["Riposte"] = 10,
-	["Rupture"] = 20,
-	["Shadow of Death"] = 30,
-	["Sinister Strike"] = 40,
-	["Slice and Dice"] = 20,
-	["Surprise Attack"] = 10,
-}
+function IWin:GetMadcap5P()
+	if CleveRoids and CleveRoids.CountEquippedSetItems then
+		if CleveRoids.CountEquippedSetItems(IWin_ItemSet["Madcap"]) >= 5 then
+			return 5
+		end
+	end
+	return 0
+end
+
+function IWin:GetVeiledShadows2P()
+	if CleveRoids and CleveRoids.CountEquippedSetItems then
+		if CleveRoids.CountEquippedSetItems(IWin_ItemSet["VeiledShadows"]) >= 2 then
+			return 10
+		end
+	end
+	return 0
+end
+
+function IWin:UpdateSpellCost()
+	local madcap5P = IWin:GetMadcap5P()
+	IWin_EnergyCost = {
+		["Adrenaline Rush"] = 0,
+		["Ambush"] = 60,
+		["Backstab"] = 60,
+		["Blade Flurry"] = 25,
+		["Cheap Shot"] = 60 - IWin:GetTalentRank("Dirty Deeds", false) * 10,
+		["Deadly Throw"] = 40,
+		["Envenom"] = 20,
+		["Eviscerate"] = 30 - madcap5P,
+		["Expose Armor"] = 20,
+		["Garrote"] = 50 - IWin:GetTalentRank("Dirty Deeds", false) * 10,
+		["Gouge"] = 45,
+		["Hemorrhage"] = 40 - IWin:GetHemorrhageCostReduction(),
+		["Kick"] = 25,
+		["Noxious Assault"] = 45,
+		["Riposte"] = 10,
+		["Rupture"] = 20 - madcap5P,
+		["Shadow of Death"] = 30,
+		["Sinister Strike"] = 40,
+		["Slice and Dice"] = 20 - IWin:GetVeiledShadows2P(),
+		["Surprise Attack"] = 10,
+	}
+end

@@ -54,7 +54,7 @@ IWin:SetScript("OnEvent", function()
 		IWin_RLS = nil
 		IWin_RLS_lastRage = nil
 		IWin_RLS_lastValue = nil
-		IWin:UpdateRageCosts()
+		IWin:UpdateSpellCost()
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS" then
 		if string.find(arg1,"blocked") then
 			IWin_RotationVar["revengeAvailable"] = IWin:GetTime(false) + 4
@@ -90,9 +90,9 @@ IWin:SetScript("OnEvent", function()
 			IWin_RotationVar["slamClipAllowedMin"] = st_timer + IWin:GetTime(false)
 		end
 	elseif event == "SPELLS_CHANGED" then
-		IWin:UpdateRageCosts()
+		IWin:UpdateSpellCost()
 	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" and not UnitAffectingCombat("player") then
-		IWin:UpdateRageCosts()
+		IWin:UpdateSpellCost()
 	elseif event == "UNIT_RAGE_GUID" and arg2 == 1 and IWin_RLS_lastRage then
 		local currentRage = UnitMana("player")
 		local delta = currentRage - IWin_RLS_lastRage
@@ -110,7 +110,7 @@ IWin:SetScript("OnUpdate", function()
 	if not IWin_RLS then return end
 	local gain = IWin_RLS_pendingGain or 0
 	IWin_RLS_pendingGain = 0
-	if gain > 0 then
+	if gain > 0 then --temporary skip
 		IWin:UpdateRageRLS(gain)
 	end
 end)

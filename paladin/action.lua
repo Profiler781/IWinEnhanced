@@ -146,12 +146,21 @@ end
 function IWin:CrusaderStrike(manaPercent, queueTime)
 	local spell = "Crusader Strike"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetPowerPercent("player") > manaPercent then
+		IWin:Cast(spell)
+	end
+end
+
+function IWin:CrusaderStrikeZeal(manaPercent, queueTime)
+	local spell = "Crusader Strike"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:GetPowerPercent("player") > manaPercent
+		and IWin:IsBuffActive("player","Zeal")
 		and (
-				IWin:GetBuffRemaining("player","Zeal") < 13
-				or IWin:GetPowerPercent("player") > 80
+				IWin:GetBuffRemaining("player","Zeal") < 9
+				or IWin:GetTimeToDie() < 9
 			) then
-				IWin:Cast(spell)
+			IWin:Cast(spell)
 	end
 end
 
@@ -382,7 +391,12 @@ function IWin:Judgement(manaPercent,queueTime)
 							)
 					)
 			)
-		and not IWin:IsGCDActive() then
+		and not IWin:IsGCDActive() --temporary fix
+		and st_timer > IWin_Settings["GCD"]
+		and (
+				not IWin:IsSpellLearnt("Holy Strike", nil, false)
+				or IWin:GetCooldownRemaining("Holy Strike") > IWin_Settings["GCD"]
+			) then
 			IWin:Cast(spell)
 	end
 end

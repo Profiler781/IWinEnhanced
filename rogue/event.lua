@@ -7,6 +7,8 @@ IWin:RegisterEvent("CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES")
 IWin:RegisterEvent("CHAT_MSG_COMBAT_SELF_MISSES")
 IWin:RegisterEvent("CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF")
 IWin:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE")
+IWin:RegisterEvent("SPELLS_CHANGED")
+IWin:RegisterEvent("UNIT_INVENTORY_CHANGED")
 
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
@@ -20,6 +22,7 @@ IWin:SetScript("OnEvent", function()
 		--init
 		IWin_RotationVar["riposteAvailable"] = 0
 		IWin_RotationVar["surpriseAttackAvailable"] = 0
+		IWin:UpdateSpellCost()
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES" then
 		if string_find(arg1,"parry") then
 			IWin_RotationVar["riposteAvailable"] = IWin:GetTime(false) + 4
@@ -32,5 +35,9 @@ IWin:SetScript("OnEvent", function()
 		if string_find(arg1,"dodged") then
 			IWin_RotationVar["surpriseAttackAvailable"] = IWin:GetTime(false) + 4
 		end
+	elseif event == "SPELLS_CHANGED" then
+		IWin:UpdateSpellCost()
+	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" and not UnitAffectingCombat("player") then
+		IWin:UpdateSpellCost()
 	end
 end)

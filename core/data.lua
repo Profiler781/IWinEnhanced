@@ -128,7 +128,9 @@ IWin_BlacklistCooldownMelee = {
 	["Firemaw"] = true,
 	["Chromaggus"] = true,
 	-- Emerald Sanctum
-	["Solnius the Awakener"] = true,
+	["Solnius"] = true,
+	-- Onyxia's Lair
+	["Onyxia"] = true,
 	-- Molten Core
 	["Baron Geddon"] = true,
 	["Ragnaros"] = true,
@@ -157,7 +159,9 @@ IWin_BlacklistCooldownRanged = {
 	["Firemaw"] = true,
 	["Chromaggus"] = true,
 	-- Emerald Sanctum
-	["Solnius the Awakener"] = true,
+	["Solnius"] = true,
+	-- Onyxia's Lair
+	["Onyxia"] = true,
 	-- Molten Core
 }
 
@@ -291,4 +295,21 @@ IWin_BuffDuration = {
 	["Recklessness"] = 15,
 	["Retaliation"] = 15,
 	["Shield Wall"] = 10 + IWin:GetTalentRank("Shield Wall", false),
+}
+
+IWin_ItemSet = {
+	-- druid
+	["CenarionFeral"] = { 47338, 47339, 47340, 47341, 47342, 47343, 47344, 47345 }, --T1
+	["StormrageFeral"] = { 47354, 47355, 47356, 47357, 47358, 47359, 47360, 47361 }, --T2
+	["GenesisFeral"] = { 47367, 47368, 47369, 47370, 47371 }, --T2.5
+	-- rogue
+	["Madcap"] = { 19835, 19834, 19836 }, --ZG TODO
+	["VeiledShadows"] = { 21406, 21404 }, --AQ Ruins TODO
+	-- warrior
+	["MightDPS"] = { 47240, 47241, 47242, 47243, 47244, 47245, 47246, 47247 }, --T1
+	["Vindicator"] = { 19822, 19824, 19823 }, --ZG TODO
+	["WrathDPS"] = { 47248, 47249, 47250, 47251, 47252, 47253, 47254, 47255 }, --T2
+	["UnyieldingStrength"] = { 21394, 21392 }, --AQ Ruins TODO
+	["DreadnaughtDPS"] = { 47261, 47262, 47263, 47264, 47265, 47266, 47267, 47268 }, --T3 TODO
+	["Brotherhood"] = { 47270, 47271, 47272, 47273, 47274, 47275 }, --T3.5
 }

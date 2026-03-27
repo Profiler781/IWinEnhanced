@@ -197,6 +197,20 @@ function SlashCmdList.IWINWARRIOR(command)
 	elseif arguments[1] == "rend" then
 	    if arguments[2] then IWin_Settings["rend"] = arguments[2] end
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Rend: |r" .. IWin_Settings["rend"])
+	elseif arguments[1] == "rageinfo" then
+	    local rps = IWin:GetRagePerSecond(false)
+	    local btCost = IWin_RageCost["Bloodthirst"] or 0
+	    local wwCost = IWin_RageCost["Whirlwind"] or 0
+	    local btBuffer = rps > 0 and (btCost / rps) or IWin_Settings["rageTimeToReserveBuffer"]
+	    local wwBuffer = rps > 0 and (wwCost / rps) or IWin_Settings["rageTimeToReserveBuffer"]
+	    local btCD = IWin:IsSpellLearnt("Bloodthirst", nil, false) and IWin:GetCooldownRemaining("Bloodthirst", false) or 0
+	    local wwCD = IWin:IsSpellLearnt("Whirlwind", nil, false) and IWin:GetCooldownRemaining("Whirlwind", false) or 0
+	    local btReserve = IWin:IsSpellLearnt("Bloodthirst", nil, false) and IWin:GetRageToReserve("Bloodthirst", "cooldown", nil, false) or 0
+	    local wwReserve = IWin:IsSpellLearnt("Whirlwind", nil, false) and IWin:GetRageToReserve("Whirlwind", "cooldown", nil, false) or 0
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Rage/sec: |r" .. string.format("%.1f", rps))
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff BT: |rcost " .. btCost .. " | buffer " .. string.format("%.2f", btBuffer) .. "s | CD " .. string.format("%.1f", btCD) .. "s | reserving " .. string.format("%.0f", btReserve))
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff WW: |rcost " .. wwCost .. " | buffer " .. string.format("%.2f", wwBuffer) .. "s | CD " .. string.format("%.1f", wwCD) .. "s | reserving " .. string.format("%.0f", wwReserve))
+	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Total reserved rage: |r" .. string.format("%.0f", IWin_CombatVar["reservedRage"] or 0))
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin:|r Current setup")
