@@ -1084,6 +1084,10 @@ function IWin:SunderArmorDPSRefresh(timeLeft)
 	if (
 			IWin_Settings["sunder"] == "low"
 			or IWin_Settings["sunder"] == "high"
+			or (
+					IWin_Settings["sunder"] == "once"
+					and not IWin_Target["sundered"]
+				)
 		)
 		and IWin:IsBuffActive("target", spell)
 		and IWin:GetBuffRemaining("target", spell) < timeLeft

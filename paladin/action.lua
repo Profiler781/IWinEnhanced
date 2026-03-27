@@ -392,12 +392,16 @@ function IWin:Judgement(manaPercent,queueTime)
 					)
 			)
 		and not IWin:IsGCDActive() --temporary fix
-		and st_timer > IWin_Settings["GCD"]
+		and (
+				not st_timer
+				or st_timer > IWin_Settings["GCD"]
+				or not IWin:Is2HanderEquipped()
+			)
 		and (
 				not IWin:IsSpellLearnt("Holy Strike", nil, false)
 				or IWin:GetCooldownRemaining("Holy Strike") > IWin_Settings["GCD"]
 			) then
-			IWin:Cast(spell)
+				IWin:Cast(spell)
 	end
 end
 

@@ -124,6 +124,26 @@ function IWin:GetBuffRemaining(unit, spell, owner, debugmsg)
 		    end
 		end
     end
+    -- Nampower aura slot scan
+	if unit == "player" and GetPlayerAuraDuration and GetSpellIdForName then
+		local targetSpellId = GetSpellIdForName(spell)
+		if targetSpellId and targetSpellId ~= 0 then
+			for slot = 0, 31 do
+				local spellId, remainingMs = GetPlayerAuraDuration(slot)
+				if spellId and spellId == targetSpellId then
+					local timeLeft = remainingMs / 1000
+					if timeLeft > 0 then
+						IWin:Debug("Nampower buff remaining "..spell.." on "..unit..": "..tostring(timeLeft), debugmsg)
+						IWin_CombatVar["buffRemaining"][cacheKey] = timeLeft
+						return timeLeft
+					else
+						IWin_CombatVar["buffRemaining"][cacheKey] = 9999
+						return 9999
+					end
+				end
+			end
+		end
+	end
     -- SCRM overflow buff scan
 		if CleveRoids and CleveRoids.OverflowBuffs then
 			for spellId, data in pairs(CleveRoids.OverflowBuffs) do
@@ -777,9 +797,7 @@ function IWin:GetRageToReserve(spell, trigger, unit, debugmsg)
 	if ragePerSecond > 0 then
 		reservedRageTime = IWin_CombatVar["reservedRage"] / ragePerSecond
 	end
-	local dynamicBuffer = ragePerSecond > 0 and (rageCost / ragePerSecond) or IWin_Settings["rageTimeToReserveBuffer"]
-	local timeToReserveRage = math.max(0, spellTriggerTime - dynamicBuffer - reservedRageTime)
-	--local timeToReserveRage = math.max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
+	local timeToReserveRage = math.max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
 	if trigger == "partybuff" or IWin:IsSpellLearnt(spell, nil, false) then
 		local result = math.max(0, rageCost - ragePerSecond * timeToReserveRage)
 		IWin:Debug("Reserving rage for "..spell..": "..tostring(result), debugmsg)
@@ -844,7 +862,6 @@ function IWin:ResetRageRLS()
 		["startTime"] = GetTime(),
 		["totalRage"] = 0,
 		["lambda"] = 0.8,
-		--["lambda"] = 0.85,
 		-- P matrix initialized to large values (high uncertainty)
 		["p11"] = 1000,
 		["p12"] = 0,
@@ -857,12 +874,12 @@ end
 
 function IWin:GetRagePerSecond(debugmsg)
 	if IWin_RLS then
-		local result = math.max(0, IWin_RLS["w1"])
+		local result = math.max(IWin_Settings["ragePerSecondPrediction"], IWin_RLS["w1"])
 		IWin:Debug("Dynamic rage per second: "..tostring(result), debugmsg)
 		return result
 	end
 	if IWin_RLS_lastValue then
-		local result = math.max(0, IWin_RLS_lastValue)
+		local result = math.max(IWin_Settings["ragePerSecondPrediction"], IWin_RLS_lastValue)
 		IWin:Debug("Last combat rage per second: "..tostring(result), debugmsg)
 		return result
 	end

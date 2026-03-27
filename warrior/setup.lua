@@ -208,8 +208,6 @@ function SlashCmdList.IWINWARRIOR(command)
 	    local btReserve = IWin:IsSpellLearnt("Bloodthirst", nil, false) and IWin:GetRageToReserve("Bloodthirst", "cooldown", nil, false) or 0
 	    local wwReserve = IWin:IsSpellLearnt("Whirlwind", nil, false) and IWin:GetRageToReserve("Whirlwind", "cooldown", nil, false) or 0
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Rage/sec: |r" .. string.format("%.1f", rps))
-	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff BT: |rcost " .. btCost .. " | buffer " .. string.format("%.2f", btBuffer) .. "s | CD " .. string.format("%.1f", btCD) .. "s | reserving " .. string.format("%.0f", btReserve))
-	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff WW: |rcost " .. wwCost .. " | buffer " .. string.format("%.2f", wwBuffer) .. "s | CD " .. string.format("%.1f", wwCD) .. "s | reserving " .. string.format("%.0f", wwReserve))
 	    DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Total reserved rage: |r" .. string.format("%.0f", IWin_CombatVar["reservedRage"] or 0))
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Usage:|r")
