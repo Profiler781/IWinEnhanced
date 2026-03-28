@@ -133,7 +133,6 @@ end
 
 function IWin:CastCDShortOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Short Offensive CD with no GCD")
-	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) then return end
 	if not IWin:IsBuffActive("player", "Enrage")
 		and IWin:GetPower("player") < 50
 		and IWin:GetHealthPercent("player") > 25
@@ -155,6 +154,7 @@ function IWin:CastCDShortOffensiveNoGCD(skipWindowControl, skipTargetControl)
 			) then
 				IWin:CastCDOffensive("Bloodrage", skipWindowControl)
 	end
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) then return end
 	IWin:CastCDOffensive("Blood Fury", skipWindowControl)
 	IWin:CastCDOffensive("Berserking", skipWindowControl)
 end
