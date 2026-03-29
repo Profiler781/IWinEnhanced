@@ -282,7 +282,7 @@ function IWin:HandOfReckoning()
 	local spell = "Hand of Reckoning"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsTanking()
-		--and not IWin:IsImmune("target", spell)
+		and not IWin:IsImmune("target", spell)
 		and not IWin:IsTaunted() then
 			IWin:Cast(spell)
 	end
@@ -718,4 +718,10 @@ function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:UseItemTrinketOffensive("Talisman of Ephemeral Power", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Zandalarian Hero Charm", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Zandalarian Hero Medallion", skipWindowControl)
+end
+
+function IWin:UseItemTrinketOffensivePrepull(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Offensive Trinket pre-pull")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true, true) then return end
+	IWin:UseItemTrinketOffensive("Gnomish Battle Chicken", skipWindowControl)
 end

@@ -2,8 +2,9 @@ if UnitClass("player") ~= "Druid" then return end
 
 SLASH_IBLASTDRUID1 = "/iblast"
 function SlashCmdList.IBLASTDRUID()
-	IWin:TargetEnemy()
 	IWin:InitializeRotation()
+	IWin:TargetEnemy()
+	IWin:UseItemTrinketOffensivePrepull(true)
 	IWin:StartAttack()
 	IWin:MarkOfTheWild()
 	IWin:Thorns()
@@ -23,8 +24,9 @@ end
 
 SLASH_IRUETOODRUID1 = "/iruetoo"
 function SlashCmdList.IRUETOODRUID()
-	IWin:TargetEnemy()
 	IWin:InitializeRotation()
+	IWin:TargetEnemy()
+	IWin:UseItemTrinketOffensivePrepull(true)
 	IWin:MarkOfTheWild()
 	IWin:Thorns()
 	IWin:BerserkFear()
@@ -56,10 +58,11 @@ end
 
 SLASH_ITANKDRUID1 = "/itank"
 function SlashCmdList.ITANKDRUID()
-	IWin:TargetEnemy()
 	IWin:InitializeRotation()
-	IWin:MarkSkull()
 	IWin:CancelSalvation()
+	IWin:TargetEnemy()
+	IWin:MarkSkull()
+	IWin:UseItemTrinketOffensivePrepull(true)
 	IWin:MarkOfTheWild()
 	IWin:Thorns()
 	IWin:BerserkFear()
@@ -87,10 +90,11 @@ end
 
 SLASH_IHODORDRUID1 = "/ihodor"
 function SlashCmdList.IHODORDRUID()
-	IWin:TargetEnemy()
 	IWin:InitializeRotation()
-	IWin:MarkSkull()
 	IWin:CancelSalvation()
+	IWin:TargetEnemy()
+	IWin:MarkSkull()
+	IWin:UseItemTrinketOffensivePrepull(true)
 	IWin:MarkOfTheWild()
 	IWin:Thorns()
 	IWin:BerserkFear()

@@ -890,7 +890,7 @@ end
 -- Energy #######################################################################################################################################
 function IWin:IsEnergyAvailable(spell, debugmsg)
 	local energyRequired = IWin_EnergyCost[spell] + IWin_CombatVar["reservedEnergy"]
-	local result = (IWin:GetPower("player", false) >= energyRequired) or IWin:IsBuffActive("player", "Clearcasting", nil, false) or (IWin:GetPower("player", false) > (100 - IWin_CombatVar["energyPerSecondPrediction"] * 2))
+	local result = (IWin:GetPower("player", false) >= energyRequired) or IWin:IsBuffActive("player", "Clearcasting", nil, false) or (IWin:GetPower("player", false) > (100 - IWin:GetEnergyPerSecond() * 2))
 	IWin:Debug("Energy available for "..spell..": "..tostring(result), debugmsg)
 	return result
 end
@@ -912,12 +912,12 @@ function IWin:GetEnergyToReserve(spell, trigger, unit, debugmsg)
 		spellTriggerTime = IWin:GetBuffRemaining(unit, spell, nil, false) or 0
 	end
 	local reservedEnergyTime = 0
-	if IWin_CombatVar["energyPerSecondPrediction"] > 0 then
-		reservedEnergyTime = IWin_CombatVar["reservedEnergy"] / IWin_CombatVar["energyPerSecondPrediction"]
+	if IWin:GetEnergyPerSecond() > 0 then
+		reservedEnergyTime = IWin_CombatVar["reservedEnergy"] / IWin:GetEnergyPerSecond()
 	end
 	local timeToReserveEnergy = math.max(0, spellTriggerTime - IWin_Settings["energyTimeToReserveBuffer"] - reservedEnergyTime)
 	if trigger == "partybuff" or IWin:IsSpellLearnt(spell, nil, false) then
-		local result = math.max(0, IWin_EnergyCost[spell] - IWin_CombatVar["energyPerSecondPrediction"] * timeToReserveEnergy)
+		local result = math.max(0, IWin_EnergyCost[spell] - IWin:GetEnergyPerSecond() * timeToReserveEnergy)
 		IWin:Debug("Reserving energy for "..spell..": "..tostring(result), debugmsg)
 		return result
 	end
@@ -1478,8 +1478,8 @@ function IWin:IsItemConsumableOffensiveTarget(melee)
 	return true
 end
 
-function IWin:IsItemTrinketOffensiveTarget(melee)
-	if melee and (not IWin:IsInRange() or IWin:IsBlacklistCooldownMelee()) then return false end
+function IWin:IsItemTrinketOffensiveTarget(melee, skipRangeControl)
+	if melee and ((not IWin:IsInRange() and not skipRangeControl) or IWin:IsBlacklistCooldownMelee()) then return false end
 	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
 	local trinketOffensiveSetting = IWin_Settings["trinketOffensive"]
 	if trinketOffensiveSetting == "off" then return false end

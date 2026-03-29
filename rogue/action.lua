@@ -38,8 +38,17 @@ function IWin:SetReservedEnergyBackstab()
 	end
 end
 
-function IWin:BladeFlurry()
-
+function IWin:BladeFlurry(range)
+	local spell = "Blade Flurry"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin_Settings["bladeFlurry"] == "off" then return end
+	if IWin:GetEnemyInRange(range) - (IWin:GetTimeToDie() < 4 and 1 or 0) > 1 then
+		if IWin:IsEnergyAvailable(spell) then
+			IWin:Cast(spell)
+		end
+	else
+		IWin:CancelPlayerBuff(spell)
+	end
 end
 
 function IWin:CastCDShortOffensiveGCD(skipWindowControl, skipTargetControl)
@@ -97,7 +106,12 @@ function IWin:Envenom()
 					)
 			)
 		and IWin:IsEnergyAvailable(spell) then
-			IWin:Cast(spell)
+			IWin_CombatVar["queueGCD"] = false
+			-- Energy pooling
+			if IWin:GetTimeToEnergyMax() < IWin_Settings["playerReactionDelay"]
+				or IWin:GetBuffRemaining("player", spell) < IWin_Settings["playerReactionDelay"] then
+					IWin:Cast(spell)
+			end
 	end
 end
 
@@ -158,7 +172,12 @@ function IWin:ExposeArmor()
 		and IWin:GetTimeToDie() > IWin:GetBuffRemaining("target", spell)
 		and IWin:GetBuffRemaining("target", spell, nil, false) < 3
 		and IWin:IsEnergyAvailable(spell) then
-			IWin:Cast(spell)
+			IWin_CombatVar["queueGCD"] = false
+			-- Energy pooling
+			if IWin:GetTimeToEnergyMax() < IWin_Settings["playerReactionDelay"]
+				or IWin:GetBuffRemaining("target", spell, nil, false) < IWin_Settings["playerReactionDelay"] then
+					IWin:Cast(spell)
+			end
 	end
 end
 
@@ -274,7 +293,13 @@ function IWin:Rupture()
 				or IWin:GetBuffRemaining("player", "Taste for Blood") < 3
 			)
 		and IWin:IsEnergyAvailable(spell) then
-			IWin:Cast(spell)
+			IWin_CombatVar["queueGCD"] = false
+			-- Energy pooling
+			if IWin:GetTimeToEnergyMax() < IWin_Settings["playerReactionDelay"]
+				or IWin:GetBuffRemaining("target", "Rupture", "player") < IWin_Settings["playerReactionDelay"]
+				or IWin:GetBuffRemaining("player", "Taste for Blood") < IWin_Settings["playerReactionDelay"] then
+					IWin:Cast(spell)
+			end
 	end
 end
 
@@ -340,7 +365,12 @@ function IWin:SliceAndDice()
 					)
 			)
 		and IWin:IsEnergyAvailable(spell) then
-			IWin:Cast(spell)
+			IWin_CombatVar["queueGCD"] = false
+			-- Energy pooling
+			if IWin:GetTimeToEnergyMax() < IWin_Settings["playerReactionDelay"]
+				or IWin:GetBuffRemaining("player", spell) < IWin_Settings["playerReactionDelay"] then
+					IWin:Cast(spell)
+			end
 	end
 end
 
@@ -369,7 +399,7 @@ function IWin:SurpriseAttack()
 	local spell = "Surprise Attack"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsSurpriseAttackAvailable()
-		and IWin:GetPower("player") < IWin:GetPowerMax("player") - IWin_CombatVar["energyPerSecondPrediction"] * 2
+		and IWin:GetTimeToEnergyMax() > IWin_Settings["GCDEnergy"]
 		and IWin:IsEnergyAvailable(spell) then
 			IWin:Cast(spell)
 	end
@@ -396,4 +426,10 @@ function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:UseItemTrinketOffensive("Molten Emberstone", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Slayer's Crest", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Zandalarian Hero Medallion", skipWindowControl)
+end
+
+function IWin:UseItemTrinketOffensivePrepull(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Offensive Trinket pre-pull")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true, true) then return end
+	IWin:UseItemTrinketOffensive("Gnomish Battle Chicken", skipWindowControl)
 end

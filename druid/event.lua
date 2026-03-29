@@ -6,6 +6,7 @@ IWin:RegisterEvent("PLAYER_REGEN_DISABLED")
 IWin:RegisterEvent("PLAYER_ENTERING_WORLD")
 IWin:RegisterEvent("SPELLCAST_START")
 IWin:RegisterEvent("SPELLS_CHANGED")
+IWin:RegisterEvent("UNIT_ENERGY")
 IWin:RegisterEvent("UNIT_INVENTORY_CHANGED")
 IWin:RegisterEvent("UNIT_RAGE_GUID")
 
@@ -20,10 +21,12 @@ IWin:SetScript("OnEvent", function()
 		if IWin_Settings["ragePerSecondPrediction"] == nil then IWin_Settings["ragePerSecondPrediction"] = 10 end
 		--eneregy
 		if IWin_Settings["energyTimeToReserveBuffer"] == nil then IWin_Settings["energyTimeToReserveBuffer"] = 0 end
-		if IWin_Settings["energyPerSecondPrediction"] == nil then IWin_Settings["energyPerSecondPrediction"] = 10 end
 		--setup
 		if IWin_Settings["frontShred"] == nil then IWin_Settings["frontShred"] = "off" end
 		--init
+		IWin_RotationVar["energyLastTick"] = UnitMana("player")
+		IWin_RotationVar["energyNextTickTime"] = 0
+		IWin_RotationVar["energyNextTickTimeTF"] = 0
 		IWin_RotationVar["lastMoonkinSpell"] = "Starfire"
 		IWin_RotationVar["lastMoonkinSpellTime"] = 0
 		IWin_RLS = nil
@@ -48,6 +51,18 @@ IWin:SetScript("OnEvent", function()
 		IWin_RotationVar["lastMoonkinSpellTime"] = IWin:GetTime(false) + (arg2 / 1000)
 	elseif event == "SPELLS_CHANGED" then
 		IWin:UpdateSpellCost()
+	elseif event == "UNIT_ENERGY" and arg1 == "player" then
+		local currentEnergy = UnitMana("player")
+		local energyDelta = currentEnergy - IWin_RotationVar["energyLastTick"]
+		IWin_RotationVar["energyLastTick"] = currentEnergy
+		-- Natural tick
+		if energyDelta == 20 then
+			IWin_RotationVar["energyNextTickTime"] = IWin:GetTime(false) + IWin:GetEnergyTickTime(false)
+		end
+		-- Tiger's Fury tick
+		if energyDelta == 10 then
+			IWin_RotationVar["energyNextTickTimeTF"] = IWin:GetTime(false) + 3
+		end
 	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" and not UnitAffectingCombat("player") then
 		IWin:UpdateSpellCost()
 	elseif event == "UNIT_RAGE_GUID" and arg2 == 1 and IWin_RLS_lastRage then

@@ -32,3 +32,42 @@ function IWin:GetBleedCount(debugmsg)
 	IWin:Debug("Bleed count: "..tostring(result), debugmsg)
 	return result
 end
+
+function IWin:GetEnergyTickTime(debugmsg)
+	local result = IWin:IsBuffActive("player", "Berserk", nil, false) and 1 or 2
+	IWin:Debug("Energy tick time: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:GetEnergyTickTigersFury(debugmsg)
+	local result = IWin:IsBuffActive("player", "Tiger's Fury", nil, false) and 10 or 0
+	IWin:Debug("Energy tick Tiger's Fury: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:GetEnergyTickAncientBrutality(debugmsg)
+	local result = ((IWin:GetTalentRank("Ancient Brutality", false) == 2) and (IWin:GetBleedCount(false) * 5)) or 0
+	IWin:Debug("Energy tick Ancient Brutality: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:GetEnergyPerSecond(debugmsg)
+	local energyNatural = 20 / IWin:GetEnergyTickTime(false)
+	local energyTigersFury = IWin:GetEnergyTickTigersFury(false) / 3
+	local energyAncientBrutality = IWin:GetEnergyTickAncientBrutality(false) / 3
+	local result = energyNatural + energyTigersFury + energyAncientBrutality
+	IWin:Debug("Energy per second: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:GetTimeToEnergyMax(debugmsg)
+	local energyToMax = IWin:GetPowerMax("player", false) - IWin:GetPower("player", false) - IWin:GetEnergyTickTigersFury(false) - IWin:GetEnergyTickAncientBrutality(false)
+	if energyToMax <= 0 then
+		IWin:Debug("Time to maximum energy: 0", debugmsg)
+		return 0
+	end
+	local energyTicksToMax = math.floor(energyToMax / 20)
+	local result = IWin_RotationVar["energyNextTickTime"] + energyTicksToMax * IWin:GetEnergyTickTime(false)
+	IWin:Debug("Time to maximum energy: "..tostring(result), debugmsg)
+	return result
+end

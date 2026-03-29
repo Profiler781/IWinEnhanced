@@ -18,6 +18,7 @@ IWin_core:SetScript("OnEvent", function()
 		if IWin_Settings["CDLongOffensive"] == nil then IWin_Settings["CDLongOffensive"] = "boss" end
 		if IWin_Settings["GCD"] == nil then IWin_Settings["GCD"] = 1.5 end
 		if IWin_Settings["GCDEnergy"] == nil then IWin_Settings["GCDEnergy"] = 1 end
+		if IWin_Settings["playerReactionDelay"] == nil then IWin_Settings["playerReactionDelay"] = 0.5 end
 		--api
 		IWin.hasSuperwow = SetAutoloot and true or false
 		IWin.hasUnitXP = pcall(UnitXP, "nop", "nop") and true or false

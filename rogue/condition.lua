@@ -49,3 +49,21 @@ function IWin:GetRuptureDuration(debugmsg)
 	IWin:Debug("Rupture full duration: "..tostring(result), debugmsg)
 	return result
 end
+
+function IWin:GetEnergyPerSecond(debugmsg)
+	local result = IWin_RotationVar["energyTick"] / IWin_RotationVar["energyTickTime"]
+	IWin:Debug("Energy per second: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:GetTimeToEnergyMax(debugmsg)
+	local energyToMax = IWin:GetPowerMax("player", false) - IWin:GetPower("player", false)
+	if energyToMax == 0 then
+		IWin:Debug("Time to maximum energy: 0", debugmsg)
+		return 0
+	end
+	local energyTicksToMax = math.floor(energyToMax / IWin_RotationVar["energyTick"])
+	local result = IWin_RotationVar["energyNextTickTime"] + energyTicksToMax * IWin_RotationVar["energyTickTime"]
+	IWin:Debug("Time to maximum energy: "..tostring(result), debugmsg)
+	return result
+end

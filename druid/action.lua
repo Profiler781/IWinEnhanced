@@ -181,6 +181,12 @@ function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:UseItemTrinketOffensive("Zandalarian Hero Medallion", skipWindowControl)
 end
 
+function IWin:UseItemTrinketOffensivePrepull(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Offensive Trinket pre-pull")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true, true) then return end
+	IWin:UseItemTrinketOffensive("Gnomish Battle Chicken", skipWindowControl)
+end
+
 function IWin:UseItemConsumableOffensiveNoGCDRanged(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Consumable Offensive NoGCD Ranged")
 	if not skipTargetControl and not IWin:IsItemConsumableOffensiveTarget() then return end
@@ -200,12 +206,18 @@ function IWin:UseItemTrinketOffensiveNoGCDRanged(skipWindowControl, skipTargetCo
 	IWin:UseItemTrinketOffensive("Zandalarian Hero Charm", skipWindowControl)
 end
 
+function IWin:UseItemTrinketOffensivePrepullRanged(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Offensive Trinket pre-pull Ranged")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(false, true) then return end
+	IWin:UseItemTrinketOffensive("Gnomish Battle Chicken", skipWindowControl)
+end
+
 ---- Feral Actions ----
 function IWin:FaerieFireFeral()
 	local spell = "Faerie Fire (Feral)"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsBuffActive("target", spell)
-		--and not IWin:IsImmune("target", "Faerie Fire (Feral)")
+		and not IWin:IsImmune("target", "Faerie Fire (Feral)")
 		and (
 				IWin:IsStanceActive("Cat Form")
 				or IWin:IsStanceActive("Bear Form")
@@ -220,7 +232,7 @@ function IWin:FaerieFireFeralRefresh()
 	local spell = "Faerie Fire (Feral)"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:GetBuffRemaining("target", spell) < 10
-		--and not IWin:IsImmune("target", "Faerie Fire (Feral)")
+		and not IWin:IsImmune("target", "Faerie Fire (Feral)")
 		and (
 				IWin:IsStanceActive("Cat Form")
 				or IWin:IsStanceActive("Bear Form")
@@ -235,7 +247,7 @@ function IWin:FaerieFireFeralRanged()
 	local spell = "Faerie Fire (Feral)"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsInRange()
-		--and not IWin:IsImmune("target", "Faerie Fire (Feral)")
+		and not IWin:IsImmune("target", "Faerie Fire (Feral)")
 		and (
 				IWin:IsStanceActive("Cat Form")
 				or IWin:IsStanceActive("Bear Form")
@@ -326,7 +338,7 @@ function IWin:Growl()
 	local spell = "Growl"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsTanking()
-		--and not IWin:IsImmune("target", "Growl")
+		and not IWin:IsImmune("target", "Growl")
 		and not IWin:IsTaunted() then
 			IWin:Cast(spell)
 	end
@@ -383,11 +395,22 @@ function IWin:FerociousBite()
 			IWin:GetComboPoints() == 5
 			or (
 					IWin:GetTimeToDie() < 3
-					and GetComboPoints() >= 3
+					and GetComboPoints(false) >= 3
 				)
 		)
 		and IWin:IsEnergyAvailable(spell) then
-			IWin:Cast(spell)
+			IWin_CombatVar["queueGCD"] = false
+			-- Energy pooling
+			if IWin:GetTalentRank("Carnage") ~= 2
+				or (
+						IWin:GetBuffRemaining("target", "Rake", "player") < IWin_Settings["playerReactionDelay"]
+						and not IWin:IsImmune("target", "bleed")
+					)
+				or IWin_RotationVar["energyNextTickTime"] - IWin:GetTime() < IWin_Settings["playerReactionDelay"]
+				or IWin:GetTimeToEnergyMax() < IWin_Settings["playerReactionDelay"]
+				or IWin:GetTimeToDie(false) < 3 then
+					IWin:Cast(spell)
+			end
 	end
 end
 
@@ -440,7 +463,18 @@ function IWin:Rake()
 		and IWin:GetTimeToDie() > 9
 		and not IWin:IsImmune("target", "bleed")
 		and IWin:IsEnergyAvailable(spell) then
-			IWin:Cast(spell)
+			IWin_CombatVar["queueGCD"] = false
+			-- Energy pooling
+			if IWin:GetTalentRank("Carnage") ~= 2
+				or IWin:GetComboPoints() < 4
+				or not IWin:IsBuffActive("target", "Rip", "player")
+				or (
+						IWin:GetEnergyToReserve("Ferocious Bite", "nocooldown") == IWin_EnergyCost["Ferocious Bite"]
+						and IWin_RotationVar["energyNextTickTime"] - IWin:GetTime() < IWin_Settings["playerReactionDelay"]
+					)
+				or IWin:GetTimeToEnergyMax() < IWin_Settings["playerReactionDelay"] then
+					IWin:Cast(spell)
+			end
 	end
 end
 

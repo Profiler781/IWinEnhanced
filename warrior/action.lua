@@ -448,7 +448,6 @@ end
 function IWin:HeroicStrike(range)
 	local spell = "Heroic Strike"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if IWin:IsExecutePhase(false) then return end
 	if IWin_CombatVar["swingAttackQueued"] then return end
 	if (
 			IWin:GetEnemyInRange(range) <= 1
@@ -628,7 +627,7 @@ function IWin:MockingBlow()
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsTanking()
 		and IWin:IsOnCooldown("Taunt")
-		--and not IWin:IsImmune("target", "Mocking Blow")
+		and not IWin:IsImmune("target", "Mocking Blow")
 		and not IWin:IsTaunted() then
 			if not IWin:IsStanceActive("Battle Stance") then
 				IWin:Cast("Battle Stance", false)
@@ -1184,7 +1183,7 @@ function IWin:Taunt()
 	local spell = "Taunt"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsTanking()
-		--and not IWin:IsImmune("target", "Taunt")
+		and not IWin:IsImmune("target", "Taunt")
 		and not IWin:IsTaunted() then
 			if not IWin:IsStanceActive("Defensive Stance") then
 				IWin:Cast("Defensive Stance", false)
@@ -1246,6 +1245,12 @@ function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:UseItemTrinketOffensive("Molten Emberstone", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Slayer's Crest", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Zandalarian Hero Medallion", skipWindowControl)
+end
+
+function IWin:UseItemTrinketOffensivePrepull(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Offensive Trinket pre-pull")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true, true) then return end
+	IWin:UseItemTrinketOffensive("Gnomish Battle Chicken", skipWindowControl)
 end
 
 function IWin:Whirlwind(queueTime, range)
