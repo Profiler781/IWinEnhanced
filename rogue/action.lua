@@ -307,16 +307,14 @@ function IWin:SetReservedEnergyRupture()
 	local spell = "Rupture"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
 	if IWin:IsMaxComboPoints(false)
+		and IWin:GetTalentRank("Taste for Blood", false) ~= 0
 		and (
 					(
 						not IWin:IsImmune("target", "bleed", false)
 						and IWin:GetTimeToDie(false) > IWin:GetRuptureDuration(false)
 						and IWin:GetBuffRemaining("target", "Rupture", "player", false) < 3
 					)
-				or (
-						IWin:GetBuffRemaining("player", "Taste for Blood", nil, false) < 3
-						and IWin:GetTalentRank("Taste for Blood", false) ~= 0
-					)
+				or IWin:GetBuffRemaining("player", "Taste for Blood", nil, false) < 3
 			) then
 				IWin:SetReservedEnergy(spell, "nocooldown")
 	end
