@@ -1478,6 +1478,17 @@ function IWin:IsItemConsumableOffensiveTarget(melee)
 	return true
 end
 
+function IWin:IsItemConsumableAOEOffensiveTarget(melee)
+	if melee and (not IWin:IsInRange() or IWin:IsBlacklistCooldownMelee()) then return false end
+	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
+	local consumableAOEOffensiveSetting = IWin_Settings["consumableAOEOffensive"]
+	if consumableAOEOffensiveSetting == "off" then return false end
+	if consumableAOEOffensiveSetting == "boss" and not IWin:IsBoss() then return false end
+	if consumableAOEOffensiveSetting == "elite" and not IWin:IsElite() then return false end
+	if IWin:IsTrainingDummy() then return false end
+	return true
+end
+
 function IWin:IsItemTrinketOffensiveTarget(melee, skipRangeControl)
 	if melee and ((not IWin:IsInRange() and not skipRangeControl) or IWin:IsBlacklistCooldownMelee()) then return false end
 	if not melee and IWin:IsBlacklistCooldownRanged() then return false end

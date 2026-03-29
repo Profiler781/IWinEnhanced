@@ -94,6 +94,7 @@ function IWin:Envenom()
 	if IWin:GetComboPoints() < 3
 		and IWin:GetComboPoints(false) > 0
 		and IWin:GetBuffRemaining("player", spell) < 3
+		and IWin:GetBuffRemaining("player", spell) <= IWin:GetBuffRemaining("player", "Slice and Dice")
 		and (
 				IWin:GetTimeToDie() > 6 --longer fight
 				or ( --solo will engage next fight
@@ -121,6 +122,7 @@ function IWin:SetReservedEnergyEnvenom()
 	if IWin:GetComboPoints(false) < 3
 		and IWin:GetComboPoints(false) > 0
 		and IWin:GetBuffRemaining("player", spell, nil, false) < 3
+		and IWin:GetBuffRemaining("player", spell, nil, false) <= IWin:GetBuffRemaining("player", "Slice and Dice", nil, false)
 		and (
 				IWin:GetTimeToDie(false) > 6 --longer fight
 				or ( --solo will engage next fight
@@ -410,6 +412,30 @@ function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetContr
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
 
+function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl, range)
+	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
+	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
+	if not IWin:IsBuffActive("player", "Fire Shield", nil, false)
+		and not IWin:IsImmune("target", "fire") then
+			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], range)
+	end
+end
+
+function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl, range)
+	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
+	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
+	if IWin:IsCreatureType("Undead")
+		and not IWin:IsImmune("target", "holy") then
+			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], range)
+	end
+	if not IWin:IsImmune("target", "fire") then
+		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], range)
+	end
+	if not IWin:IsImmune("target", "fire") then
+		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], range)
+	end
+end
+
 function IWin:UseItemTrinketOffensiveGCD(skipWindowControl, skipTargetControl)
 	--none
 end
@@ -423,6 +449,7 @@ function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:UseItemTrinketOffensive("Kiss of the Spider", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Molten Emberstone", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Slayer's Crest", skipWindowControl)
+	IWin:UseItemTrinketOffensive("Venomous Totem", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Zandalarian Hero Medallion", skipWindowControl)
 end
 

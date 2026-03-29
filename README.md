@@ -1,6 +1,6 @@
 # IWinEnhanced v2.4
 
-1-button rotation macros for Turtle Druids, Paladins and Warriors.
+1-button rotation macros for Turtle Druids, Paladins, Rogues and Warriors.
 
 Updated for Turtle WoW 1.18.1.
 
@@ -10,6 +10,7 @@ Contributors: Vlad/Goodnice - Tel'Abim, Jrc13245/Torio
 
 ## Latest features
 
+- /iconsumableaoe macro to use AOE Consumables. Minimum target setup per consumable.
 - Rogue module!
 - /iconsumable macro to use Consumables.
 - /itrinket macro to use Trinkets.
@@ -57,6 +58,11 @@ Optionnal Addons:
     /iwin                                       Current setup
     /iwin debug <toggle>                        Enable/disable debug.
     /iwin consumableoffensive <classification>  Use offensive consumables on target: Juju Flurry, Mighty Rage Potion, Potion of Quickness.
+    /iwin consumableaoe <classification>        Use AOE consumables on target: Oil of Immolation, Stratholme Holy Water, Goblin Sapper Charge, Dense Dynamite.
+    /iwin oilofimmolation <number>              Minimum targets for Oil of Immolation. 0 to disable.
+    /iwin holywater <number>                    Minimum targets for Stratholme Holy Water. 0 to disable.
+    /iwin sapper <number>                       Minimum targets for Goblin Sapper Charge. 0 to disable.
+    /iwin densedynamite <number>                Minimum targets for Dense Dynamite. 0 to disable.
     /iwin trinketoffensive <classification>     Use offensive trinkets on target.
     /iwin cdshortoffensive <classification>     Use short offensive CDs on target: Berserk.
     /iwin cdlongoffensive <classification>      Use long offensive CDs on target: N/A.
@@ -65,6 +71,8 @@ Optionnal Addons:
 toggle possible values: on, off.
 
 classification possible values: boss, elite, all, off.
+
+number possible values: 0 or more.
 
 Example: /iwin frontshred on
 => Use shred while in front of the target. You must strafe through the mob and spam the macro.
@@ -93,6 +101,11 @@ Example: /iwin frontshred on
     /iwin                                       Current setup
     /iwin debug <toggle>                        Enable/disable debug.
     /iwin consumableoffensive <classification>  Use offensive consumables on target: Juju Flurry, Potion of Quickness.
+    /iwin consumableaoe <classification>        Use AOE consumables on target: Oil of Immolation, Stratholme Holy Water, Goblin Sapper Charge, Dense Dynamite.
+    /iwin oilofimmolation <number>              Minimum targets for Oil of Immolation. 0 to disable.
+    /iwin holywater <number>                    Minimum targets for Stratholme Holy Water. 0 to disable.
+    /iwin sapper <number>                       Minimum targets for Goblin Sapper Charge. 0 to disable.
+    /iwin densedynamite <number>                Minimum targets for Dense Dynamite. 0 to disable.
     /iwin trinketoffensive <classification>     Use offensive trinkets on target.
     /iwin cdshortoffensive <classification>     Use short offensive CDs on target: Perception.
     /iwin cdlongoffensive <classification>      Use long offensive CDs on target: N/A.
@@ -110,6 +123,8 @@ socOption possible values: auto, on, off.
 classification possible values: boss, elite, all, off.
 
 toggle possible values: on, off.
+
+number possible values: 0 or more.
 
 Example: /iwin wisdom boss
 => Judge wisdom on boss if it's the selected judgement debuff.
@@ -131,12 +146,19 @@ Example: /iwin wisdom boss
     /iwin                                       Current setup
     /iwin debug <toggle>                        Enable/disable debug.
     /iwin consumableoffensive <classification>  Use offensive consumables on target: Juju Flurry, Potion of Quickness.
+    /iwin consumableaoe <classification>        Use AOE consumables on target: Oil of Immolation, Stratholme Holy Water, Goblin Sapper Charge, Dense Dynamite.
+    /iwin oilofimmolation <number>              Minimum targets for Oil of Immolation. 0 to disable.
+    /iwin holywater <number>                    Minimum targets for Stratholme Holy Water. 0 to disable.
+    /iwin sapper <number>                       Minimum targets for Goblin Sapper Charge. 0 to disable.
+    /iwin densedynamite <number>                Minimum targets for Dense Dynamite. 0 to disable.
     /iwin trinketoffensive <classification>     Use offensive trinkets on target.
     /iwin cdshortoffensive <classification>     Use short offensive CDs on target: Adrenaline Rush, Bloodfury, Berserking, Perception.
     /iwin cdlongoffensive <classification>      Use long offensive CDs on target: N/A.
     /iwin bladeflurry <toggle>                  Use Blade Flurry.
 
 toggle possible values: on, off.
+
+number possible values: 0 or more.
 
 Example: /iwin bladeflurry off
 => Does not toggle Blade Flurry.
@@ -165,6 +187,11 @@ Example: /iwin bladeflurry off
     /iwin                                       Current setup
     /iwin debug <toggle>                        Enable/disable debug.
     /iwin consumableoffensive <classification>  Use offensive consumables on target: Juju Flurry, Mighty Rage Potion, Potion of Quickness.
+    /iwin consumableaoe <classification>        Use AOE consumables on target: Oil of Immolation, Stratholme Holy Water, Goblin Sapper Charge, Dense Dynamite.
+    /iwin oilofimmolation <number>              Minimum targets for Oil of Immolation. 0 to disable.
+    /iwin holywater <number>                    Minimum targets for Stratholme Holy Water. 0 to disable.
+    /iwin sapper <number>                       Minimum targets for Goblin Sapper Charge. 0 to disable.
+    /iwin densedynamite <number>                Minimum targets for Dense Dynamite. 0 to disable.
     /iwin trinketoffensive <classification>     Use offensive trinkets on target.
     /iwin cdshortoffensive <classification>     Use short offensive CDs on target: Death Wish, Bloodfury, Berserking, Perception.
     /iwin cdlongoffensive <classification>      Use long offensive CDs on target: Recklessness.

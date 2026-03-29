@@ -165,6 +165,30 @@ function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetContr
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
 
+function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl, range)
+	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
+	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
+	if not IWin:IsBuffActive("player", "Fire Shield", nil, false)
+		and not IWin:IsImmune("target", "fire") then
+			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], range)
+	end
+end
+
+function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl, range)
+	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
+	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
+	if IWin:IsCreatureType("Undead")
+		and not IWin:IsImmune("target", "holy") then
+			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], range)
+	end
+	if not IWin:IsImmune("target", "fire") then
+		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], range)
+	end
+	if not IWin:IsImmune("target", "fire") then
+		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], range)
+	end
+end
+
 function IWin:UseItemTrinketOffensiveGCD(skipWindowControl, skipTargetControl)
 	--none
 end
@@ -321,8 +345,9 @@ end
 function IWin:Enrage()
 	local spell = "Enrage"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if IWin:GetPower("player") < 50 then
-		IWin:Cast(spell, false)
+	if IWin:GetPower("player") < 50
+		and not IWin:IsBuffActive("player", "Blood Frenzy") then
+			IWin:Cast(spell, false)
 	end
 end
 

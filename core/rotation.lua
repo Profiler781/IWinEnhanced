@@ -12,9 +12,11 @@ function SlashCmdList.INUKE()
 	IWin:UseItemConsumableOffensiveNoGCD(true, true)
 	IWin:UseItemTrinketOffensiveNoGCD(true, true)
 	IWin:CastCDShortOffensiveNoGCD(true, true)
+	IWin:UseItemConsumableAOEOffensiveNoGCD(true, true, "meleeAutoAttack")
 	IWin:UseItemTrinketOffensiveGCD(true, true)
 	IWin:CastCDShortOffensiveGCD(true, true)
 	IWin:CastCDLongOffensiveGCD(true, true)
+	IWin:UseItemConsumableAOEOffensiveGCD(true, true, "meleeAutoAttack")
 	IWin:StartAttack()
 end
 
@@ -23,6 +25,15 @@ function SlashCmdList.ICONSUMABLE()
 	IWin:InitializeRotation()
 	IWin:TargetEnemy()
 	IWin:UseItemConsumableOffensiveNoGCD(true, true)
+	IWin:StartAttack()
+end
+
+SLASH_ICONSUMABLEAOE1 = "/iconsumableaoe"
+function SlashCmdList.ICONSUMABLEAOE()
+	IWin:InitializeRotation()
+	IWin:TargetEnemy()
+	IWin:UseItemConsumableAOEOffensiveNoGCD(true, true, "meleeAutoAttack")
+	IWin:UseItemConsumableAOEOffensiveGCD(true, true, "meleeAutoAttack")
 	IWin:StartAttack()
 end
 
