@@ -18,7 +18,7 @@ IWin:SetScript("OnEvent", function()
 		--energy
 		if IWin_Settings["energyTimeToReserveBuffer"] == nil then IWin_Settings["energyTimeToReserveBuffer"] = 0 end
 		--setup
-		if IWin_Settings["bladeFlurry"] == nil then IWin_Settings["bladeFlurry"] = "on" end
+		if IWin_Settings["bladeFlurry"] == nil then IWin_Settings["bladeFlurry"] = "off" end
 		--init
 		IWin_RotationVar["energyLastTick"] = UnitMana("player")
 		IWin_RotationVar["energyNextTickTime"] = 0
