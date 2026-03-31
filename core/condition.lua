@@ -1001,7 +1001,7 @@ end
 
 -- range values: static number, meleeAutoAttack
 function IWin:GetEnemyInFront(range, debugmsg)
-	if staticReturn then return staticReturn end
+	if type(range) == "number" then return range end
 	local cached = IWin_CombatVar["enemyInFront"][range]
 	if cached ~= nil then
 		IWin:Debug("Enemies in front in "..tostring(range)..": "..tostring(cached), debugmsg)
