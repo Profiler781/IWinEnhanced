@@ -70,9 +70,6 @@ IWin_core:SetScript("OnEvent", function()
 			["name"] = {},
 			["pvp"] = {},
 		}
-	elseif event == "ADDON_LOADED" and (arg1 == "SuperCleveRoidMacros" or arg1 == "IWinEnhanced") then
-		IWin.libdebuff = CleveRoids and CleveRoids.libdebuff
-		IWin.API = CleveRoids and CleveRoids.NampowerAPI
 	elseif event == "PLAYER_ENTERING_WORLD" then
 		if UnitAffectingCombat("player") then
 			IWin_RotationVar["combatStart"] = GetTime()

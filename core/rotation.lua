@@ -12,11 +12,9 @@ function SlashCmdList.INUKE()
 	IWin:UseItemConsumableOffensiveNoGCD(true, true)
 	IWin:UseItemTrinketOffensiveNoGCD(true, true)
 	IWin:CastCDShortOffensiveNoGCD(true, true)
-	IWin:UseItemConsumableAOEOffensiveNoGCD(true, true, "meleeAutoAttack")
 	IWin:UseItemTrinketOffensiveGCD(true, true)
 	IWin:CastCDShortOffensiveGCD(true, true)
 	IWin:CastCDLongOffensiveGCD(true, true)
-	IWin:UseItemConsumableAOEOffensiveGCD(true, true, "meleeAutoAttack")
 	IWin:StartAttack()
 end
 

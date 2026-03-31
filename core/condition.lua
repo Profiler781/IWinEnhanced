@@ -84,7 +84,7 @@ function IWin:GetBuffRemaining(unit, spell, owner, debugmsg)
 	    end
 	end
 	for index = 1, 48 do
-	    local effect, _, _, _, _, _, timeLeft = IWin.libdebuff:UnitDebuff(unit, index, owner)
+	    local effect, _, _, _, _, _, timeLeft = CleveRoids.libdebuff:UnitDebuff(unit, index, owner)
 	    if effect and effect == spell then
 	    	timeLeft = timeLeft or 9999
 	    	IWin:Debug("Debuff remaining "..spell.." on "..unit..": "..tostring(timeLeft), debugmsg)
@@ -159,7 +159,7 @@ function IWin:GetBuffRemaining(unit, spell, owner, debugmsg)
 		end
     -- Debuff scan overflow as buff
 	for index = 1, 64 do
-	    local effect, _, _, _, _, _, timeLeft, caster = IWin.libdebuff:UnitBuff(unit, index)
+	    local effect, _, _, _, _, _, timeLeft, caster = CleveRoids.libdebuff:UnitBuff(unit, index)
 	    if not effect then break end
 	    if effect == spell and ((not owner) or (caster == owner)) then
 	    	IWin:Debug("Debuff overflow remaining "..spell.." on "..unit..": "..tostring(timeLeft or 9999), debugmsg)
@@ -187,16 +187,18 @@ function IWin:GetBuffStack(unit, spell, owner, debugmsg)
 		return cached
 	end
 	-- Nampower API
-	local _, _, stacks = IWin.API.FindUnitAuraInfo(unit, nil, string.lower(spell))
-	if stacks ~= nil then
-		stacks = stacks or 0
-		IWin:Debug("API Debuff "..spell.." stacks on "..unit..": "..tostring(stacks), debugmsg)
-		IWin_CombatVar["buffStack"][cacheKey] = stacks
-	    return stacks
+	if CleveRoids.NampowerAPI and CleveRoids.NampowerAPI.FindUnitAuraInfo then
+		local _, _, stacks = CleveRoids.NampowerAPI.FindUnitAuraInfo(unit, nil, string.lower(spell))
+		if stacks ~= nil then
+			stacks = stacks or 0
+			IWin:Debug("API Debuff "..spell.." stacks on "..unit..": "..tostring(stacks), debugmsg)
+			IWin_CombatVar["buffStack"][cacheKey] = stacks
+		    return stacks
+		end
 	end
 	-- Debuff scan
 	for index = 1, 16 do
-	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = IWin.libdebuff:UnitDebuff(unit, index)
+	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = CleveRoids.libdebuff:UnitDebuff(unit, index)
 	    if not effect then break end
 	    if effect == spell and ((not owner) or (caster == owner)) then
 	    	IWin:Debug("Debuff "..spell.." stacks on "..unit..": "..tostring(stacks), debugmsg)
@@ -238,7 +240,7 @@ function IWin:GetBuffStack(unit, spell, owner, debugmsg)
 		end
 	-- Debuff scan overflow as buff
 	for index = 1, 64 do
-	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = IWin.libdebuff:UnitBuff(unit, index)
+	    local effect, _, texture, stacks, dtype, duration, timeLeft, caster = CleveRoids.libdebuff:UnitBuff(unit, index)
 	    if not effect then break end
 	    if effect == spell and ((not owner) or (caster == owner)) then
 	    	IWin:Debug("Debuff overflow "..spell.." stacks on "..unit..": "..tostring(stacks), debugmsg)
