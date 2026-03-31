@@ -282,7 +282,7 @@ function IWin:HandOfReckoning()
 	local spell = "Hand of Reckoning"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsTanking()
-		--and not IWin:IsImmune("target", spell)
+		and not IWin:IsImmune("target", spell)
 		and not IWin:IsTaunted() then
 			IWin:Cast(spell)
 	end
@@ -392,12 +392,16 @@ function IWin:Judgement(manaPercent,queueTime)
 					)
 			)
 		and not IWin:IsGCDActive() --temporary fix
-		and st_timer > IWin_Settings["GCD"]
+		and (
+				not st_timer
+				or st_timer > IWin_Settings["GCD"]
+				or not IWin:Is2HanderEquipped()
+			)
 		and (
 				not IWin:IsSpellLearnt("Holy Strike", nil, false)
 				or IWin:GetCooldownRemaining("Holy Strike") > IWin_Settings["GCD"]
 			) then
-			IWin:Cast(spell)
+				IWin:Cast(spell)
 	end
 end
 
@@ -696,6 +700,30 @@ function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetContr
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
 
+function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl, range)
+	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
+	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
+	if not IWin:IsBuffActive("player", "Fire Shield", nil, false)
+		and not IWin:IsImmune("target", "fire") then
+			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], range)
+	end
+end
+
+function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl, range)
+	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
+	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
+	if IWin:IsCreatureType("Undead")
+		and not IWin:IsImmune("target", "holy") then
+			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], range)
+	end
+	if not IWin:IsImmune("target", "fire") then
+		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], range)
+	end
+	if not IWin:IsImmune("target", "fire") then
+		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], range)
+	end
+end
+
 function IWin:UseItemTrinketOffensiveGCD(skipWindowControl, skipTargetControl)
 	--none
 end
@@ -714,4 +742,10 @@ function IWin:UseItemTrinketOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:UseItemTrinketOffensive("Talisman of Ephemeral Power", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Zandalarian Hero Charm", skipWindowControl)
 	IWin:UseItemTrinketOffensive("Zandalarian Hero Medallion", skipWindowControl)
+end
+
+function IWin:UseItemTrinketOffensivePrepull(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Offensive Trinket pre-pull")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true, true) then return end
+	IWin:UseItemTrinketOffensive("Gnomish Battle Chicken", skipWindowControl)
 end

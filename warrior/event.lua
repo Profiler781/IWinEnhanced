@@ -14,7 +14,7 @@ IWin:RegisterEvent("PLAYER_ENTERING_WORLD")
 IWin:RegisterEvent("SPELLCAST_START")
 IWin:RegisterEvent("SPELLS_CHANGED")
 IWin:RegisterEvent("UNIT_INVENTORY_CHANGED")
-IWin:RegisterEvent("UNIT_RAGE_GUID")
+IWin:RegisterEvent("UNIT_RAGE")
 
 IWin:SetScript("OnEvent", function()
 	if event == "ADDON_LOADED" and arg1 == "IWinEnhanced" then
@@ -80,7 +80,10 @@ IWin:SetScript("OnEvent", function()
 		IWin:ResetRageRLS()
 		IWin_RLS_lastRage = UnitMana("player")
 	elseif event == "PLAYER_REGEN_ENABLED" then
-		IWin_RLS_lastValue = nil
+		if IWin_RLS then
+			IWin_RLS_lastValue = math.max(0, IWin_RLS["w1"])
+		end
+		IWin_RLS = nil
 		IWin_RLS_lastRage = nil
 	elseif event == "SPELLCAST_START" and arg1 == "Slam" then
 		IWin_RotationVar["slamCasting"] = IWin:GetTime(false) + (arg2 / 1000)
@@ -93,7 +96,8 @@ IWin:SetScript("OnEvent", function()
 		IWin:UpdateSpellCost()
 	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" and not UnitAffectingCombat("player") then
 		IWin:UpdateSpellCost()
-	elseif event == "UNIT_RAGE_GUID" and arg2 == 1 and IWin_RLS_lastRage then
+	--elseif event == "UNIT_RAGE_GUID" and arg2 and IWin_RLS_lastRage then
+	elseif event == "UNIT_RAGE" and arg1 == "player" and IWin_RLS_lastRage then
 		local currentRage = UnitMana("player")
 		local delta = currentRage - IWin_RLS_lastRage
 		if delta > 0 then
@@ -110,7 +114,5 @@ IWin:SetScript("OnUpdate", function()
 	if not IWin_RLS then return end
 	local gain = IWin_RLS_pendingGain or 0
 	IWin_RLS_pendingGain = 0
-	if gain > 0 then --temporary skip
-		IWin:UpdateRageRLS(gain)
-	end
+	IWin:UpdateRageRLS(gain)
 end)

@@ -124,6 +124,26 @@ function IWin:GetBuffRemaining(unit, spell, owner, debugmsg)
 		    end
 		end
     end
+    -- Nampower aura slot scan
+	if unit == "player" and GetPlayerAuraDuration and GetSpellIdForName then
+		local targetSpellId = GetSpellIdForName(spell)
+		if targetSpellId and targetSpellId ~= 0 then
+			for slot = 0, 31 do
+				local spellId, remainingMs = GetPlayerAuraDuration(slot)
+				if spellId and spellId == targetSpellId then
+					local timeLeft = remainingMs / 1000
+					if timeLeft > 0 then
+						IWin:Debug("Nampower buff remaining "..spell.." on "..unit..": "..tostring(timeLeft), debugmsg)
+						IWin_CombatVar["buffRemaining"][cacheKey] = timeLeft
+						return timeLeft
+					else
+						IWin_CombatVar["buffRemaining"][cacheKey] = 9999
+						return 9999
+					end
+				end
+			end
+		end
+	end
     -- SCRM overflow buff scan
 		if CleveRoids and CleveRoids.OverflowBuffs then
 			for spellId, data in pairs(CleveRoids.OverflowBuffs) do
@@ -777,9 +797,7 @@ function IWin:GetRageToReserve(spell, trigger, unit, debugmsg)
 	if ragePerSecond > 0 then
 		reservedRageTime = IWin_CombatVar["reservedRage"] / ragePerSecond
 	end
-	local dynamicBuffer = ragePerSecond > 0 and (rageCost / ragePerSecond) or IWin_Settings["rageTimeToReserveBuffer"]
-	local timeToReserveRage = math.max(0, spellTriggerTime - dynamicBuffer - reservedRageTime)
-	--local timeToReserveRage = math.max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
+	local timeToReserveRage = math.max(0, spellTriggerTime - IWin_Settings["rageTimeToReserveBuffer"] - reservedRageTime)
 	if trigger == "partybuff" or IWin:IsSpellLearnt(spell, nil, false) then
 		local result = math.max(0, rageCost - ragePerSecond * timeToReserveRage)
 		IWin:Debug("Reserving rage for "..spell..": "..tostring(result), debugmsg)
@@ -844,7 +862,6 @@ function IWin:ResetRageRLS()
 		["startTime"] = GetTime(),
 		["totalRage"] = 0,
 		["lambda"] = 0.8,
-		--["lambda"] = 0.85,
 		-- P matrix initialized to large values (high uncertainty)
 		["p11"] = 1000,
 		["p12"] = 0,
@@ -857,12 +874,12 @@ end
 
 function IWin:GetRagePerSecond(debugmsg)
 	if IWin_RLS then
-		local result = math.max(0, IWin_RLS["w1"])
+		local result = math.max(IWin_Settings["ragePerSecondPrediction"], IWin_RLS["w1"])
 		IWin:Debug("Dynamic rage per second: "..tostring(result), debugmsg)
 		return result
 	end
 	if IWin_RLS_lastValue then
-		local result = math.max(0, IWin_RLS_lastValue)
+		local result = math.max(IWin_Settings["ragePerSecondPrediction"], IWin_RLS_lastValue)
 		IWin:Debug("Last combat rage per second: "..tostring(result), debugmsg)
 		return result
 	end
@@ -873,7 +890,7 @@ end
 -- Energy #######################################################################################################################################
 function IWin:IsEnergyAvailable(spell, debugmsg)
 	local energyRequired = IWin_EnergyCost[spell] + IWin_CombatVar["reservedEnergy"]
-	local result = (IWin:GetPower("player", false) >= energyRequired) or IWin:IsBuffActive("player", "Clearcasting", nil, false) or (IWin:GetPower("player", false) > (100 - IWin_CombatVar["energyPerSecondPrediction"] * 2))
+	local result = (IWin:GetPower("player", false) >= energyRequired) or IWin:IsBuffActive("player", "Clearcasting", nil, false) or (IWin:GetPower("player", false) > (100 - IWin:GetEnergyPerSecond() * 2))
 	IWin:Debug("Energy available for "..spell..": "..tostring(result), debugmsg)
 	return result
 end
@@ -895,12 +912,12 @@ function IWin:GetEnergyToReserve(spell, trigger, unit, debugmsg)
 		spellTriggerTime = IWin:GetBuffRemaining(unit, spell, nil, false) or 0
 	end
 	local reservedEnergyTime = 0
-	if IWin_CombatVar["energyPerSecondPrediction"] > 0 then
-		reservedEnergyTime = IWin_CombatVar["reservedEnergy"] / IWin_CombatVar["energyPerSecondPrediction"]
+	if IWin:GetEnergyPerSecond() > 0 then
+		reservedEnergyTime = IWin_CombatVar["reservedEnergy"] / IWin:GetEnergyPerSecond()
 	end
 	local timeToReserveEnergy = math.max(0, spellTriggerTime - IWin_Settings["energyTimeToReserveBuffer"] - reservedEnergyTime)
 	if trigger == "partybuff" or IWin:IsSpellLearnt(spell, nil, false) then
-		local result = math.max(0, IWin_EnergyCost[spell] - IWin_CombatVar["energyPerSecondPrediction"] * timeToReserveEnergy)
+		local result = math.max(0, IWin_EnergyCost[spell] - IWin:GetEnergyPerSecond() * timeToReserveEnergy)
 		IWin:Debug("Reserving energy for "..spell..": "..tostring(result), debugmsg)
 		return result
 	end
@@ -1461,8 +1478,19 @@ function IWin:IsItemConsumableOffensiveTarget(melee)
 	return true
 end
 
-function IWin:IsItemTrinketOffensiveTarget(melee)
+function IWin:IsItemConsumableAOEOffensiveTarget(melee)
 	if melee and (not IWin:IsInRange() or IWin:IsBlacklistCooldownMelee()) then return false end
+	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
+	local consumableAOEOffensiveSetting = IWin_Settings["consumableAOEOffensive"]
+	if consumableAOEOffensiveSetting == "off" then return false end
+	if consumableAOEOffensiveSetting == "boss" and not IWin:IsBoss() then return false end
+	if consumableAOEOffensiveSetting == "elite" and not IWin:IsElite() then return false end
+	if IWin:IsTrainingDummy() then return false end
+	return true
+end
+
+function IWin:IsItemTrinketOffensiveTarget(melee, skipRangeControl)
+	if melee and ((not IWin:IsInRange() and not skipRangeControl) or IWin:IsBlacklistCooldownMelee()) then return false end
 	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
 	local trinketOffensiveSetting = IWin_Settings["trinketOffensive"]
 	if trinketOffensiveSetting == "off" then return false end

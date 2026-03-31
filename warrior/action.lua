@@ -133,7 +133,6 @@ end
 
 function IWin:CastCDShortOffensiveNoGCD(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Short Offensive CD with no GCD")
-	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) then return end
 	if not IWin:IsBuffActive("player", "Enrage")
 		and IWin:GetPower("player") < 50
 		and IWin:GetHealthPercent("player") > 25
@@ -155,6 +154,7 @@ function IWin:CastCDShortOffensiveNoGCD(skipWindowControl, skipTargetControl)
 			) then
 				IWin:CastCDOffensive("Bloodrage", skipWindowControl)
 	end
+	if not skipTargetControl and not IWin:IsCDShortOffensiveTarget(true) then return end
 	IWin:CastCDOffensive("Blood Fury", skipWindowControl)
 	IWin:CastCDOffensive("Berserking", skipWindowControl)
 end
@@ -448,7 +448,6 @@ end
 function IWin:HeroicStrike(range)
 	local spell = "Heroic Strike"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
-	if IWin:IsExecutePhase(false) then return end
 	if IWin_CombatVar["swingAttackQueued"] then return end
 	if (
 			IWin:GetEnemyInRange(range) <= 1
@@ -628,7 +627,7 @@ function IWin:MockingBlow()
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsTanking()
 		and IWin:IsOnCooldown("Taunt")
-		--and not IWin:IsImmune("target", "Mocking Blow")
+		and not IWin:IsImmune("target", "Mocking Blow")
 		and not IWin:IsTaunted() then
 			if not IWin:IsStanceActive("Battle Stance") then
 				IWin:Cast("Battle Stance", false)
@@ -1084,6 +1083,10 @@ function IWin:SunderArmorDPSRefresh(timeLeft)
 	if (
 			IWin_Settings["sunder"] == "low"
 			or IWin_Settings["sunder"] == "high"
+			or (
+					IWin_Settings["sunder"] == "once"
+					and not IWin_Target["sundered"]
+				)
 		)
 		and IWin:IsBuffActive("target", spell)
 		and IWin:GetBuffRemaining("target", spell) < timeLeft
@@ -1180,7 +1183,7 @@ function IWin:Taunt()
 	local spell = "Taunt"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsTanking()
-		--and not IWin:IsImmune("target", "Taunt")
+		and not IWin:IsImmune("target", "Taunt")
 		and not IWin:IsTaunted() then
 			if not IWin:IsStanceActive("Defensive Stance") then
 				IWin:Cast("Defensive Stance", false)
@@ -1226,6 +1229,30 @@ function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetContr
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
 
+function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl, range)
+	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
+	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
+	if not IWin:IsBuffActive("player", "Fire Shield", nil, false)
+		and not IWin:IsImmune("target", "fire") then
+			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], range)
+	end
+end
+
+function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl, range)
+	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
+	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
+	if IWin:IsCreatureType("Undead")
+		and not IWin:IsImmune("target", "holy") then
+			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], range)
+	end
+	if not IWin:IsImmune("target", "fire") then
+		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], range)
+	end
+	if not IWin:IsImmune("target", "fire") then
+		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], range)
+	end
+end
+
 function IWin:UseItemTrinketOffensiveGCD(skipWindowControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: Offensive Trinket with GCD")
 	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true) or not IWin_CombatVar["queueGCD"] then return end
@@ -1269,6 +1296,21 @@ function IWin:WhirlwindDefensiveTactics(queueTime, range)
 	end
 end
 
+function IWin:SetReservedRageWhirlwindDefensiveTactics(range)
+	local spell = "Whirlwind"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:GetEnemyInRange(range, false) >= 1 
+		and IWin:IsDefensiveTacticsActive("Berserker Stance") then
+		IWin:SetReservedRage(spell, "cooldown")
+	end
+end
+
+function IWin:UseItemTrinketOffensivePrepull(skipWindowControl, skipTargetControl)
+	IWin:Debug("+++ checking conditions: Offensive Trinket pre-pull")
+	if not skipTargetControl and not IWin:IsItemTrinketOffensiveTarget(true, true) then return end
+	IWin:UseItemTrinketOffensive("Gnomish Battle Chicken", skipWindowControl)
+end
+
 function IWin:Whirlwind(queueTime, range)
 	local spell = "Whirlwind"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
@@ -1296,7 +1338,7 @@ end
 function IWin:SetReservedRageWhirlwind(range)
 	local spell = "Whirlwind"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if IWin:GetEnemyInRange(range, false) > 1 then
+	if IWin:GetEnemyInRange(range, false) >= 1 then
 		IWin:SetReservedRage(spell, "cooldown")
 	end
 end
@@ -1304,7 +1346,7 @@ end
 function IWin:SetReservedRageWhirlwindNotEnemyInRange(range)
 	local spell = "Whirlwind"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if not (IWin:GetEnemyInRange(range, false) > 1) then
+	if not (IWin:GetEnemyInRange(range, false) >= 1) then
 		IWin:SetReservedRage(spell, "cooldown")
 	end
 end

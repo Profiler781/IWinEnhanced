@@ -235,18 +235,24 @@ IWin_CooldownDuration = {
 	["Mighty Rage Potion"] = 120,
 	["Potion of Quickness"] = 120,
 	-- trinkets
+	---- physical
 	["Badge of the Swarmguard"] = 180,
-	["Diamond Flask"] = 240,
-	["Draconic Infused Emblem"] = 75,
 	["Earthstrike"] = 120,
 	["Jom Gabbar"] = 120,
 	["Kiss of the Spider"] = 120,
 	["Molten Emberstone"] = 120,
-	["Scrolls of Blinding Light"] = 300,
 	["Slayer's Crest"] = 120,
+	["Zandalarian Hero Medallion"] = 120,
+	---- caster
+	["Draconic Infused Emblem"] = 75,
 	["Talisman of Ephemeral Power"] = 90,
 	["Zandalarian Hero Charm"] = 120,
-	["Zandalarian Hero Medallion"] = 120,
+	---- paladin
+	["Scrolls of Blinding Light"] = 300,
+	---- rogue
+	["Venomous Totem"] = 300,
+	---- warrior
+	["Diamond Flask"] = 240,
 	-- racials
 	["Berserking"] = 180,
 	["Blood Fury"] = 120,
@@ -269,18 +275,24 @@ IWin_BuffDuration = {
 	["Mighty Rage Potion"] = 20,
 	["Potion of Quickness"] = 30,
 	-- trinkets
+	---- physical
 	["Badge of the Swarmguard"] = 30,
-	["Diamond Flask"] = 60,
-	["Draconic Infused Emblem"] = 15,
 	["Earthstrike"] = 20,
 	["Jom Gabbar"] = 20,
 	["Kiss of the Spider"] = 15,
 	["Molten Emberstone"] = 20,
-	["Scrolls of Blinding Light"] = 20,
 	["Slayer's Crest"] = 20,
+	["Zandalarian Hero Medallion"] = 20,
+	---- caster
+	["Draconic Infused Emblem"] = 15,
 	["Talisman of Ephemeral Power"] = 15,
 	["Zandalarian Hero Charm"] = 20,
-	["Zandalarian Hero Medallion"] = 20,
+	---- paladin
+	["Scrolls of Blinding Light"] = 20,
+	---- rogue
+	["Venomous Totem"] = 20,
+	---- warrior
+	["Diamond Flask"] = 60,
 	-- racials
 	["Berserking"] = 10,
 	["Blood Fury"] = 15,
