@@ -19,13 +19,23 @@ function IWin:BattleShout()
 	end
 end
 
-function IWin:BattleShoutRefresh()
+function IWin:BattleShoutRefresh(range)
 	local spell = "Battle Shout"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:GetBuffRemaining("player", spell) < 9
+		and IWin:GetEnemyInRange(range) > 2
 		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
 			IWin:Cast(spell)
+	end
+end
+
+function IWin:SetReservedRageBattleShoutRefresh(range)
+	local spell = "Battle Shout"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin:GetBuffRemaining("player", spell) < 9
+		and IWin:GetEnemyInRange(range, false) > 2 then 
+			IWin:SetReservedRage(spell, "buff", "player")
 	end
 end
 
@@ -116,13 +126,22 @@ function IWin:CastCDShortOffensiveGCD(skipWindowControl, skipTargetControl)
 			or (
 					(
 						not IWin:IsSpellLearnt("Bloodthirst")
-						or IWin:GetCooldownRemaining("Bloodthirst") <= IWin_Settings["GCD"] * 2 + 0.5
+						or (
+								IWin:GetCooldownRemaining("Bloodthirst") <= IWin_Settings["GCD"] * 2
+								and IWin:GetCooldownRemaining("Bloodthirst") >= IWin_Settings["GCD"]
+							)
 					) and (
 						not IWin:IsSpellLearnt("Mortal Strike")
-						or IWin:GetCooldownRemaining("Mortal Strike") <= IWin_Settings["GCD"] * 2 + 0.5
+						or (
+								IWin:GetCooldownRemaining("Mortal Strike") <= IWin_Settings["GCD"] * 2
+								and IWin:GetCooldownRemaining("Mortal Strike") >= IWin_Settings["GCD"]
+							)
 					) and (
 						not IWin:IsSpellLearnt("Shield Slam")
-						or IWin:GetCooldownRemaining("Shield Slam") <= IWin_Settings["GCD"] * 2 + 0.5
+						or (
+								IWin:GetCooldownRemaining("Shield Slam") <= IWin_Settings["GCD"] * 2
+								and IWin:GetCooldownRemaining("Shield Slam") >= IWin_Settings["GCD"]
+							)
 					)
 				)
 		) then
@@ -168,13 +187,22 @@ function IWin:CastCDLongOffensiveGCD(skipWindowControl, skipTargetControl)
 				or (
 						(
 							not IWin:IsSpellLearnt("Bloodthirst")
-							or IWin:GetCooldownRemaining("Bloodthirst") <= IWin_Settings["GCD"] + 0.5
+							or (
+									IWin:GetCooldownRemaining("Bloodthirst") <= IWin_Settings["GCD"] * 2
+									and IWin:GetCooldownRemaining("Bloodthirst") >= IWin_Settings["GCD"]
+								)
 						) and (
 							not IWin:IsSpellLearnt("Mortal Strike")
-							or IWin:GetCooldownRemaining("Mortal Strike") <= IWin_Settings["GCD"] + 0.5
+							or (
+									IWin:GetCooldownRemaining("Mortal Strike") <= IWin_Settings["GCD"] * 2
+									and IWin:GetCooldownRemaining("Mortal Strike") >= IWin_Settings["GCD"]
+								)
 						) and (
 							not IWin:IsSpellLearnt("Shield Slam")
-							or IWin:GetCooldownRemaining("Shield Slam") <= IWin_Settings["GCD"] + 0.5
+							or (
+									IWin:GetCooldownRemaining("Shield Slam") <= IWin_Settings["GCD"] * 2
+									and IWin:GetCooldownRemaining("Shield Slam") >= IWin_Settings["GCD"]
+								)
 						)
 					)
 			) then
@@ -228,7 +256,7 @@ end
 function IWin:SetReservedRageCleave(range)
 	local spell = "Cleave"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if IWin:GetEnemyInRange(range, false) > 1 then
+	if IWin:GetEnemyInFront(range, false) > 1 then
 		IWin:SetReservedRage(spell, "nocooldown")
 	end
 end
@@ -242,25 +270,29 @@ function IWin:ConcussionBlow()
 	end
 end
 
-function IWin:DemoralizingShout()
+function IWin:DemoralizingShout(range)
 	local spell = "Demoralizing Shout"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if not IWin:IsBuffActive("target", spell)
-		and IWin_Settings["demo"] == "on"
+	if IWin_Settings["demo"] == "on"
+		and not IWin:IsBuffActive("target", spell)
+		and not IWin:IsBuffActive("target", "Demoralizing Roar")
+		and IWin:GetEnemyInRange(range) > 2
 		and not IWin:IsBlacklistAOEDebuff()
-		and IWin:IsInRange("Intimidating Shout")
 		and IWin:GetTimeToDie() > 10
+		and IWin:IsInRange("Intimidating Shout")
 		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
 			IWin:Cast(spell)
 	end
 end
 
-function IWin:SetReservedRageDemoralizingShout()
+function IWin:SetReservedRageDemoralizingShout(range)
 	local spell = "Demoralizing Shout"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if not IWin:IsBuffActive("target", spell, nil, false)
-		and IWin_Settings["demo"] == "on"
+	if IWin_Settings["demo"] == "on"
+		and not IWin:IsBuffActive("target", spell, nil, false)
+		and not IWin:IsBuffActive("target", "Demoralizing Roar", nil, false)
+		and IWin:GetEnemyInRange(range) > 2
 		and not IWin:IsBlacklistAOEDebuff(false)
 		and IWin:GetTimeToDie(false) > 10 then
 			IWin:SetReservedRage(spell, "buff", "target")
@@ -450,7 +482,7 @@ function IWin:HeroicStrike(range)
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
 	if IWin_CombatVar["swingAttackQueued"] then return end
 	if (
-			IWin:GetEnemyInRange(range) <= 1
+			IWin:GetEnemyInFront(range) <= 1
 			or not IWin:IsSpellLearnt("Cleave")
 		)
 		and (
@@ -472,7 +504,7 @@ end
 function IWin:SetReservedRageHeroicStrike(range)
 	local spell = "Heroic Strike"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if IWin:GetEnemyInRange(range, false) <= 1
+	if IWin:GetEnemyInFront(range, false) <= 1
 		or not IWin:IsSpellLearnt("Cleave") then
 			IWin:SetReservedRage(spell, "nocooldown")
 	end
@@ -888,13 +920,14 @@ function IWin:ShieldBlock()
 	end
 end
 
-function IWin:ShieldBlockFRD()
+function IWin:ShieldBlockFRD(range)
 	local spell = "Shield Block"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
 	if IWin:IsStanceActive("Defensive Stance")
 		and IWin:IsShieldEquipped()
 		and IWin:IsTanking()
 		and IWin:IsItemEquipped(17, "Force Reactive Disk")
+		and IWin:GetEnemyInRange(range) > 2
 		and IWin:IsRageAvailable(spell) then
 			IWin:Cast(spell, false)
 	end
@@ -1193,10 +1226,11 @@ function IWin:Taunt()
 	end
 end
 
-function IWin:ThunderClap(queueTime)
+function IWin:ThunderClap(queueTime, range)
 	local spell = "Thunder Clap"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin_Settings["thunderclap"] == "on"
+		and IWin:GetEnemyInRange(range) > 2
 		and IWin:IsInRange()
 		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
@@ -1205,6 +1239,16 @@ function IWin:ThunderClap(queueTime)
 			else
 				IWin:Cast(spell)
 			end
+	end
+end
+
+function IWin:SetReservedRageThunderClap(range)
+	local spell = "Thunder Clap"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if IWin_Settings["thunderclap"] == "on"
+		and IWin:GetEnemyInRange(range, false) > 2
+		and IWin:IsInRange() then
+			IWin:SetReservedRage(spell, "cooldown")
 	end
 end
 

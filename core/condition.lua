@@ -360,44 +360,37 @@ end
 
 function IWin:GetGCDRemaining(debugmsg)
 	local cached = IWin_CombatVar["GCD"]
-	if cached ~= nil then return cached end
+	if cached ~= nil then
+		IWin:Debug("GCD remaining: "..tostring(cached), debugmsg)
+		return cached
+	end
+	-- From SCRM
     -- Get GCD remaining in seconds
     local gcdRemaining = 0
 
-    -- Try Nampower API first (most accurate)
+    -- Try Nampower API first (handles GetCastInfo + GetSpellIdCooldown)
     if CleveRoids.NampowerAPI and CleveRoids.NampowerAPI.GetGCDRemainingMs then
         local gcdMs = CleveRoids.NampowerAPI.GetGCDRemainingMs()
         if gcdMs and gcdMs > 0 then
             gcdRemaining = gcdMs / 1000
         end
-    else
-        -- Fallback: check the first spell in spellbook for GCD
-        -- GCD shows as cooldown <= 1.5s on any GCD-triggering spell
+    end
+    -- Fallback: scan spellbook for GCD cooldown (pre-v2.18 or if API returned 0)
+    if gcdRemaining == 0 then
         for i = 1, 200 do
             local spellName = GetSpellName(i, BOOKTYPE_SPELL)
             if not spellName then break end
             local start, duration = GetSpellCooldown(i, BOOKTYPE_SPELL)
             if start and duration and duration > 0 and duration <= 1.5 then
-                gcdRemaining = (start + duration) - GetTime()
+                gcdRemaining = (start + duration) - IWin:GetTime()
                 if gcdRemaining < 0 then gcdRemaining = 0 end
                 break
             end
         end
     end
-    if gcdRemaining ~= 0 then
-    	IWin_CombatVar["GCD"] = gcdRemaining
-		IWin:Debug("GCD remaining: "..tostring(gcdRemaining), debugmsg)
-		return gcdRemaining
-	end
-	--[[local info = GetCastInfo()
-	if info and info.gcdRemainingMs then
-		IWin_CombatVar["GCD"] = info.gcdRemainingMs
-		IWin:Debug("GCD remaining: "..tostring(IWin_CombatVar["GCD"]), debugmsg)
-		return IWin_CombatVar["GCD"]
-	end]]
-	IWin:Debug("GCD ready", debugmsg)
-	IWin_CombatVar["GCD"] = 0
-	return 0
+	IWin_CombatVar["GCD"] = gcdRemaining
+	IWin:Debug("GCD remaining: "..tostring(gcdRemaining), debugmsg)
+	return gcdRemaining
 end
 
 function IWin:IsGCDActive(debugmsg)

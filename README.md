@@ -10,13 +10,11 @@ Contributors: Vlad/Goodnice - Tel'Abim, Jrc13245/Torio
 
 ## Latest features
 
+- /ihodor for warrior removed.
+- /itank for warrior handle multi target.
+- /itankfocus for warrior forces single target.
 - /iconsumableaoe macro to use AOE Consumables. Minimum target setup per consumable.
 - Rogue module!
-- /iconsumable macro to use Consumables.
-- /itrinket macro to use Trinkets.
-- /icdshort macro to use Short Cooldowns.
-- /icdlong macro to use Long Cooldowns (> 5min).
-- Energy pooling for rogue and druid
 
 ## Mods Dependencies
 
@@ -169,8 +167,8 @@ Example: /iwin bladeflurry off
 
     /idps           Single + Multi target DPS rotation
     /idpsfocus      Single target DPS rotation
-    /itank          Single target threat rotation
-    /ihodor         Multi target threat rotation
+    /itank          Single + Multi target threat rotation
+    /itankfocus     Single target threat rotation
     /ichase         Stick to your target with Charge, Intercept, Hamstring
     /ikick          Use Pummel or Shield Bash while the target is casting
     /ifeardance     Use Berserker Rage if available

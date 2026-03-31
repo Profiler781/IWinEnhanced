@@ -31,8 +31,6 @@ function IWin:InitializeRotationCore()
 		["dead"] = {},
 		["enemyInFront"] = {},
 		["enemyInRange"] = {},
-		["energyPerSecondPrediction"] = 0,
-		["GCD"] = 0,
 		["health"] = {},
 		["healthMax"] = {},
 		["healthPercent"] = {},
