@@ -165,27 +165,27 @@ function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetContr
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
 
-function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl, range)
+function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
 	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
 	if not IWin:IsBuffActive("player", "Fire Shield", nil, false)
 		and not IWin:IsImmune("target", "fire") then
-			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], range)
+			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], "meleeAutoAttack")
 	end
 end
 
-function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl, range)
+function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
 	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
 	if IWin:IsCreatureType("Undead")
 		and not IWin:IsImmune("target", "holy") then
-			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], range)
+			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], "meleeAutoAttack")
 	end
 	if not IWin:IsImmune("target", "fire") then
-		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], range)
+		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], "meleeAutoAttack")
 	end
 	if not IWin:IsImmune("target", "fire") then
-		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], range)
+		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], "meleeAutoAttack")
 	end
 end
 
@@ -237,11 +237,12 @@ function IWin:UseItemTrinketOffensivePrepullRanged(skipWindowControl, skipTarget
 end
 
 ---- Feral Actions ----
-function IWin:FaerieFireFeral()
+function IWin:FaerieFireFeral(skipEnemyInRange)
 	local spell = "Faerie Fire (Feral)"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsBuffActive("target", spell)
 		and not IWin:IsImmune("target", "Faerie Fire (Feral)")
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") <= 1)
 		and (
 				IWin:IsStanceActive("Cat Form")
 				or IWin:IsStanceActive("Bear Form")
@@ -342,10 +343,11 @@ function IWin:DemoralizingRoar()
 	end
 end
 
-function IWin:Enrage()
+function IWin:Enrage(skipEnemyInRange)
 	local spell = "Enrage"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
 	if IWin:GetPower("player") < 50
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") < 3)
 		and not IWin:IsBuffActive("player", "Blood Frenzy") then
 			IWin:Cast(spell, false)
 	end
@@ -379,20 +381,39 @@ function IWin:Maul()
 	end
 end
 
-function IWin:SavageBite(queueTime)
+function IWin:SavageBite(queueTime, skipEnemyInRange)
 	local spell = "Savage Bite"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:IsRageAvailable(spell) then
-		IWin:Cast(spell)
+	if (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") <= 1)
+		and IWin:IsRageAvailable(spell) then
+			IWin:Cast(spell)
 	end
 end
 
-function IWin:Swipe()
+function IWin:SetReservedRageSavageBite(skipEnemyInRange)
+	local spell = "Savage Bite"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") <= 1) then
+		IWin:SetReservedRage(spell, "nocooldown")
+	end
+end
+
+function IWin:Swipe(skipEnemyInRange)
 	local spell = "Swipe"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if not IWin:IsBlacklistAOEDamage()
+	if (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 2)
+		and not IWin:IsBlacklistAOEDamage()
 		and IWin:IsRageAvailable(spell) then
 			IWin:Cast(spell)
+	end
+end
+
+function IWin:SetReservedRageSwipe(skipEnemyInRange)
+	local spell = "Swipe"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 2)
+		and not IWin:IsBlacklistAOEDamage() then
+			IWin:SetReservedRage(spell, "nocooldown")
 	end
 end
 

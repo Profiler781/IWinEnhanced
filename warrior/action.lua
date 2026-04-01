@@ -19,22 +19,22 @@ function IWin:BattleShout()
 	end
 end
 
-function IWin:BattleShoutRefresh(range)
+function IWin:BattleShoutRefresh(skipEnemyInRange)
 	local spell = "Battle Shout"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:GetBuffRemaining("player", spell) < 9
-		and IWin:GetEnemyInRange(range) > 2
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 2)
 		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
 			IWin:Cast(spell)
 	end
 end
 
-function IWin:SetReservedRageBattleShoutRefresh(range)
+function IWin:SetReservedRageBattleShoutRefresh(skipEnemyInRange)
 	local spell = "Battle Shout"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
 	if IWin:GetBuffRemaining("player", spell) < 9
-		and IWin:GetEnemyInRange(range, false) > 2 then 
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack", false) > 2) then 
 			IWin:SetReservedRage(spell, "buff", "player")
 	end
 end
@@ -238,11 +238,11 @@ function IWin:ChargePartySize()
 	end
 end
 
-function IWin:Cleave(range)
+function IWin:Cleave(skipEnemyInFront)
 	local spell = "Cleave"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
 	if IWin_CombatVar["swingAttackQueued"] then return end
-	if IWin:GetEnemyInFront(range) > 1
+	if (skipEnemyInFront or IWin:GetEnemyInFront("meleeAutoAttack") > 1)
 		and (
 				IWin:IsRageAvailable(spell)
 				or IWin:GetPower("player") > IWin:GetPowerMax("player") - IWin:GetRagePerSecond(false) * IWin_Settings["GCD"]
@@ -253,10 +253,10 @@ function IWin:Cleave(range)
 	end
 end
 
-function IWin:SetReservedRageCleave(range)
+function IWin:SetReservedRageCleave(skipEnemyInFront)
 	local spell = "Cleave"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if IWin:GetEnemyInFront(range, false) > 1 then
+	if (skipEnemyInFront or IWin:GetEnemyInFront("meleeAutoAttack", false) > 1) then
 		IWin:SetReservedRage(spell, "nocooldown")
 	end
 end
@@ -270,13 +270,13 @@ function IWin:ConcussionBlow()
 	end
 end
 
-function IWin:DemoralizingShout(range)
+function IWin:DemoralizingShout(skipEnemyInRange)
 	local spell = "Demoralizing Shout"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin_Settings["demo"] == "on"
 		and not IWin:IsBuffActive("target", spell)
 		and not IWin:IsBuffActive("target", "Demoralizing Roar")
-		and IWin:GetEnemyInRange(range) > 2
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 2)
 		and not IWin:IsBlacklistAOEDebuff()
 		and IWin:GetTimeToDie() > 10
 		and IWin:IsInRange("Intimidating Shout")
@@ -286,20 +286,20 @@ function IWin:DemoralizingShout(range)
 	end
 end
 
-function IWin:SetReservedRageDemoralizingShout(range)
+function IWin:SetReservedRageDemoralizingShout(skipEnemyInRange)
 	local spell = "Demoralizing Shout"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
 	if IWin_Settings["demo"] == "on"
 		and not IWin:IsBuffActive("target", spell, nil, false)
 		and not IWin:IsBuffActive("target", "Demoralizing Roar", nil, false)
-		and IWin:GetEnemyInRange(range) > 2
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 2)
 		and not IWin:IsBlacklistAOEDebuff(false)
 		and IWin:GetTimeToDie(false) > 10 then
 			IWin:SetReservedRage(spell, "buff", "target")
 	end
 end
 
-function IWin:DPSStance(range)
+function IWin:DPSStance(skipEnemyInRange)
 	local spell = "Berserker Stance"
 	IWin:Debug("+++ checking conditions: "..spell, debugmsg)
 	if IWin:IsInRange("Rend")
@@ -315,7 +315,8 @@ function IWin:DPSStance(range)
 				and (
 						not IWin:IsSpellLearnt("Sweeping Strikes")
 						or IWin:IsOnCooldown("Sweeping Strikes")
-						or IWin:GetEnemyInRange(range) <= 1
+						or skipEnemyInRange
+						or IWin:GetEnemyInRange("meleeAutoAttack") <= 1
 					) then
 						IWin:SetReservedRageStanceCast()
 						IWin:Cast(spell, false)
@@ -328,11 +329,11 @@ function IWin:DPSStance(range)
 	end
 end
 
-function IWin:Execute(queueTime, range)
+function IWin:Execute(queueTime, skipEnemyInRange)
 	local spell = "Execute"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsExecutePhase()
-		and IWin:GetEnemyInRange(range) <= 1
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") <= 1)
 		and (
 				IWin:IsPVP("target")
 				or IWin:GetHealthPercent("player") < 40
@@ -356,7 +357,7 @@ function IWin:Execute(queueTime, range)
 	end
 end
 
-function IWin:SetReservedRageExecute(range)
+function IWin:SetReservedRageExecute(skipEnemyInRange)
 	local spell = "Execute"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
 	local lowHealthTarget = (IWin:GetHealthMax("player", false) * 0.3 > IWin:GetHealth("target", false))
@@ -364,7 +365,7 @@ function IWin:SetReservedRageExecute(range)
 			lowHealthTarget
 			or IWin:IsExecutePhase(false)
 		)
-		and IWin:GetEnemyInRange(range, false) <= 1
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack", false) <= 1)
 		and (
 				IWin:IsPVP("target", false)
 				or IWin:GetHealthPercent("player", false) < 40
@@ -382,12 +383,12 @@ function IWin:SetReservedRageExecute(range)
 	end
 end
 
-function IWin:Execute2Hander(range)
+function IWin:Execute2Hander(skipEnemyInRange)
 	local spell = "Execute"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsExecutePhase(false)
 		and IWin:Is2HanderEquipped()
-		and IWin:GetEnemyInRange(range) <= 1
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") <= 1)
 		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
 			if IWin:IsStanceActive("Defensive Stance") then
@@ -445,11 +446,11 @@ function IWin:Hamstring()
 	end
 end
 
-function IWin:HamstringJousting(range)
+function IWin:HamstringJousting(skipEnemyInRange)
 	local spell = "Hamstring"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin_Settings["jousting"] == "on"
-		and IWin:GetEnemyInRange(range) <= 1
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") <= 1)
 		and IWin:IsInRange(spell)
 		and IWin:GetGroupSize() == 1
 		and IWin:IsRageCostAvailable(spell)
@@ -477,12 +478,13 @@ function IWin:SetReservedRageHamstringWindfury()
 	end
 end
 
-function IWin:HeroicStrike(range)
+function IWin:HeroicStrike(skipEnemyInFront)
 	local spell = "Heroic Strike"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
 	if IWin_CombatVar["swingAttackQueued"] then return end
 	if (
-			IWin:GetEnemyInFront(range) <= 1
+			skipEnemyInFront
+			or IWin:GetEnemyInFront("meleeAutoAttack") <= 1
 			or not IWin:IsSpellLearnt("Cleave")
 		)
 		and (
@@ -501,10 +503,11 @@ function IWin:HeroicStrike(range)
 	end
 end
 
-function IWin:SetReservedRageHeroicStrike(range)
+function IWin:SetReservedRageHeroicStrike(skipEnemyInRange)
 	local spell = "Heroic Strike"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if IWin:GetEnemyInFront(range, false) <= 1
+	if skipEnemyInRange
+		or IWin:GetEnemyInFront("meleeAutoAttack", false) <= 1
 		or not IWin:IsSpellLearnt("Cleave") then
 			IWin:SetReservedRage(spell, "nocooldown")
 	end
@@ -920,14 +923,14 @@ function IWin:ShieldBlock()
 	end
 end
 
-function IWin:ShieldBlockFRD(range)
+function IWin:ShieldBlockFRD(skipEnemyInRange)
 	local spell = "Shield Block"
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
 	if IWin:IsStanceActive("Defensive Stance")
 		and IWin:IsShieldEquipped()
 		and IWin:IsTanking()
 		and IWin:IsItemEquipped(17, "Force Reactive Disk")
-		and IWin:GetEnemyInRange(range) > 2
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 2)
 		and IWin:IsRageAvailable(spell) then
 			IWin:Cast(spell, false)
 	end
@@ -1147,10 +1150,10 @@ function IWin:SetReservedRageSunderArmorWindfury()
 	end
 end
 
-function IWin:SweepingStrikes(range)
+function IWin:SweepingStrikes(skipEnemyInRange)
 	local spell = "Sweeping Strikes"
 	if IWin:IsSpellLearnt(spell)
-		and IWin:GetEnemyInRange(range) > 1
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 1)
 		and IWin:IsReservedRageStance("Battle Stance")
 		and not IWin_CombatVar["slamQueued"]
 		and IWin:IsTimeToReserveRage(spell, "cooldown") then
@@ -1169,11 +1172,12 @@ function IWin:SweepingStrikes(range)
 	end
 end
 
-function IWin:SetReservedRageSweepingStrikes(range)
+function IWin:SetReservedRageSweepingStrikes(skipEnemyInRange)
 	local spell = "Sweeping Strikes"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if IWin:GetEnemyInRange(range, false) > 1 then
-		IWin:SetReservedRage(spell, "cooldown")
+	if skipEnemyInRange
+		or IWin:GetEnemyInRange("meleeAutoAttack", false) > 1 then
+			IWin:SetReservedRage(spell, "cooldown")
 	end
 end
 
@@ -1226,11 +1230,11 @@ function IWin:Taunt()
 	end
 end
 
-function IWin:ThunderClap(queueTime, range)
+function IWin:ThunderClap(queueTime, skipEnemyInRange)
 	local spell = "Thunder Clap"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin_Settings["thunderclap"] == "on"
-		and IWin:GetEnemyInRange(range) > 2
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 2)
 		and IWin:IsInRange()
 		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
@@ -1242,21 +1246,21 @@ function IWin:ThunderClap(queueTime, range)
 	end
 end
 
-function IWin:SetReservedRageThunderClap(range)
+function IWin:SetReservedRageThunderClap(skipEnemyInRange)
 	local spell = "Thunder Clap"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
 	if IWin_Settings["thunderclap"] == "on"
-		and IWin:GetEnemyInRange(range, false) > 2
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack", false) > 2)
 		and IWin:IsInRange() then
 			IWin:SetReservedRage(spell, "cooldown")
 	end
 end
 
-function IWin:ThunderClapDPS(range)
+function IWin:ThunderClapDPS(skipEnemyInRange)
 	local spell = "Thunder Clap"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin_Settings["thunderclap"] == "on"
-		and IWin:GetEnemyInRange(range) > 2
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 2)
 		and IWin:IsInRange()
 		and not IWin:IsStanceActive("Berserker Stance")
 		and IWin:IsRageAvailable(spell)
@@ -1273,27 +1277,27 @@ function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetContr
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
 
-function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl, range)
+function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
 	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
 	if not IWin:IsBuffActive("player", "Fire Shield", nil, false)
 		and not IWin:IsImmune("target", "fire") then
-			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], range)
+			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], "meleeAutoAttack")
 	end
 end
 
-function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl, range)
+function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
 	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
 	if IWin:IsCreatureType("Undead")
 		and not IWin:IsImmune("target", "holy") then
-			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], range)
+			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], "meleeAutoAttack")
 	end
 	if not IWin:IsImmune("target", "fire") then
-		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], range)
+		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], "meleeAutoAttack")
 	end
 	if not IWin:IsImmune("target", "fire") then
-		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], range)
+		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], "meleeAutoAttack")
 	end
 end
 
@@ -1321,11 +1325,11 @@ function IWin:UseItemTrinketOffensivePrepull(skipWindowControl, skipTargetContro
 	IWin:UseItemTrinketOffensive("Gnomish Battle Chicken", skipWindowControl)
 end
 
-function IWin:Whirlwind(queueTime, range)
+function IWin:Whirlwind(queueTime, skipEnemyInRange)
 	local spell = "Whirlwind"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsAffectingCombat("player")
-		and IWin:GetEnemyInRange(range) > 1
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 1)
 		and IWin:IsReservedRageStance("Berserker Stance")
 		and not IWin:IsBlacklistAOEDamage()
 		and not IWin_CombatVar["slamQueued"]
@@ -1345,18 +1349,20 @@ function IWin:Whirlwind(queueTime, range)
 	end
 end
 
-function IWin:SetReservedRageWhirlwind(range)
+function IWin:SetReservedRageWhirlwind(skipEnemyInRange)
 	local spell = "Whirlwind"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if IWin:GetEnemyInRange(range, false) > 1 then
-		IWin:SetReservedRage(spell, "cooldown")
+	if skipEnemyInRange
+		or IWin:GetEnemyInRange("meleeAutoAttack", false) > 1 then
+			IWin:SetReservedRage(spell, "cooldown")
 	end
 end
 
-function IWin:SetReservedRageWhirlwindNotEnemyInRange(range)
+function IWin:SetReservedRageWhirlwindNotEnemyInRange(skipEnemyInRange)
 	local spell = "Whirlwind"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if not (IWin:GetEnemyInRange(range, false) > 1) then
-		IWin:SetReservedRage(spell, "cooldown")
+	if skipEnemyInRange
+		or not (IWin:GetEnemyInRange("meleeAutoAttack", false) > 1) then
+			IWin:SetReservedRage(spell, "cooldown")
 	end
 end

@@ -165,8 +165,8 @@ function IWin:UseItemConsumableOffensive(item, skipWindowControl)
 	IWin:UseItem(item)
 end
 
-function IWin:UseItemConsumableAOEOffensive(item, skipTargetsControl, targets, range)
-	if not skipTargetsControl and (not (IWin:GetEnemyInRange(range) >= targets) or targets == 0) then return end
+function IWin:UseItemConsumableAOEOffensive(item, skipTargetsControl, targets, spell)
+	if not skipTargetsControl and (not (IWin:GetEnemyInRange(spell) >= targets) or targets == 0) then return end
 	IWin:UseItem(item)
 end
 

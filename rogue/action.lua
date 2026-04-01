@@ -38,11 +38,11 @@ function IWin:SetReservedEnergyBackstab()
 	end
 end
 
-function IWin:BladeFlurry(range)
+function IWin:BladeFlurry(cancelBuff)
 	local spell = "Blade Flurry"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin_Settings["bladeFlurry"] == "off" then return end
-	if IWin:GetEnemyInRange(range) - (IWin:GetTimeToDie() < 4 and 1 or 0) > 1 then
+	if not cancelBuff and IWin:GetEnemyInRange("meleeAutoAttack") - (IWin:GetTimeToDie() < 4 and 1 or 0) > 1 then
 		if IWin:IsEnergyAvailable(spell) then
 			IWin:Cast(spell)
 		end
@@ -412,27 +412,27 @@ function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetContr
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
 
-function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl, range)
+function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
 	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
 	if not IWin:IsBuffActive("player", "Fire Shield", nil, false)
 		and not IWin:IsImmune("target", "fire") then
-			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], range)
+			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], "meleeAutoAttack")
 	end
 end
 
-function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl, range)
+function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
 	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
 	if IWin:IsCreatureType("Undead")
 		and not IWin:IsImmune("target", "holy") then
-			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], range)
+			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], "meleeAutoAttack")
 	end
 	if not IWin:IsImmune("target", "fire") then
-		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], range)
+		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], "meleeAutoAttack")
 	end
 	if not IWin:IsImmune("target", "fire") then
-		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], range)
+		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], "meleeAutoAttack")
 	end
 end
 

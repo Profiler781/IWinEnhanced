@@ -1,4 +1,4 @@
-# IWinEnhanced v2.4
+# IWinEnhanced v2.5
 
 1-button rotation macros for Turtle Druids, Paladins, Rogues and Warriors.
 
@@ -10,11 +10,9 @@ Contributors: Vlad/Goodnice - Tel'Abim, Jrc13245/Torio
 
 ## Latest features
 
-- /ihodor for warrior removed.
-- /itank for warrior handle multi target.
-- /itankfocus for warrior forces single target.
-- /iconsumableaoe macro to use AOE Consumables. Minimum target setup per consumable.
-- Rogue module!
+- /ihodor and /icleave for warrior, druid, paladin removed.
+- /itank and /idps for warrior, druid, paladin handles multi target.
+- /itankfocus and /idpsfocus for warrior, druid, paladin forces single target.
 
 ## Mods Dependencies
 
@@ -42,8 +40,8 @@ Optionnal Addons:
 
     /iblast         Single target caster rotation
     /iruetoo        Single target cat rotation
-    /itank          Single target bear rotation
-    /ihodor         Multi target bear rotation
+    /itank          Single + Multi target bear rotation
+    /itankfocus     Single target bear rotation
     /itaunt         Growl if the target is not under another taunt effect
     /ihydrate       Use conjured or vendor water
     /inuke          Use cooldowns, trinkets and consumables
@@ -79,10 +77,10 @@ Example: /iwin frontshred on
 
 ## Macros
 
-    /idps           Single target DPS rotation
-    /icleave        Multi target DPS rotation
-    /itank          Single target Prot rotation
-    /ihodor         Multi target Prot rotation
+    /idps           Single + Multi target DPS rotation
+    /idpsfocus      Single target DPS rotation
+    /itank          Single + Multi target Prot rotation
+    /itankfocus     Single target Prot rotation
     /ieco           Mana regeneration rotation
     /ijudge         Seal and Judgement only
     /istun          Stun with Hammer of Justice or Repentance

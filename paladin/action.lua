@@ -4,6 +4,25 @@ function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
 end
 
+function IWin:Aura()
+	IWin:DevotionAura()
+	IWin:RetributionAura()
+	IWin:ConcentrationAura()
+	IWin:ShadowResistanceAura()
+	IWin:FrostResistanceAura()
+	IWin:FireResistanceAura()
+	IWin:SanctityAura()
+end
+
+function IWin:Blessing()
+	IWin:BlessingOfSanctuary()
+	IWin:BlessingOfWisdom()
+	IWin:BlessingOfMight()
+	IWin:BlessingOfKings()
+	IWin:BlessingOfLight()
+	IWin:BlessingOfSalvation()
+end
+
 function IWin:BlessingOfKings()
 	local spell = "Blessing of Kings"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, false) then return end
@@ -126,11 +145,12 @@ function IWin:ConcentrationAura()
 	end
 end
 
-function IWin:Consecration(manaPercent)
+function IWin:Consecration(manaPercent, skipEnemyInRange)
 	local spell = "Consecration"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
-	if IWin:GetPowerPercent("player") > manaPercent then
-		IWin:Cast(spell)
+	if IWin:GetPowerPercent("player") > manaPercent
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 2) then
+			IWin:Cast(spell)
 	end
 end
 
@@ -288,12 +308,13 @@ function IWin:HandOfReckoning()
 	end
 end
 
-function IWin:HolyShield(manaPercent, minParty)
+function IWin:HolyShield(manaPercent, minParty, skipEnemyInRange)
 	local spell = "Holy Shield"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:GetPowerPercent("player") > manaPercent
 		and IWin:IsShieldEquipped()
 		and IWin:GetGroupSize() >= minParty
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 1)
 		and (
 				not IWin:IsAffectingCombat("target")
 				or IWin:IsTanking()
@@ -302,12 +323,12 @@ function IWin:HolyShield(manaPercent, minParty)
 	end
 end
 
-function IWin:HolyShock(manaPercent)
+function IWin:HolyShock(manaPercent, healthPercent)
 	local spell = "Holy Shock"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsTanking()
 		and not IWin:IsBuffActive("player", "Mortal Strike")
-		and IWin:GetHealthPercent("player") < 80
+		and IWin:GetHealthPercent("player") < healthPercent
 		and IWin:GetPowerPercent("player") > manaPercent then
 			IWin:Cast(spell, nil, "player")
 	end
@@ -339,11 +360,12 @@ function IWin:HolyStrikeHolyMight(queueTime)
 	end
 end
 
-function IWin:HolyWrath(manaPercent)
+function IWin:HolyWrath(manaPercent, skipEnemyInRange)
 	local spell = "Holy Wrath"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if not IWin:IsMoving()
 		and not IWin:IsTanking()
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 1)
 		and (
 				IWin:IsCreatureType("Undead")
 				or IWin:IsCreatureType("Demon")
@@ -490,7 +512,7 @@ function IWin:SanctityAura()
 	end
 end
 
-function IWin:SealOfCommand(manaPercent)
+function IWin:SealOfCommand(manaPercent, skipEnemyInRange)
 	local spell = "Seal of Command"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:GetPowerPercent("player") > manaPercent
@@ -506,6 +528,7 @@ function IWin:SealOfCommand(manaPercent)
 				or IWin:IsHiddenSealUsed()
 				or IWin:GetPowerPercent("player") > 95
 			)
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") <= 2)
 		and IWin:IsExists("target") then
 				IWin:Cast(spell)
 	end
@@ -572,7 +595,7 @@ function IWin:SealOfLightElite()
 	end
 end
 
-function IWin:SealOfRighteousness(manaPercent)
+function IWin:SealOfRighteousness(manaPercent, skipEnemyInRange)
 	local spell = "Seal of Righteousness"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:GetPowerPercent("player") > manaPercent
@@ -592,6 +615,7 @@ function IWin:SealOfRighteousness(manaPercent)
 							)
 					)
 			)
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") <= 2)
 		and IWin:IsExists("target") then
 				IWin:Cast(spell)
 	end
@@ -671,14 +695,15 @@ function IWin:SealOfWisdomElite()
 	end
 end
 
-function IWin:SealOfWisdomEco()
+function IWin:SealOfWisdomEco(skipEnemyInRange)
 	local spell = "Seal of Wisdom"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if (
 			not IWin:IsSealActive()
 			or IWin:IsHiddenSealUsed()
 		)
-		and IWin:IsExists("target") then
+		and IWin:IsExists("target")
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 2) then
 			IWin:Cast(spell)
 	end
 end
@@ -700,27 +725,27 @@ function IWin:UseItemConsumableOffensiveNoGCD(skipWindowControl, skipTargetContr
 	IWin:UseItemConsumableOffensive("Potion of Quickness", skipWindowControl)
 end
 
-function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl, range)
+function IWin:UseItemConsumableAOEOffensiveNoGCD(skipTargetsControl, skipTargetControl)
 	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
 	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
 	if not IWin:IsBuffActive("player", "Fire Shield", nil, false)
 		and not IWin:IsImmune("target", "fire") then
-			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], range)
+			IWin:UseItemConsumableAOEOffensive("Oil of Immolation", skipTargetsControl, IWin_Settings["targetsOilOfImmolation"], "meleeAutoAttack")
 	end
 end
 
-function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl, range)
+function IWin:UseItemConsumableAOEOffensiveGCD(skipTargetsControl, skipTargetControl, spell)
 	IWin:Debug("+++ checking conditions: AOE Consumable Offensive")
 	if not skipTargetControl and not IWin:IsItemConsumableAOEOffensiveTarget(true) then return end
 	if IWin:IsCreatureType("Undead")
 		and not IWin:IsImmune("target", "holy") then
-			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], range)
+			IWin:UseItemConsumableAOEOffensive("Stratholme Holy Water", skipTargetsControl, IWin_Settings["targetsHolyWater"], "meleeAutoAttack")
 	end
 	if not IWin:IsImmune("target", "fire") then
-		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], range)
+		IWin:UseItemConsumableAOEOffensive("Goblin Sapper Charge", skipTargetsControl, IWin_Settings["targetsSapper"], "meleeAutoAttack")
 	end
 	if not IWin:IsImmune("target", "fire") then
-		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], range)
+		IWin:UseItemConsumableAOEOffensive("Dense Dynamite", skipTargetsControl, IWin_Settings["targetsDenseDynamite"], "meleeAutoAttack")
 	end
 end
 

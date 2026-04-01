@@ -982,38 +982,54 @@ function IWin:IsInRange(spell, distance, unit, debugmsg)
 	end
 end
 
--- range values: static number, meleeAutoAttack
-function IWin:GetEnemyInRange(range, debugmsg)
-	if type(range) == "number" then return range end
-	local cached = IWin_CombatVar["enemyInRange"][range]
+-- spell values: meleeAutoAttack, spell name
+function IWin:GetEnemyInRange(spell, debugmsg)
+	local cached = IWin_CombatVar["enemyInRange"][spell]
 	if cached ~= nil then
-		IWin:Debug("Enemies in "..range.." range: "..tostring(cached), debugmsg)
+		IWin:Debug("Enemies in "..tostring(spell).." range: "..tostring(cached), debugmsg)
 		return cached
 	end
+	local spellId = CleveRoids.NampowerAPI.GetSpellIdFromName(spell)
+    local spellRange = spellId and CleveRoids.NampowerAPI.GetSpellRange(spellId)
     local result = CleveRoids.CountEnemiesMatching(function(unit)
-        local distance = UnitXP("distanceBetween", "player", unit, range)
-        return distance and distance <= 5
-    end)
-    IWin_CombatVar["enemyInRange"][range] = result
-	IWin:Debug("Enemies in "..range.." range: "..tostring(result), debugmsg)
+				    	if spell == "meleeAutoAttack" then
+				    		local distance = UnitXP("distanceBetween", "player", unit, "meleeAutoAttack")
+				        	return distance and distance <= 5
+				        end
+				        if spellRange and spellRange > 0 then
+				            local distance = UnitXP("distanceBetween", "player", unit)
+				            return distance and distance <= spellRange
+				        end
+				        return CleveRoids.NampowerAPI.IsSpellInRange(spell, unit) == 1
+	    			end)
+    IWin_CombatVar["enemyInRange"][spell] = result
+	IWin:Debug("Enemies in "..tostring(spell).." range: "..tostring(result), debugmsg)
 	return result
 end
 
--- range values: static number, meleeAutoAttack
-function IWin:GetEnemyInFront(range, debugmsg)
-	if type(range) == "number" then return range end
-	local cached = IWin_CombatVar["enemyInFront"][range]
+-- spell values: meleeAutoAttack, spell name
+function IWin:GetEnemyInFront(spell, debugmsg)
+	local cached = IWin_CombatVar["enemyInFront"][spell]
 	if cached ~= nil then
-		IWin:Debug("Enemies in front in "..tostring(range)..": "..tostring(cached), debugmsg)
+		IWin:Debug("Enemies in front in "..tostring(spell).." range: "..tostring(cached), debugmsg)
 		return cached
 	end
+	local spellId = CleveRoids.NampowerAPI.GetSpellIdFromName(spell)
+    local spellRange = spellId and CleveRoids.NampowerAPI.GetSpellRange(spellId)
     local result = CleveRoids.CountEnemiesMatching(function(unit)
-    	local distance = UnitXP("distanceBetween", "player", unit, range)
-    	local facing = UnitXP("behind", unit, "player") ~= true
-        return distance and distance <= 5 and facing
-    end)
-    IWin_CombatVar["enemyInFront"][range] = result
-	IWin:Debug("Enemies in front in "..tostring(range)..": "..tostring(result), debugmsg)
+    					local facing = UnitXP("behind", unit, "player") ~= true
+    					if spell == "meleeAutoAttack" then
+				    		local distance = UnitXP("distanceBetween", "player", unit, "meleeAutoAttack")
+							return distance and distance <= 5 and facing
+						end
+						if spellRange and spellRange > 0 then
+				            local distance = UnitXP("distanceBetween", "player", unit)
+				            return distance and distance <= spellRange and facing
+				        end
+				        return CleveRoids.NampowerAPI.IsSpellInRange(spell, unit) == 1 and facing
+				    end)
+    IWin_CombatVar["enemyInFront"][spell] = result
+	IWin:Debug("Enemies in front in "..tostring(spell).." range: "..tostring(result), debugmsg)
 	return result
 end
 
