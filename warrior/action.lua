@@ -270,6 +270,15 @@ function IWin:ConcussionBlow()
 	end
 end
 
+function IWin:ConcussionBlowThreat()
+	local spell = "Concussion Blow"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:GetRagePerSecond() >= 20
+		and not IWin_CombatVar["slamQueued"] then
+			IWin:Cast(spell)
+	end
+end
+
 function IWin:DemoralizingShout(skipEnemyInRange)
 	local spell = "Demoralizing Shout"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
@@ -407,11 +416,11 @@ function IWin:ExecuteDefensiveTactics()
 		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
 			if IWin:IsStanceActive("Defensive Stance")
-				and IWin:IsDefensiveTacticsActive("Battle Stance") then
-					IWin:Cast("Battle Stance", false)
-			elseif IWin:IsStanceActive("Defensive Stance")
 				and IWin:IsDefensiveTacticsActive("Berserker Stance") then
 					IWin:Cast("Berserker Stance", false)
+			elseif IWin:IsStanceActive("Defensive Stance")
+				and IWin:IsDefensiveTacticsActive("Battle Stance") then
+					IWin:Cast("Battle Stance", false)
 			end
 			if IWin:IsStanceActive("Battle Stance")
 				or IWin:IsStanceActive("Berserker Stance") then
@@ -1352,8 +1361,8 @@ end
 function IWin:SetReservedRageWhirlwind(skipEnemyInRange)
 	local spell = "Whirlwind"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if skipEnemyInRange
-		or IWin:GetEnemyInRange("meleeAutoAttack", false) > 1 then
+	if not IWin:IsBlacklistAOEDamage()
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack", false) > 1) then
 			IWin:SetReservedRage(spell, "cooldown")
 	end
 end
@@ -1361,8 +1370,53 @@ end
 function IWin:SetReservedRageWhirlwindNotEnemyInRange(skipEnemyInRange)
 	local spell = "Whirlwind"
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
-	if skipEnemyInRange
-		or not (IWin:GetEnemyInRange("meleeAutoAttack", false) > 1) then
+	if not IWin:IsBlacklistAOEDamage()
+		and (skipEnemyInRange or not (IWin:GetEnemyInRange("meleeAutoAttack", false) > 1)) then
+			IWin:SetReservedRage(spell, "cooldown")
+	end
+end
+
+function IWin:WhirlwindDefensiveTactics(queueTime, skipEnemyInRange)
+	local spell = "Whirlwind"
+	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
+	if IWin:IsAffectingCombat("player")
+		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 1)
+		and IWin:IsReservedRageStance("Berserker Stance")
+		and not IWin:IsBlacklistAOEDamage()
+		and IWin:IsDefensiveTacticsStanceAvailable("Berserker Stance")
+		and not IWin_CombatVar["slamQueued"]
+		and IWin:IsTimeToReserveRage(spell, "cooldown") then
+			if not IWin:IsStanceActive("Berserker Stance") then
+				IWin:SetReservedRageStance("Berserker Stance")
+				IWin:SetReservedRageStanceCast()
+				IWin:Cast("Berserker Stance", false)
+			end
+			if IWin:IsInRange("Rend")
+				and IWin:IsStanceActive("Berserker Stance") then
+					IWin:SetReservedRageStance("Berserker Stance")
+					if IWin:IsRageAvailable(spell) then
+						IWin:Cast(spell)
+					end
+			end
+	end
+end
+
+function IWin:SetReservedRageWhirlwindDefensiveTactics(skipEnemyInRange)
+	local spell = "Whirlwind"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack", false) > 1)
+		and not IWin:IsBlacklistAOEDamage()
+		and IWin:IsDefensiveTacticsStanceAvailable("Berserker Stance") then
+			IWin:SetReservedRage(spell, "cooldown")
+	end
+end
+
+function IWin:SetReservedRageWhirlwindDefensiveTacticsNotEnemyInRange(skipEnemyInRange)
+	local spell = "Whirlwind"
+	if not IWin:IsSpellLearnt(spell, nil, false) then return end
+	if not IWin:IsBlacklistAOEDamage()
+		and (skipEnemyInRange or not (IWin:GetEnemyInRange("meleeAutoAttack", false) > 1))
+		and IWin:IsDefensiveTacticsStanceAvailable("Berserker Stance") then
 			IWin:SetReservedRage(spell, "cooldown")
 	end
 end
