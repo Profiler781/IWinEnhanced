@@ -412,7 +412,7 @@ function IWin:ExecuteDefensiveTactics()
 	local spell = "Execute"
 	if IWin:IsSpellSkip(spell, nil, true, queueTime, true) then return end
 	if IWin:IsExecutePhase()
-		and IWin:IsDefensiveTacticsActive()
+		and IWin:IsDefensiveTacticsAvailable()
 		and IWin:IsRageAvailable(spell)
 		and not IWin_CombatVar["slamQueued"] then
 			if IWin:IsStanceActive("Defensive Stance")
@@ -732,7 +732,7 @@ function IWin:OverpowerDefensiveTactics()
 		)
 		and IWin:IsRageCostAvailable(spell)
 		and IWin:IsReservedRageStance("Battle Stance")
-		and IWin:IsDefensiveTacticsStanceAvailable("Battle Stance")
+		and IWin:IsDefensiveTacticsActive("Battle Stance")
 		and not IWin_CombatVar["slamQueued"] then
 			if IWin:IsOverpowerAvailable(1)
 				and not IWin:IsStanceActive("Battle Stance")
@@ -847,25 +847,22 @@ function IWin:Revenge()
 	if IWin:IsReservedRageStance("Defensive Stance")
 		and IWin:IsRageCostAvailable(spell)
 		and not IWin_CombatVar["slamQueued"]
-		and (
-				not IWin:IsDefensiveTacticsAvailable()
-				or IWin:IsDefensiveTacticsStanceAvailable("Defensive Stance")
-			) then
-				if IWin:IsRevengeAvailable(1)
-					and not IWin:IsStanceActive("Defensive Stance")
-					and (
-							IWin:IsStanceSwapMaxRageLoss(5)
-							or IWin:IsPVP("target")
-						) then
-							IWin:SetReservedRageStance("Defensive Stance")
-							IWin:SetReservedRageStanceCast()
-							IWin:Cast("Defensive Stance", false)
-				end
-				if IWin:IsRevengeAvailable(0)
-					and IWin:IsStanceActive("Defensive Stance") then
+		and IWin:IsDefensiveTacticsActive("Defensive Stance") then
+			if IWin:IsRevengeAvailable(1)
+				and not IWin:IsStanceActive("Defensive Stance")
+				and (
+						IWin:IsStanceSwapMaxRageLoss(5)
+						or IWin:IsPVP("target")
+					) then
 						IWin:SetReservedRageStance("Defensive Stance")
-						IWin:Cast(spell)
-				end
+						IWin:SetReservedRageStanceCast()
+						IWin:Cast("Defensive Stance", false)
+			end
+			if IWin:IsRevengeAvailable(0)
+				and IWin:IsStanceActive("Defensive Stance") then
+					IWin:SetReservedRageStance("Defensive Stance")
+					IWin:Cast(spell)
+			end
 	end
 end
 
@@ -1198,7 +1195,7 @@ function IWin:TankStance()
 				not IWin:IsDefensiveTacticsAvailable()
 				or (
 						not IWin:IsDefensiveTacticsActive()
-						and IWin:IsDefensiveTacticsStanceAvailable(spell)
+						and IWin:IsDefensiveTacticsActive(spell)
 					)
 			)
 		and IWin:IsAffectingCombat("player")
@@ -1212,14 +1209,14 @@ function IWin:TankStance()
 					)
 				or (
 						not IWin:IsDefensiveTacticsActive()
-						and IWin:IsDefensiveTacticsStanceAvailable("Battle Stance")
+						and IWin:IsDefensiveTacticsActive("Battle Stance")
 					)
 			)
 		and not IWin:IsStanceActive("Battle Stance") then
 			IWin:Cast("Battle Stance", false)
 	elseif IWin:IsSpellLearnt("Berserker Stance")
 		and not IWin:IsDefensiveTacticsActive()
-		and IWin:IsDefensiveTacticsStanceAvailable("Berserker Stance")
+		and IWin:IsDefensiveTacticsActive("Berserker Stance")
 		and not IWin:IsStanceActive("Berserker Stance") then
 			IWin:Cast("Berserker Stance", false)
 	end
@@ -1383,7 +1380,7 @@ function IWin:WhirlwindDefensiveTactics(queueTime, skipEnemyInRange)
 		and (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack") > 1)
 		and IWin:IsReservedRageStance("Berserker Stance")
 		and not IWin:IsBlacklistAOEDamage()
-		and IWin:IsDefensiveTacticsStanceAvailable("Berserker Stance")
+		and IWin:IsDefensiveTacticsActive("Berserker Stance")
 		and not IWin_CombatVar["slamQueued"]
 		and IWin:IsTimeToReserveRage(spell, "cooldown") then
 			if not IWin:IsStanceActive("Berserker Stance") then
@@ -1406,7 +1403,7 @@ function IWin:SetReservedRageWhirlwindDefensiveTactics(skipEnemyInRange)
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
 	if (skipEnemyInRange or IWin:GetEnemyInRange("meleeAutoAttack", false) > 1)
 		and not IWin:IsBlacklistAOEDamage()
-		and IWin:IsDefensiveTacticsStanceAvailable("Berserker Stance") then
+		and IWin:IsDefensiveTacticsActive("Berserker Stance") then
 			IWin:SetReservedRage(spell, "cooldown")
 	end
 end
@@ -1416,7 +1413,7 @@ function IWin:SetReservedRageWhirlwindDefensiveTacticsNotEnemyInRange(skipEnemyI
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
 	if not IWin:IsBlacklistAOEDamage()
 		and (skipEnemyInRange or not (IWin:GetEnemyInRange("meleeAutoAttack", false) > 1))
-		and IWin:IsDefensiveTacticsStanceAvailable("Berserker Stance") then
+		and IWin:IsDefensiveTacticsActive("Berserker Stance") then
 			IWin:SetReservedRage(spell, "cooldown")
 	end
 end

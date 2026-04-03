@@ -104,45 +104,35 @@ function IWin:IsDefensiveTacticsActive(stance, debugmsg)
 	if IWin:IsDefensiveTacticsAvailable(false)
 		and (
 				(
-					IWin_Settings["dtBattle"] == "on"
-					and dtStance == "Battle Stance"
+					dtStance == "Battle Stance"
+					and (
+							IWin_Settings["dtBattle"] == "on"
+							or (
+									IWin_Settings["dtBattle"] == "execute"
+									and IWin:IsExecutePhase(false)
+								)
+						)
 				) or (
-					IWin_Settings["dtDefensive"] == "on"
-					and dtStance == "Defensive Stance"
+					dtStance == "Defensive Stance"
 					and IWin:IsSpellLearnt("Defensive Stance", nil, false)
+					and IWin_Settings["dtDefensive"] == "on"
 				) or (
-					IWin_Settings["dtBerserker"] == "on"
-					and dtStance == "Berserker Stance"
+					dtStance == "Berserker Stance"
 					and IWin:IsSpellLearnt("Berserker Stance", nil, false)
+					and (
+							IWin_Settings["dtBerserker"] == "on"
+							or (
+									IWin_Settings["dtBerserker"] == "whirlwind"
+									and IWin:IsTimeToReserveRage("Whirlwind", "cooldown", nil, false)
+									and IWin:GetEnemyInRange("meleeAutoAttack", false) > 1
+								)
+						)
 				)
 			) then
 				IWin:Debug(dtStance.." allowed for Defensive Tactics: true", debugmsg)
 				return true
 	end
 	IWin:Debug(dtStance.." allowed for Defensive Tactics: false", debugmsg)
-	return false
-end
-
-function IWin:IsDefensiveTacticsStanceAvailable(stance, debugmsg)
-	if IWin:IsDefensiveTacticsAvailable(false)
-		and (
-				(
-					IWin_Settings["dtBattle"] == "on"
-					and stance == "Battle Stance"
-				) or (
-					IWin_Settings["dtDefensive"] == "on"
-					and stance == "Defensive Stance"
-					and IWin:IsSpellLearnt("Defensive Stance", nil, false)
-				) or (
-					IWin_Settings["dtBerserker"] == "on"
-					and stance == "Berserker Stance"
-					and IWin:IsSpellLearnt("Berserker Stance", nil, false)
-				)
-			) then
-				IWin:Debug(stance.." allowed for Defensive Tactics: true", debugmsg)
-				return true
-	end
-	IWin:Debug(stance.." allowed for Defensive Tactics: false", debugmsg)
 	return false
 end
 

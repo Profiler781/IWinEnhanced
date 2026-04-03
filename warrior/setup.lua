@@ -123,6 +123,7 @@ function SlashCmdList.IWINWARRIOR(command)
 	elseif arguments[1] == "dtbattle" then
 		if arguments[2] ~= nil
 			and arguments[2] ~= "on"
+			and arguments[2] ~= "execute"
 			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
@@ -137,6 +138,7 @@ function SlashCmdList.IWINWARRIOR(command)
 	elseif arguments[1] == "dtberserker" then
 		if arguments[2] ~= nil
 			and arguments[2] ~= "on"
+			and arguments[2] ~= "whirlwind"
 			and arguments[2] ~= "off" then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
 				return
@@ -275,9 +277,9 @@ function SlashCmdList.IWINWARRIOR(command)
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin chargewl [|r" .. IWin_Settings["chargewl"] .. "|cff0066ff]:|r Use Charge, Intercept and Intervene if the target is whitelisted.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin sunder [|r" .. IWin_Settings["sunder"] .. "|cff0066ff]:|r Use Sunder Armor priority as DPS. Possible values: high, once, low, off.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin demo [|r" .. IWin_Settings["demo"] .. "|cff0066ff]:|r Use Demoralizing Shout.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtbattle [|r" .. IWin_Settings["dtBattle"] .. "|cff0066ff]:|r Use Battle stance with Defensive Tactics.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtbattle [|r" .. IWin_Settings["dtBattle"] .. "|cff0066ff]:|r Use Battle stance with Defensive Tactics freely or only for Execute phase.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtdefensive [|r" .. IWin_Settings["dtDefensive"] .. "|cff0066ff]:|r Use Defensive stance with Defensive Tactics.")
-		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtberserker [|r" .. IWin_Settings["dtBerserker"] .. "|cff0066ff]:|r Use Berserker stance with Defensive Tactics.")
+		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin dtberserker [|r" .. IWin_Settings["dtBerserker"] .. "|cff0066ff]:|r Use Berserker stance with Defensive Tactics freely or only for Whirlwind AOE.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin ragebuffer [|r" .. tostring(IWin_Settings["rageTimeToReserveBuffer"]) .. "|cff0066ff]:|r Save 100% required rage for spells X seconds before the spells are used. 1.5 is the default parameter.")
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin ragegain [|r" .. tostring(IWin_Settings["ragePerSecondPrediction"]) .. "|cff0066ff]:|r Initial rage per second estimate (seed for dynamic RLS tracking). Current dynamic value: " .. tostring(IWin:GetRagePerSecond(false)))
 		DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff /iwin jousting [|r" .. IWin_Settings["jousting"] .. "|cff0066ff]:|r Use Hamstring to joust with target in solo DPS.")

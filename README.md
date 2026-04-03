@@ -10,6 +10,8 @@ Contributors: Vlad/Goodnice - Tel'Abim, Jrc13245/Torio
 
 ## Latest features
 
+- /iwin dtbattle execute to swap to battle stance only for execute.
+- /iwin dtberserker whirlwind to swap to berserker stance only to aoe.
 - /ihodor and /icleave for warrior, druid, paladin removed.
 - /itank and /idps for warrior, druid, paladin handles multi target.
 - /itankfocus and /idpsfocus for warrior, druid, paladin forces single target.
@@ -196,9 +198,9 @@ Example: /iwin bladeflurry off
     /iwin chargewl <toggle>                     Use Charge, Intercept and Intervene if the target is whitelisted.
     /iwin sunder <priority>                     Use Sunder Armor priority as DPS.
     /iwin demo <toggle>                         Use Demoralizing Shout.
-    /iwin dtbattle <toggle>                     Use Battle stance with Defensive Tactics.
+    /iwin dtbattle <dtbattleOption>             Use Battle stance with Defensive Tactics freely or only for Execute phase.
     /iwin dtdefensive <toggle>                  Use Defensive stance with Defensive Tactics.
-    /iwin dtberserker <toggle>                  Use Berserker stance with Defensive Tactics.
+    /iwin dtberserker <dtberserkerOption>       Use Berserker stance with Defensive Tactics freely or only for Whirlwind AOE.
     /iwin ragebuffer <number>                   Save 100% required rage for spells X seconds before the spells are used.
     /iwin ragegain <number>                     Initial rage per second estimate (seed for dynamic RLS tracking).
     /iwin jousting <toggle>                     Use Hamstring to joust with target in solo DPS.
@@ -210,6 +212,10 @@ Example: /iwin bladeflurry off
 priority possible values: high, once, low, off.
 
 toggle possible values: on, off.
+
+dtbattleOption possible values: on, execute, off.
+
+dtberserkerOption possible values: on, whirlwind, off.
 
 number possible values: 0 or more.
 
