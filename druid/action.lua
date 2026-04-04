@@ -620,6 +620,7 @@ function IWin:Shred()
 				IWin:GetBleedCount() < 2
 				or IWin:IsBuffActive("player", "Clearcasting")
 				or IWin:IsBuffActive("player", "Berserk")
+				or IWin:IsBuffActive("player", "Essence of the Red")
 				or IWin:GetTalentRank("Open Wounds") == 0
 			)
 		and IWin:IsEnergyAvailable(spell) then

@@ -51,17 +51,25 @@ function IWin:GetEnergyTickAncientBrutality(debugmsg)
 	return result
 end
 
+function IWin:GetEnergyTickEssenceOfTheRed(debugmsg)
+	local result = IWin:IsBuffActive("player", "Essence of the Red", nil, false) and 50 or 0
+	IWin:Debug("Energy tick Essence of the Red: "..tostring(result), debugmsg)
+	return result
+end
+
 function IWin:GetEnergyPerSecond(debugmsg)
 	local energyNatural = 20 / IWin:GetEnergyTickTime(false)
 	local energyTigersFury = IWin:GetEnergyTickTigersFury(false) / 3
 	local energyAncientBrutality = IWin:GetEnergyTickAncientBrutality(false) / 3
-	local result = energyNatural + energyTigersFury + energyAncientBrutality
+	local energyEssenceOfTheRed = IWin:GetEnergyTickEssenceOfTheRed(false)
+	local result = energyNatural + energyTigersFury + energyAncientBrutality + energyEssenceOfTheRed
 	IWin:Debug("Energy per second: "..tostring(result), debugmsg)
 	return result
 end
 
 function IWin:GetTimeToEnergyMax(debugmsg)
-	local energyToMax = IWin:GetPowerMax("player", false) - IWin:GetPower("player", false) - IWin:GetEnergyTickTigersFury(false) - IWin:GetEnergyTickAncientBrutality(false)
+	local energyEssenceOfTheRed = IWin:IsBuffActive("player", "Essence of the Red", nil, false) and 50 or 0
+	local energyToMax = IWin:GetPowerMax("player", false) - IWin:GetPower("player", false) - IWin:GetEnergyTickTigersFury(false) - IWin:GetEnergyTickAncientBrutality(false) - IWin:GetEnergyTickEssenceOfTheRed(false)
 	if energyToMax <= 0 then
 		IWin:Debug("Time to maximum energy: 0", debugmsg)
 		return 0

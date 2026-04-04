@@ -50,15 +50,21 @@ function IWin:GetRuptureDuration(debugmsg)
 	return result
 end
 
+function IWin:GetEnergyTickEssenceOfTheRed(debugmsg)
+	local result = IWin:IsBuffActive("player", "Essence of the Red", nil, false) and 50 or 0
+	IWin:Debug("Energy tick Essence of the Red: "..tostring(result), debugmsg)
+	return result
+end
+
 function IWin:GetEnergyPerSecond(debugmsg)
-	local result = IWin_RotationVar["energyTick"] / IWin_RotationVar["energyTickTime"]
+	local result = IWin_RotationVar["energyTick"] / IWin_RotationVar["energyTickTime"] + IWin:GetEnergyTickEssenceOfTheRed(false)
 	IWin:Debug("Energy per second: "..tostring(result), debugmsg)
 	return result
 end
 
 function IWin:GetTimeToEnergyMax(debugmsg)
-	local energyToMax = IWin:GetPowerMax("player", false) - IWin:GetPower("player", false)
-	if energyToMax == 0 then
+	local energyToMax = IWin:GetPowerMax("player", false) - IWin:GetPower("player", false) - IWin:GetEnergyTickEssenceOfTheRed(false)
+	if energyToMax <= 0 then
 		IWin:Debug("Time to maximum energy: 0", debugmsg)
 		return 0
 	end
