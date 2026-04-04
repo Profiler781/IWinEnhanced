@@ -1190,17 +1190,19 @@ end
 function IWin:TankStance()
 	local spell = "Defensive Stance"
 	IWin:Debug("+++ checking conditions: "..spell, debugmsg)
-	if IWin:IsSpellLearnt(spell)
+	if IWin:IsSpellLearnt("Berserker Stance")
 		and (
-				not IWin:IsDefensiveTacticsAvailable()
+					(
+						not IWin:IsDefensiveTacticsAvailable()
+						and not IWin:IsSpellLearnt(spell)
+					)
 				or (
 						not IWin:IsDefensiveTacticsActive()
-						and IWin:IsDefensiveTacticsActive(spell)
+						and IWin:IsDefensiveTacticsActive("Berserker Stance")
 					)
 			)
-		and IWin:IsAffectingCombat("player")
-		and not IWin:IsStanceActive(spell) then
-			IWin:Cast(spell, false)
+		and not IWin:IsStanceActive("Berserker Stance") then
+			IWin:Cast("Berserker Stance", false)
 	elseif IWin:IsSpellLearnt("Battle Stance")
 		and (
 					(
@@ -1214,11 +1216,17 @@ function IWin:TankStance()
 			)
 		and not IWin:IsStanceActive("Battle Stance") then
 			IWin:Cast("Battle Stance", false)
-	elseif IWin:IsSpellLearnt("Berserker Stance")
-		and not IWin:IsDefensiveTacticsActive()
-		and IWin:IsDefensiveTacticsActive("Berserker Stance")
-		and not IWin:IsStanceActive("Berserker Stance") then
-			IWin:Cast("Berserker Stance", false)
+	elseif IWin:IsSpellLearnt(spell)
+		and (
+				not IWin:IsDefensiveTacticsAvailable()
+				or (
+						not IWin:IsDefensiveTacticsActive()
+						and IWin:IsDefensiveTacticsActive(spell)
+					)
+			)
+		and IWin:IsAffectingCombat("player")
+		and not IWin:IsStanceActive(spell) then
+			IWin:Cast(spell, false)
 	end
 end
 
