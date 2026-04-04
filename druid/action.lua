@@ -296,15 +296,11 @@ function IWin:Powershift()
 					and IWin:GetPowerType("player") == "rage"
 				)
 			)
-		and IWin:GetBuffRemaining("player", "Tiger's Fury") < 7
 		and (
-					IWin:GetPlayerDruidManaPercent() > 70
-				or (
-						IWin:GetGroupSize() > 2
-						and IWin:IsDruidManaAvailable("Reshift")
-						and IWin:GetPlayerDruidManaPercent() > 20
-					)
-			) then
+				IWin:GetBuffRemaining("player", "Tiger's Fury") < 7
+				or IWin:IsShredBurstAvailable()
+			)
+		and IWin:IsPowershiftManaAvailable() then
 				IWin:Reshift()
 	end
 end
@@ -656,8 +652,15 @@ function IWin:TigersFury()
 	if not IWin:IsBuffActive("player", spell)
 		and IWin:GetTalentRank("Blood Frenzy") ~= 0
 		and (
-				IWin:GetTimeToDie() > 6
-				or not IWin:IsExists("target")
+				not IWin:IsShredBurstAvailable()
+				or not IWin:IsBuffActive("player", "Blood Frenzy")
+				or (
+						IWin:GetPower("player") == IWin:GetPowerMax("player")
+						and (
+								not IWin:IsAffectingCombat("player")
+								or not IWin:IsInRange()
+							)
+					)
 			)
 		and IWin:IsEnergyAvailable(spell) then
 			IWin:Cast(spell, false)
@@ -669,8 +672,15 @@ function IWin:SetReservedEnergyTigersFury()
 	if not IWin:IsSpellLearnt(spell, nil, false) then return end
 	if IWin:GetTalentRank("Blood Frenzy", false) ~= 0
 		and (
-				IWin:GetTimeToDie(false) > 6
-				or not IWin:IsExists("target", false)
+				not IWin:IsShredBurstAvailable(false)
+				or not IWin:IsBuffActive("player", "Blood Frenzy", nil, false)
+				or (
+						IWin:GetPower("player", false) == IWin:GetPowerMax("player", false)
+						and (
+								not IWin:IsAffectingCombat("player", false)
+								or not IWin:IsInRange(nil, nil, nil, false)
+							)
+					)
 			) then
 				IWin:SetReservedEnergy(spell, "buff", "player")
 	end

@@ -72,17 +72,6 @@ function IWin:GetBuffRemaining(unit, spell, owner, debugmsg)
 		return cached
 	end
 	-- Debuff scan
-	  if not owner then
-	    local targetGuid = CleveRoids.GetGUID(unit)
-	    if targetGuid then
-	    	local timeLeft = CleveRoids.FindAllCasterAuraByName(targetGuid, spell)
-	    	if timeLeft then
-	    		IWin:Debug("Debuff remaining "..spell.." on "..unit..": "..tostring(timeLeft), debugmsg)
-	    		IWin_CombatVar["buffRemaining"][cacheKey] = timeLeft
-	    		return timeLeft
-	    	end
-	    end
-	end
 	for index = 1, 48 do
 	    local effect, _, _, _, _, _, timeLeft = CleveRoids.libdebuff:UnitDebuff(unit, index, owner)
 	    if effect and effect == spell then
@@ -943,7 +932,7 @@ function IWin:IsInRange(spell, distance, unit, debugmsg)
 		return cached
 	end
 	if not IWin:IsExists(unit, false) then
-		IWin:Debug("No range for unkown "..unit, debugmsg)
+		IWin:Debug("No range for unknown "..unit, debugmsg)
 		IWin_CombatVar["inRange"][cacheKey] = false
 		return false
 	end

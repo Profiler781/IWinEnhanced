@@ -71,3 +71,27 @@ function IWin:GetTimeToEnergyMax(debugmsg)
 	IWin:Debug("Time to maximum energy: "..tostring(result), debugmsg)
 	return result
 end
+
+function IWin:IsPowershiftManaAvailable(debugmsg)
+	local result = IWin:GetPlayerDruidManaPercent(false) > 60
+					or (
+							IWin:GetGroupSize(false) > 2
+							and IWin:IsDruidManaAvailable("Reshift", false)
+							and IWin:GetPlayerDruidManaPercent(false) > 20
+						)
+	IWin:Debug("Mana available for powershift: "..tostring(result), debugmsg)
+	return result
+end
+
+function IWin:IsShredBurstAvailable(debugmsg)
+	local result = IWin:IsSpellLearnt("Shred", nil, false)
+					and IWin:IsExists("target", false)
+					and IWin:IsBehind(false)
+					and IWin:IsPowershiftManaAvailable(false)
+					and (
+							IWin:GetTimeToDie(false) < 20
+							or IWin:IsImmune("target", "bleed", false)
+						)
+	IWin:Debug("Shred burst available: "..tostring(result), debugmsg)
+	return result
+end

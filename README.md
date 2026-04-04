@@ -10,6 +10,7 @@ Contributors: Vlad/Goodnice - Tel'Abim, Jrc13245/Torio
 
 ## Latest features
 
+- druid shred burst conditions
 - /iwin dtbattle execute to swap to battle stance only for execute.
 - /iwin dtberserker whirlwind to swap to berserker stance only to aoe.
 - /ihodor and /icleave for warrior, druid, paladin removed.
@@ -48,6 +49,7 @@ Optionnal Addons:
     /ihydrate       Use conjured or vendor water
     /inuke          Use cooldowns, trinkets and consumables
     /iconsumable    Use consumables
+    /iconsumableaoe Use AOE consumables
     /itrinket       Use trinkets
     /icdshort       Use short cooldowns
 
@@ -91,6 +93,7 @@ Example: /iwin frontshred on
     /ihydrate       Use conjured or vendor water
     /inuke          Use cooldowns, trinkets and consumables
     /iconsumable    Use consumables
+    /iconsumableaoe Use AOE consumables
     /itrinket       Use trinkets
     /icdshort       Use short cooldowns
 
@@ -136,6 +139,7 @@ Example: /iwin wisdom boss
     /ikick          Use Kick or Deadly Throw while the target is casting
     /inuke          Use cooldowns, trinkets and consumables
     /iconsumable    Use consumables
+    /iconsumableaoe Use AOE consumables
     /itrinket       Use trinkets
     /icdshort       Use short cooldowns
 
@@ -176,6 +180,7 @@ Example: /iwin bladeflurry off
     /ishoot         Shoot with bow, crossbow, gun or throw
     /inuke          Use cooldowns, trinkets and consumables
     /iconsumable    Use consumables
+    /iconsumableaoe Use AOE consumables
     /itrinket       Use trinkets
     /icdshort       Use short cooldowns
     /icdlong        Use long cooldowns
