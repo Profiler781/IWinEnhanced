@@ -9,13 +9,6 @@ function IWin:InitializeRotation()
 			IWin_RotationVar["lastMoonkinSpell"] = "Wrath"
 		end
 	end
-	IWin_CombatVar["energyPerSecondPrediction"] = IWin_Settings["energyPerSecondPrediction"]
-	if IWin:IsBuffActive("player", "Tiger's Fury", nil, false) then
-		IWin_CombatVar["energyPerSecondPrediction"] = IWin_CombatVar["energyPerSecondPrediction"] + 3.3
-	end
-	if IWin:IsBuffActive("player", "Berserk", nil, false) then
-		IWin_CombatVar["energyPerSecondPrediction"] = IWin_CombatVar["energyPerSecondPrediction"] + IWin_Settings["energyPerSecondPrediction"]
-	end
 end
 
 ---- Class Actions ----
