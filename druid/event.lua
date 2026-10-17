@@ -48,7 +48,7 @@ IWin:SetScript("OnEvent", function()
 		IWin_RLS_lastRage = nil
 	elseif event == "SPELLCAST_START" and (arg1 == "Wrath" or arg1 == "Starfire") then
 		IWin_RotationVar["lastMoonkinSpell"] = arg1
-		IWin_RotationVar["lastMoonkinSpellTime"] = IWin:GetTime(false) + (arg2 / 1000)
+		IWin_RotationVar["lastMoonkinSpellTime"] = GetTime() + (arg2 / 1000)
 	elseif event == "SPELLS_CHANGED" then
 		IWin:UpdateSpellCost()
 	elseif event == "UNIT_ENERGY" and arg1 == "player" then
@@ -57,11 +57,11 @@ IWin:SetScript("OnEvent", function()
 		IWin_RotationVar["energyLastTick"] = currentEnergy
 		-- Natural tick
 		if energyDelta == 20 then
-			IWin_RotationVar["energyNextTickTime"] = IWin:GetTime(false) + IWin:GetEnergyTickTime(false)
+			IWin_RotationVar["energyNextTickTime"] = GetTime() + IWin:GetEnergyTickTime(false)
 		end
 		-- Tiger's Fury tick
 		if energyDelta == 10 then
-			IWin_RotationVar["energyNextTickTimeTF"] = IWin:GetTime(false) + 3
+			IWin_RotationVar["energyNextTickTimeTF"] = GetTime() + 3
 		end
 	elseif event == "UNIT_INVENTORY_CHANGED" and arg1 == "player" and not UnitAffectingCombat("player") then
 		IWin:UpdateSpellCost()
