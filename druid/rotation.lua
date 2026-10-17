@@ -131,8 +131,8 @@ end
 
 SLASH_ICHASEDRUID1 = "/ichase"
 function SlashCmdList.ICHASEDRUID()
-	IWin:TargetEnemy()
 	IWin:InitializeRotation()
+	IWin:TargetEnemy()
 	IWin:CancelRootReact()
 	IWin:CancelSnare()
 	IWin:TravelForm()
@@ -141,8 +141,8 @@ end
 
 SLASH_IRUNDRUID1 = "/irun"
 function SlashCmdList.IRUNDRUID()
-	IWin:TargetEnemy()
 	IWin:InitializeRotation()
+	IWin:TargetEnemy()
 	--IWin:NaturesGrasp() --outdoors test missing
 	IWin:CancelRootReact()
 	IWin:CancelSnareReact()
@@ -152,8 +152,8 @@ end
 
 SLASH_ITAUNTDRUID1 = "/itaunt"
 function SlashCmdList.ITAUNTDRUID()
-	IWin:TargetEnemy()
 	IWin:InitializeRotation()
+	IWin:TargetEnemy()
 	IWin:BearForm()
 	IWin:Growl()
 	IWin:StartAttack()

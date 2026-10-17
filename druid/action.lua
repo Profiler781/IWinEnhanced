@@ -365,7 +365,7 @@ function IWin:Maul()
 	if IWin:IsSpellSkip(spell, nil, false, queueTime, true) then return end
 	if IWin:IsRageAvailable(spell) then
 		IWin_CombatVar["swingAttackQueued"] = true
-		IWin_CombatVar["startAttackThrottle"] = IWin:GetTime() + 0.2
+		IWin_RotationVar["startAttackThrottle"] = IWin:GetTime() + 0.2
 		IWin:Cast(spell, false)
 	end
 end
