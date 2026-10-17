@@ -84,8 +84,9 @@ function IWin:GetBuffRemaining(unit, spell, owner, debugmsg)
 	-- Buff scan only for player
 	if unit == "player" then
 		for index = 0, 31 do
-	        spellID = GetPlayerBuffID(index)
+	        local spellID = GetPlayerBuffID(index)
 	        if not spellID then break end
+	        spellID = (spellID < -1) and (spellID + 65536) or spellID
 	        if spell == SpellInfo(spellID) then
 	        	local timeLeft = GetPlayerBuffTimeLeft(index)
 	        	if timeLeft and timeLeft ~= 0 then
@@ -207,7 +208,7 @@ function IWin:GetBuffStack(unit, spell, owner, debugmsg)
 		end
 		local index = IWin:GetPlayerBuffIndex(spell)
 		if index then
-			local _, stack = UnitBuff(unit, index)
+			local stack = GetPlayerBuffApplications(index)
 			local result = stack or 0
 			IWin:Debug("Player Buff "..spell.." stacks on "..unit..": "..tostring(result), debugmsg)
 			IWin_CombatVar["buffStack"][cacheKey] = result
@@ -298,9 +299,9 @@ function IWin:GetSpellSpellbookID(spell, rank)
     end
     local spellID = 1
     while true do
-        local spellName, spellRank = GetSpellName(spellID, "BOOKTYPE_SPELL")
+        local spellName, spellRank = GetSpellName(spellID, BOOKTYPE_SPELL)
         if not spellName then break end
-        if spellName == spell and ((not rank) or spellRank == rank) and (rank ~= nil or spellName ~= GetSpellName(spellID + 1, "BOOKTYPE_SPELL")) then
+        if spellName == spell and ((not rank) or spellRank == rank) and (rank ~= nil or spellName ~= GetSpellName(spellID + 1, BOOKTYPE_SPELL)) then
         	IWin_Spellbook[cacheKey] = spellID
             return spellID
         end
@@ -318,7 +319,7 @@ function IWin:GetCooldownRemaining(spell, debugmsg)
 	end
 	local spellID = IWin:GetSpellSpellbookID(spell)
 	if not spellID then return false end
-	local start, duration = GetSpellCooldown(spellID, "BOOKTYPE_SPELL")
+	local start, duration = GetSpellCooldown(spellID, BOOKTYPE_SPELL)
 	if start ~= 0 and duration ~= IWin_Settings["GCD"] then
 		local result = duration - (IWin:GetTime(false) - start)
 		IWin:Debug("Cooldown "..spell.." remaining: "..tostring(result), debugmsg)
@@ -422,7 +423,7 @@ function IWin:GetCastTime(spell, debugmsg)
 
     IWin_T:SetOwner(WorldFrame, "ANCHOR_NONE")
     IWin_T:ClearLines()
-	IWin_T:SetSpell(spellID, "BOOKTYPE_SPELL")
+	IWin_T:SetSpell(spellID, BOOKTYPE_SPELL)
 
     -- Scan tooltip lines for cast time
     for i = 1, IWin_T:NumLines() do
@@ -482,6 +483,7 @@ function IWin:GetSpellNameMaxRank(spell, debugmsg)
 		IWin:Debug("Unknown spell: "..spell, debugmsg)
 		return nil
 	end
+	local spellNameMaxRank = spell
 	local rank = 1
 	while true do
 		local rankName = "Rank " .. tostring(rank)
@@ -651,7 +653,7 @@ function IWin:GetTimeToExecute(debugmsg)
 		tte = TimeToKill.GetTTE() - 1
 	end
 	IWin_CombatVar["timeToExecute"] = tte
-	IWin:Debug("Target time to execute: "..tostring(ttd), debugmsg)
+	IWin:Debug("Target time to execute: "..tostring(tte), debugmsg)
 	return tte
 end
 
@@ -664,49 +666,49 @@ function IWin:GetPowerType(unit, debugmsg)
 	end
 	local result = IWin_PowerType[UnitPowerType(unit)]
 	IWin_CombatVar["powerType"][unit] = result
-	IWin:Debug(unit.." power type: "..result, debugmsg)
+	IWin:Debug(unit.." power type: "..tostring(result), debugmsg)
 	return result
 end
 
 function IWin:GetPower(unit, debugmsg)
 	local cached = IWin_CombatVar["power"][unit]
 	if cached ~= nil then
-		IWin:Debug(unit.." "..IWin:GetPowerType(unit, false)..": "..tostring(cached), debugmsg)
+		IWin:Debug(unit.." "..tostring(IWin:GetPowerType(unit, false))..": "..tostring(cached), debugmsg)
 		return cached
 	end
 	local result = UnitMana(unit)
 	IWin_CombatVar["power"][unit] = result
-	IWin:Debug(unit.." "..IWin:GetPowerType(unit, false)..": "..tostring(result), debugmsg)
+	IWin:Debug(unit.." "..tostring(IWin:GetPowerType(unit, false))..": "..tostring(result), debugmsg)
 	return result
 end
 
 function IWin:GetPowerMax(unit, debugmsg)
 	local cached = IWin_CombatVar["powerMax"][unit]
 	if cached ~= nil then
-		IWin:Debug(unit.." "..IWin:GetPowerType(unit, false)..": "..tostring(cached), debugmsg)
+		IWin:Debug(unit.." "..tostring(IWin:GetPowerType(unit, false))..": "..tostring(cached), debugmsg)
 		return cached
 	end
 	local result = UnitManaMax(unit)
 	IWin_CombatVar["powerMax"][unit] = result
-	IWin:Debug(unit.." "..IWin:GetPowerType(unit, false)..": "..tostring(result), debugmsg)
+	IWin:Debug(unit.." "..tostring(IWin:GetPowerType(unit, false))..": "..tostring(result), debugmsg)
 	return result
 end
 
 function IWin:GetPowerPercent(unit, debugmsg)
 	local cached = IWin_CombatVar["powerPercent"][unit]
 	if cached ~= nil then
-		IWin:Debug(unit.." "..IWin:GetPowerType(unit, false).." %: "..tostring(cached), debugmsg)
+		IWin:Debug(unit.." "..tostring(IWin:GetPowerType(unit, false)).." %: "..tostring(cached), debugmsg)
 		return cached
 	end
 	local result = UnitMana(unit) / UnitManaMax(unit) * 100
 	IWin_CombatVar["powerPercent"][unit] = result
-	IWin:Debug(unit.." "..IWin:GetPowerType(unit, false).." %: "..tostring(result), debugmsg)
+	IWin:Debug(unit.." "..tostring(IWin:GetPowerType(unit, false)).." %: "..tostring(result), debugmsg)
 	return result
 end
 
 function IWin:IsPowerAvailable(spell, debugmsg)
 	local result = UnitMana("player") >= IWin_ManaCost[spell]
-	IWin:Debug(IWin:GetPowerType(unit, false).." available for "..spell..": "..tostring(result), debugmsg)
+	IWin:Debug(tostring(IWin:GetPowerType("player", false)).." available for "..spell..": "..tostring(result), debugmsg)
 	return result
 end
 
