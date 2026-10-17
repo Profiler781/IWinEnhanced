@@ -30,7 +30,7 @@ function IWin:BlessingOfKings()
 		and not IWin:IsBuffActive("player", "Greater Blessing of Kings", nil, false)
 		and IWin:GetGroupSize(false) == 1
 		and IWin.hasPallyPower
-		and PallyPower_Assignments[IWin:GetName("player", false)][4] == 4 then
+		and IWin:GetPallyPowerBlessingAssignment() == 4 then
 			IWin:Cast(spell)
 	end
 end
@@ -42,7 +42,7 @@ function IWin:BlessingOfLight()
 		and not IWin:IsBuffActive("player", "Greater Blessing of Light", nil, false)
 		and IWin:GetGroupSize(false) == 1
 		and IWin.hasPallyPower
-		and PallyPower_Assignments[IWin:GetName("player", false)][4] == 3 then
+		and IWin:GetPallyPowerBlessingAssignment() == 3 then
 			IWin:Cast(spell)
 	end
 end
@@ -58,7 +58,7 @@ function IWin:BlessingOfMight()
 				)
 			or (
 					IWin.hasPallyPower
-					and PallyPower_Assignments[IWin:GetName("player", false)][4] == 1
+					and IWin:GetPallyPowerBlessingAssignment() == 1
 					and not IWin:IsBuffActive("player", spell, nil, false)
 					and not IWin:IsBuffActive("player", "Greater Blessing of Might", nil, false)
 				)
@@ -74,7 +74,7 @@ function IWin:BlessingOfSalvation()
 		and not IWin:IsBuffActive("player", "Greater Blessing of Salvation", nil, false)
 		and IWin:GetGroupSize(false) == 1
 		and IWin.hasPallyPower
-		and PallyPower_Assignments[IWin:GetName("player", false)][4] == 2 then
+		and IWin:GetPallyPowerBlessingAssignment() == 2 then
 			IWin:Cast(spell)
 	end
 end
@@ -87,7 +87,7 @@ function IWin:BlessingOfSanctuary()
 		and IWin:GetGroupSize(false) == 1
 		and (
 				not IWin.hasPallyPower
-				or PallyPower_Assignments[IWin:GetName("player", false)][4] == 5
+				or IWin:GetPallyPowerBlessingAssignment() == 5
 			) then
 				IWin:Cast(spell)
 	end
@@ -104,7 +104,7 @@ function IWin:BlessingOfWisdom()
 				)
 			or (
 					IWin.hasPallyPower
-					and PallyPower_Assignments[IWin:GetName("player", false)][4] == 0
+					and IWin:GetPallyPowerBlessingAssignment() == 0
 					and not IWin:IsBuffActive("player", spell, nil, false)
 					and not IWin:IsBuffActive("player", "Greater Blessing of Wisdom", nil, false)
 				)

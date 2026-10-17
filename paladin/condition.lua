@@ -16,6 +16,13 @@ function IWin:IsDPSWindow(cooldown)
 	return true
 end
 
+-- PallyPowerTW blessing assigned to the player, or nil when PallyPower has no entry for this paladin yet
+function IWin:GetPallyPowerBlessingAssignment()
+	if not IWin.hasPallyPower or not PallyPower_Assignments then return nil end
+	local assignments = PallyPower_Assignments[IWin:GetName("player", false)]
+	return assignments and assignments[4]
+end
+
 function IWin:IsJudgementTarget(judgement, debugmsg)
 	local targetClassification = IWin_Settings[judgement]
 	if (
