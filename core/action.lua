@@ -132,30 +132,33 @@ function IWin:UseItem(item)
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
 			local itemName = GetContainerItemLink(bag, slot)
-			if itemName and strfind(itemName,item) then
+			if itemName and string.find(itemName, item, 1, true) then
 				local start, duration = GetContainerItemCooldown(bag, slot)
 				if start == 0 or duration == 0 then
 					IWin:Debug("=> Using: "..item)
 					UseContainerItem(bag, slot)
-					return
+					return true
 				end
 			end
 		end
 	end
+	return false
 end
 
 function IWin:UseItemDrink()
+	if IWin:IsBuffActive("player", "Drink", nil, false) then return end
 	local playerLevel = IWin:GetLevel("player")
-	for drinkItem in IWin_DrinkConjured do
-		if IWin:IsBuffActive("player", "Drink", nil, false) then break end
-		if playerLevel >= IWin_DrinkConjured[drinkItem] then
-			IWin:UseItem(drinkItem)
+	for _, drinkTable in ipairs({IWin_DrinkConjured, IWin_DrinkVendor}) do
+		--highest level first, a single drink per press
+		local drinks = {}
+		for drinkItem in drinkTable do
+			if playerLevel >= drinkTable[drinkItem] then
+				table.insert(drinks, drinkItem)
+			end
 		end
-	end
-	for drinkItem in IWin_DrinkVendor do
-		if IWin:IsBuffActive("player", "Drink", nil, false) then break end
-		if playerLevel >= IWin_DrinkVendor[drinkItem] then
-			IWin:UseItem(drinkItem)
+		table.sort(drinks, function(a, b) return drinkTable[a] > drinkTable[b] end)
+		for _, drinkItem in ipairs(drinks) do
+			if IWin:UseItem(drinkItem) then return end
 		end
 	end
 end

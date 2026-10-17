@@ -1423,7 +1423,7 @@ function IWin:IsItemInBag(item, debugmsg)
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
 			local itemName = GetContainerItemLink(bag, slot)
-			if itemName and strfind(itemName,item) then
+			if itemName and string.find(itemName, item, 1, true) then
 				IWin:Debug("Item "..item.." is in inventory: true", debugmsg)
 				return true
 			end
@@ -1438,8 +1438,9 @@ function IWin:GetItemCountInBag(item, debugmsg)
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
 			local itemName = GetContainerItemLink(bag, slot)
-			if itemName and strfind(itemName,item) then
-				itemCount = itemCount + 1
+			if itemName and string.find(itemName, item, 1, true) then
+				local _, stackCount = GetContainerItemInfo(bag, slot)
+				itemCount = itemCount + (stackCount or 1)
 			end
 		end
 	end
