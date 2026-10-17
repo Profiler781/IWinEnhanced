@@ -208,3 +208,14 @@ function IWin:RangedAttackAny()
 	IWin:RangedAttack("Shoot Crossbow", "Crossbows")
 	IWin:RangedAttack("Throw", "Thrown")
 end
+
+--shared slash command defaults (core/rotation.lua), overridden by the class action files loaded after this one
+function IWin:CastCDShortOffensiveGCD() end
+function IWin:CastCDShortOffensiveNoGCD() end
+function IWin:CastCDLongOffensiveGCD() end
+function IWin:UseItemConsumableOffensiveNoGCD() end
+function IWin:UseItemConsumableAOEOffensiveNoGCD() end
+function IWin:UseItemConsumableAOEOffensiveGCD() end
+function IWin:UseItemTrinketOffensiveGCD() end
+function IWin:UseItemTrinketOffensiveNoGCD() end
+function IWin:UseItemTrinketOffensivePrepull() end
