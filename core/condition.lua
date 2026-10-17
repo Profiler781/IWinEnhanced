@@ -1481,7 +1481,7 @@ end
 function IWin:IsItemConsumableAOEOffensiveTarget(melee)
 	if melee and (not IWin:IsInRange() or IWin:IsBlacklistCooldownMelee()) then return false end
 	if not melee and IWin:IsBlacklistCooldownRanged() then return false end
-	local consumableAOEOffensiveSetting = IWin_Settings["consumableAOEOffensive"]
+	local consumableAOEOffensiveSetting = IWin_Settings["consumableAOE"]
 	if consumableAOEOffensiveSetting == "off" then return false end
 	if consumableAOEOffensiveSetting == "boss" and not IWin:IsBoss() then return false end
 	if consumableAOEOffensiveSetting == "elite" and not IWin:IsElite() then return false end
