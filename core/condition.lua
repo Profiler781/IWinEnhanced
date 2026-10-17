@@ -1530,8 +1530,8 @@ function IWin:GetWeaponSpeed(debugmsg)
     IWin_T:SetInventoryItem("player", 16)
 
     for i = 1, IWin_T:NumLines() do
-        local left  = _G["IWin_TTextLeft" .. i]
-        local right = _G["IWin_TTextRight" .. i]
+        local left  = getglobal("IWin_TTextLeft" .. i)
+        local right = getglobal("IWin_TTextRight" .. i)
         if right and right.GetText then
             local text = right:GetText()
             if text then
