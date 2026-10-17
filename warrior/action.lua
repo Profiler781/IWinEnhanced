@@ -922,6 +922,7 @@ function IWin:ShieldBlock()
 		and IWin:IsBuffStack("target", "Sunder Armor", 5)
 		and not IWin:IsBuffActive("player", "Improved Shield Slam")
 		and not IWin:IsBuffActive("player", spell)
+		and IWin:IsSpellLearnt("Revenge")
 		and IWin:GetCooldownRemaining("Revenge") < IWin_Settings["GCD"]
 		and not IWin:IsRevengeAvailable(0)
 		and IWin:IsRageAvailable(spell) then
