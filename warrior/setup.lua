@@ -35,25 +35,25 @@ function SlashCmdList.IWINWARRIOR(command)
 		end
 	elseif arguments[1] == "oilofimmolation" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more.|r")
 				return
 		end
 	elseif arguments[1] == "holywater" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more.|r")
 				return
 		end
 	elseif arguments[1] == "sapper" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more.|r")
 				return
 		end
 	elseif arguments[1] == "densedynamite" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more.|r")
 				return
 		end
@@ -86,7 +86,7 @@ function SlashCmdList.IWINWARRIOR(command)
 		end
 	elseif arguments[1] == "chargepartysize" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more. 1 is the default parameter.|r")
 				return
 		end
@@ -125,7 +125,7 @@ function SlashCmdList.IWINWARRIOR(command)
 			and arguments[2] ~= "on"
 			and arguments[2] ~= "execute"
 			and arguments[2] ~= "off" then
-				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, execute, off.|r")
 				return
 		end
 	elseif arguments[1] == "dtdefensive" then
@@ -140,18 +140,18 @@ function SlashCmdList.IWINWARRIOR(command)
 			and arguments[2] ~= "on"
 			and arguments[2] ~= "whirlwind"
 			and arguments[2] ~= "off" then
-				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, off.|r")
+				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: on, whirlwind, off.|r")
 				return
 		end
 	elseif arguments[1] == "ragebuffer" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more. 1.5 is the default parameter.|r")
 				return
 		end
 	elseif arguments[1] == "ragegain" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more. 10 is the default parameter.|r")
 				return
 		end
