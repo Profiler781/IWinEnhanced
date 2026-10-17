@@ -1266,7 +1266,10 @@ function IWin:IsExists(unit, debugmsg)
 		return cached
 	end
 	local result = UnitExists(unit) and true or false
-	IWin_Target["exists"][unit] = result
+	--IWin_Target is only reset on target change: do not keep units that change on their own (targettarget)
+	if unit == "target" or unit == "player" then
+		IWin_Target["exists"][unit] = result
+	end
 	IWin:Debug(unit.." exists: "..tostring(result), debugmsg)
 	return result
 end
@@ -1278,7 +1281,9 @@ function IWin:GetName(unit, debugmsg)
 		return cached
 	end
 	local result = UnitName(unit)
-	IWin_Target["name"][unit] = result
+	if unit == "target" or unit == "player" then
+		IWin_Target["name"][unit] = result
+	end
 	IWin:Debug(unit.." name: "..tostring(result), debugmsg)
 	return result
 end
