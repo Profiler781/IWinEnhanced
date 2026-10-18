@@ -35,25 +35,25 @@ function SlashCmdList.IWINPALADIN(command)
 		end
 	elseif arguments[1] == "oilofimmolation" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more.|r")
 				return
 		end
 	elseif arguments[1] == "holywater" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more.|r")
 				return
 		end
 	elseif arguments[1] == "sapper" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more.|r")
 				return
 		end
 	elseif arguments[1] == "densedynamite" then
 		if arguments[2] ~= nil
-			and tonumber(arguments[2]) < 0 then
+			and (tonumber(arguments[2]) or -1) < 0 then
 				DEFAULT_CHAT_FRAME:AddMessage("|cff0066ff Unkown parameter. Possible values: 0 or more.|r")
 				return
 		end

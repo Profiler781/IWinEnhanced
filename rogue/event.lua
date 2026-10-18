@@ -29,15 +29,15 @@ IWin:SetScript("OnEvent", function()
 		IWin:UpdateSpellCost()
 	elseif event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES" then
 		if string.find(arg1,"parry") then
-			IWin_RotationVar["riposteAvailable"] = IWin:GetTime(false) + 4
+			IWin_RotationVar["riposteAvailable"] = GetTime() + 4
 		end
 	elseif event == "CHAT_MSG_COMBAT_SELF_MISSES" or event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF" then
 		if string.find(arg1,"dodge") then
-			IWin_RotationVar["surpriseAttackAvailable"] = IWin:GetTime(false) + 4
+			IWin_RotationVar["surpriseAttackAvailable"] = GetTime() + 4
 		end
 	elseif event == "CHAT_MSG_SPELL_SELF_DAMAGE" then
 		if string.find(arg1,"dodged") then
-			IWin_RotationVar["surpriseAttackAvailable"] = IWin:GetTime(false) + 4
+			IWin_RotationVar["surpriseAttackAvailable"] = GetTime() + 4
 		end
 	elseif event == "UNIT_ENERGY" and arg1 == "player" then
 		local currentEnergy = UnitMana("player")
@@ -47,7 +47,7 @@ IWin:SetScript("OnEvent", function()
 			IWin_RotationVar["energyTick"] = energyDelta
 			local playerAgility = UnitStat("player", 2)
 			IWin_RotationVar["energyTickTime"] = 2 / (1 + IWin:GetTalentRank("Blade Rush", false) * 0.000375 * playerAgility) 
-			IWin_RotationVar["energyNextTickTime"] = IWin:GetTime(false) + IWin_RotationVar["energyTickTime"]
+			IWin_RotationVar["energyNextTickTime"] = GetTime() + IWin_RotationVar["energyTickTime"]
 		end
 	elseif event == "SPELLS_CHANGED" then
 		IWin:UpdateSpellCost()

@@ -2,7 +2,7 @@ if UnitClass("player") ~= "Rogue" then return end
 
 function IWin:InitializeRotation()
 	IWin:InitializeRotationCore()
-	IWin_CombatVar["energyPerSecondPrediction"] = IWin_Settings["energyPerSecondPrediction"]
+	IWin_CombatVar["energyPerSecondPrediction"] = IWin_Settings["energyPerSecondPrediction"] or 0
 	if IWin:IsBuffActive("player", "Adrenaline", nil, false) then
 		IWin_CombatVar["energyPerSecondPrediction"] = IWin_CombatVar["energyPerSecondPrediction"] * 2
 	end

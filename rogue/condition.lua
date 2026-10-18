@@ -69,7 +69,9 @@ function IWin:GetTimeToEnergyMax(debugmsg)
 		return 0
 	end
 	local energyTicksToMax = math.floor(energyToMax / IWin_RotationVar["energyTick"])
-	local result = IWin_RotationVar["energyNextTickTime"] + energyTicksToMax * IWin_RotationVar["energyTickTime"]
+	-- energyNextTickTime is an absolute timestamp: convert it to a duration
+	local timeToNextTick = math.max(0, IWin_RotationVar["energyNextTickTime"] - IWin:GetTime(false))
+	local result = timeToNextTick + energyTicksToMax * IWin_RotationVar["energyTickTime"]
 	IWin:Debug("Time to maximum energy: "..tostring(result), debugmsg)
 	return result
 end

@@ -72,7 +72,7 @@ end
 
 function IWin:GetDreadnaught2P()
 	if CleveRoids and CleveRoids.CountEquippedSetItems then
-		if CleveRoids.CountEquippedSetItems(IWin_ItemSet["Dreadnaught"]) >= 2 then
+		if CleveRoids.CountEquippedSetItems(IWin_ItemSet["DreadnaughtDPS"]) >= 2 then
 			return 10
 		end
 	end

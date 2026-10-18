@@ -20,7 +20,7 @@ end
 
 function IWin:GetGenesisFeral3P()
 	if CleveRoids and CleveRoids.CountEquippedSetItems then
-		if CleveRoids.CountEquippedSetItems(IWin_ItemSet["StormrageFeral"]) >= 3 then
+		if CleveRoids.CountEquippedSetItems(IWin_ItemSet["GenesisFeral"]) >= 3 then
 			return 3
 		end
 	end
